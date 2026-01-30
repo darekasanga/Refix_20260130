@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>保護者ポータル</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --sub: #64748b;
+      --accent: #16a34a;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans JP", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 32px 20px;
+    }
+    .container {
+      width: min(720px, 100%);
+      display: grid;
+      gap: 20px;
+    }
+    header {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .title h1 {
+      margin: 0 0 6px;
+      font-size: 22px;
+    }
+    .title p {
+      margin: 0;
+      color: var(--sub);
+      font-size: 13px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      background: #f1f5f9;
+      text-decoration: none;
+    }
+    .badge.linked {
+      border-color: rgba(22, 163, 74, 0.3);
+      color: #15803d;
+      background: rgba(22, 163, 74, 0.1);
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .button {
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .button.primary {
+      border: none;
+      background: var(--accent);
+      color: #fff;
+    }
+    .note {
+      font-size: 13px;
+      color: var(--sub);
+      margin: 10px 0 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title">
+        <h1>保護者ポータル</h1>
+        <p>園児との連携状況を確認できます。</p>
+      </div>
+      <a id="linkBadge" class="badge" href="/me/children">未紐付け</a>
+    </header>
+
+    <div class="card">
+      <div class="actions">
+        <a class="button primary" href="/login">ログイン</a>
+        <a class="button" href="/me/children">連携園児一覧</a>
+      </div>
+      <p class="note">QRコードから連携を行うと、ここに連携状況が表示されます。</p>
+    </div>
+  </div>
+
+  <script>
+    const badgeEl = document.getElementById("linkBadge");
+    async function loadBadge() {
+      try {
+        const res = await fetch("/me/badge");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.linked) {
+          badgeEl.classList.add("linked");
+          badgeEl.textContent = `紐付け済み (${data.count})`;
+        } else {
+          badgeEl.classList.remove("linked");
+          badgeEl.textContent = "未紐付け";
+        }
+      } catch (error) {
+        badgeEl.textContent = "未紐付け";
+      }
+    }
+    loadBadge();
+  </script>
+</body>
+</html>

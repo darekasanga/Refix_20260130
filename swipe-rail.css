@@ -1,0 +1,115 @@
+.swipe-rail {
+  position: fixed;
+  right: 16px;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 6px;
+  overflow: hidden;
+  background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent, #8b5cf6) 18%, transparent) 0%,
+      color-mix(in srgb, var(--panel-overlay, rgba(15, 23, 42, 0.9)) 88%, transparent) 45%,
+      color-mix(in srgb, var(--accent-2, #f59e0b) 20%, transparent) 100%
+    ),
+    color-mix(in srgb, var(--panel-overlay, rgba(15, 23, 42, 0.9)) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border, #e7dff2) 65%, transparent);
+  border-radius: 18px;
+  color: var(--subtext, #d8d9e4);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  touch-action: pan-y;
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.swipe-rail::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 50%;
+  width: 2px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--accent, #8b5cf6) 82%, transparent) 20%,
+    color-mix(in srgb, var(--accent-2, #f59e0b) 95%, transparent) 50%,
+    color-mix(in srgb, var(--accent, #8b5cf6) 82%, transparent) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.swipe-rail--collapsed {
+  transform: translateX(120%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 3px;
+  height: 100vh;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-2, #f59e0b) 70%, transparent),
+    color-mix(in srgb, var(--accent-2, #f59e0b) 15%, transparent)
+  );
+  pointer-events: none;
+  z-index: 900;
+}
+
+.swipe-rail__label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: color-mix(in srgb, var(--text, #ffffff) 92%, transparent);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--accent-2, #f59e0b) 45%, transparent);
+  background: color-mix(in srgb, var(--panel-overlay, rgba(15, 23, 42, 0.9)) 80%, transparent);
+  padding: 6px 4px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  display: inline-block;
+  transform: rotate(90deg);
+  transform-origin: center;
+}
+
+.swipe-rail__divider {
+  width: 1px;
+  height: 32px;
+  display: none;
+  flex-shrink: 0;
+}
+
+@media (max-width: 720px) {
+  .swipe-rail {
+    display: none;
+  }
+  body::after {
+    content: none;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .swipe-rail {
+    display: none;
+  }
+  body::after {
+    content: none;
+  }
+}

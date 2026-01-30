@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>LINE連携 | 保護者向け</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root{
+      --bg:#f5f7ff;
+      --panel:#ffffff;
+      --border:#e4e1f3;
+      --text:#1f1b2d;
+      --subtext:#6b6477;
+      --accent:#8b5cf6;
+      --danger:#ef4444;
+      --success:#16a34a;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family:"Noto Sans JP","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .card{
+      width:min(520px, 100%);
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:20px;
+      box-shadow:0 10px 30px rgba(49,46,129,0.12);
+      display:grid;
+      gap:16px;
+    }
+    h1{
+      margin:0;
+      font-size:20px;
+    }
+    label{
+      font-size:12px;
+      color:var(--subtext);
+      font-weight:700;
+    }
+    input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      font-size:14px;
+    }
+    button{
+      padding:10px 14px;
+      border-radius:10px;
+      border:none;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .line-button{
+      background:#06c755;
+      color:#fff;
+    }
+    .primary{
+      background:var(--accent);
+      color:#fff;
+    }
+    .ghost{
+      border:1px solid var(--border);
+      background:#fff;
+    }
+    .status{
+      padding:8px 10px;
+      border-radius:10px;
+      font-size:13px;
+    }
+    .status.success{
+      background:#e7f7ec;
+      color:var(--success);
+      border:1px solid #b6ebc5;
+    }
+    .status.error{
+      background:#fdecec;
+      color:var(--danger);
+      border:1px solid #f9c6c6;
+    }
+    .muted{
+      font-size:12px;
+      color:var(--subtext);
+    }
+    .button-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>LINE連携（保護者）</h1>
+    <div class="muted">QRコードからアクセスした場合は token が自動入力されます。紙に記載の4桁パスワードも入力してください。</div>
+    <div>
+      <label for="tokenInput">token</label>
+      <input id="tokenInput" type="text" placeholder="tokenを入力" />
+    </div>
+    <div>
+      <label for="otpInput">ワンタイムPW（OTP・任意）</label>
+      <input id="otpInput" type="text" placeholder="OTPを入力（任意）" />
+    </div>
+    <div>
+      <label for="passwordInput">認証パスワード（4桁）</label>
+      <input id="passwordInput" type="text" inputmode="numeric" maxlength="4" placeholder="4桁のパスワードを入力" />
+    </div>
+    <div>
+      <label for="lineUserIdInput">LINEユーザーID</label>
+      <input id="lineUserIdInput" type="text" placeholder="LINEログイン後に自動入力" />
+    </div>
+    <div class="button-row">
+      <button class="ghost line-button" type="button" id="simulateLineLogin">LINEログイン（疑似）</button>
+      <button class="primary" type="button" id="confirmButton">連携する</button>
+    </div>
+    <div class="status" id="statusMessage" hidden></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const tokenInput = document.getElementById("tokenInput");
+    const otpInput = document.getElementById("otpInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const lineUserIdInput = document.getElementById("lineUserIdInput");
+    const confirmButton = document.getElementById("confirmButton");
+    const simulateLineLogin = document.getElementById("simulateLineLogin");
+    const statusMessage = document.getElementById("statusMessage");
+
+    const token = params.get("token");
+    if (token) {
+      tokenInput.value = token;
+    }
+
+    simulateLineLogin.addEventListener("click", () => {
+      const dummyId = `line_${Math.random().toString(36).slice(2, 10)}`;
+      lineUserIdInput.value = dummyId;
+      statusMessage.hidden = false;
+      statusMessage.className = "status";
+      statusMessage.textContent = "LINEログイン（疑似）が完了しました。";
+    });
+
+    confirmButton.addEventListener("click", async () => {
+      statusMessage.hidden = true;
+      const payload = {
+        token: tokenInput.value.trim(),
+        otp: otpInput.value.trim(),
+        password: passwordInput.value.trim(),
+        line_user_id: lineUserIdInput.value.trim()
+      };
+      if (!payload.token || !payload.password || !payload.line_user_id) {
+        statusMessage.hidden = false;
+        statusMessage.className = "status error";
+        statusMessage.textContent = "token・パスワード・LINEユーザーIDを入力してください。";
+        return;
+      }
+      if (!/^\d{4}$/.test(payload.password)) {
+        statusMessage.hidden = false;
+        statusMessage.className = "status error";
+        statusMessage.textContent = "パスワードは4桁の数字で入力してください。";
+        return;
+      }
+      try {
+        const res = await fetch("/api/link/confirm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || "連携に失敗しました。");
+        }
+        statusMessage.hidden = false;
+        statusMessage.className = "status success";
+        statusMessage.textContent = "連携完了しました。";
+      } catch (error) {
+        statusMessage.hidden = false;
+        statusMessage.className = "status error";
+        statusMessage.textContent = error.message || "連携に失敗しました。";
+      }
+    });
+  </script>
+</body>
+</html>

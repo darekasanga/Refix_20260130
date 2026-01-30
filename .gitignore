@@ -1,0 +1,10 @@
+# Python virtual environments
+.venv/
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+
+# SQLite data files
+data/*.db
+/.ipynb_checkpoints/

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assisted Reception & Judgment Support | EnCho-エンチョ-</title>
+  <script src="theme.js"></script>
+  <script>
+    window.EnchoTheme?.applyCurrentTheme(document);
+  </script>
+  <script src="swipe-handler.js"></script>
+  <link rel="stylesheet" href="swipe-rail.css">
+  <script src="swipe-rail.js" defer></script>
+  <style>
+    :root {
+      --accent: #8b5cf6;
+      --accent-2: #f97316;
+      --accent-3: #22d3ee;
+      --accent-4: #fb7185;
+      --muted: #1b1827;
+      --panel: #100f1a;
+      --panel-sub: #161524;
+      --border: #221f30;
+      --text: #f8fafc;
+      --subtext: #c7cedf;
+      --bg: radial-gradient(circle at 14% 12%, rgba(139, 92, 246, 0.24), transparent 36%), radial-gradient(circle at 86% 10%, rgba(34, 211, 238, 0.18), transparent 32%), linear-gradient(180deg, #0b1021, #101325 46%, #0b1021);
+      --panel-overlay: rgba(20, 19, 30, 0.85);
+      --glow: 0 12px 32px rgba(139, 92, 246, 0.28);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans JP", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 24px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    header {
+      background: linear-gradient(140deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      box-shadow: var(--glow);
+      flex-wrap: wrap;
+    }
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      background: conic-gradient(from 180deg, var(--accent), var(--accent-2), var(--accent-3), var(--accent-4), var(--accent));
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 26px;
+      color: #0b1021;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.32);
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 0.4px;
+    }
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--subtext);
+      font-size: 14px;
+    }
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-weight: 800;
+      font-size: 12px;
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--subtext);
+      font-weight: 800;
+      font-size: 12px;
+    }
+    .grid-two {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .panel {
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--glow);
+    }
+    .panel h2 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      letter-spacing: 0.2px;
+    }
+    .panel small {
+      color: var(--subtext);
+    }
+    textarea {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel-sub);
+      color: var(--text);
+      font: inherit;
+      padding: 12px;
+      min-height: 140px;
+      resize: vertical;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+    }
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      color: #0b1021;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    }
+    button.secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      box-shadow: none;
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(1.02); }
+    button:active { transform: translateY(0); }
+    .list {
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 6px;
+    }
+    .list li {
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-size: 14px;
+    }
+    .meta-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-weight: 800;
+      font-size: 12px;
+      color: var(--text);
+      word-break: break-all;
+    }
+    .frame {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 120px;
+      font-size: 13px;
+      color: var(--subtext);
+    }
+    .todo-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .todo-row input {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      font: inherit;
+    }
+    .grid-three {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .label {
+      display: block;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: var(--subtext);
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .note-area {
+      min-height: 120px;
+    }
+    @media (max-width: 640px) {
+      body { padding: 14px; }
+      header { padding: 14px; }
+      h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title">
+        <div class="logo" aria-hidden="true">灯</div>
+        <div>
+          <h1>Assisted Reception & Judgment Support</h1>
+          <p class="subtitle">原本を尊重し、特徴だけを整理するフレームです。判断は常に利用者に委ねられます。</p>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge">0D / 0.45D / 1.45D / 2D</span>
+        <a class="badge" href="index.html">ポータルへ戻る</a>
+      </div>
+    </header>
+
+    <div class="grid-two">
+      <section class="panel">
+        <div class="section-title">
+          <h2>0D: オリジナルソース</h2>
+          <span class="pill">転送メールのみ処理対象</span>
+        </div>
+        <small>ヘッダー行があれば Subject / From / Date を自動検出し、URL からはドメインのみを抽出します。</small>
+        <textarea id="sourceInput" placeholder="転送されたメール本文を貼り付けてください。認証コードやトークンは表示しません。"></textarea>
+        <div class="actions">
+          <button type="button" class="secondary" id="resetBtn">クリア</button>
+          <button type="button" id="processBtn">0.45D で整理する</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>0.45D: 正規化された項目</h2>
+          <span class="pill">出典そのまま / 決定なし</span>
+        </div>
+        <div class="meta-row">
+          <div>
+            <div class="label">件名 (Subject)</div>
+            <div class="chip" id="subjectChip">-</div>
+          </div>
+          <div>
+            <div class="label">送信ドメイン</div>
+            <div class="chip" id="domainChip">-</div>
+          </div>
+          <div>
+            <div class="label">タイムスタンプ</div>
+            <div class="chip" id="timestampChip">-</div>
+          </div>
+        </div>
+        <div class="label">リンクドメイン (ドメインのみを表示)</div>
+        <ul class="list" id="linkList">
+          <li>まだ抽出されていません。</li>
+        </ul>
+        <div class="label">添付の有無 / 種別</div>
+        <div id="attachmentRow" class="meta-row"></div>
+        <div class="label">認証・整合性インジケーター (順序はランダム)</div>
+        <div id="authIndicators" class="meta-row"></div>
+      </section>
+    </div>
+
+    <div class="grid-two">
+      <section class="panel">
+        <div class="section-title">
+          <h2>1.45D: Spotlight (最大全3行)</h2>
+          <span class="pill">特徴のみを示します</span>
+        </div>
+        <ul class="list" id="spotlightList">
+          <li>処理結果を待っています。</li>
+        </ul>
+      </section>
+      <section class="panel">
+        <div class="section-title">
+          <h2>2D: Frame 表示</h2>
+          <span class="pill">不明な場合は原本へ戻ります</span>
+        </div>
+        <div class="frame" id="frameView">原文がまだ読み込まれていません。</div>
+      </section>
+    </div>
+
+    <div class="grid-three">
+      <section class="panel">
+        <div class="section-title">
+          <h2>ToDo / Reminders</h2>
+          <span class="pill">ユーザーが追加した項目のみ</span>
+        </div>
+        <div class="todo-row">
+          <input id="todoInput" type="text" placeholder="自分用メモを追加" aria-label="ToDo入力">
+          <button type="button" id="addTodo">追加</button>
+        </div>
+        <ul class="list" id="todoList">
+          <li>まだ追加はありません。</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>Notes (Personal / 非共有)</h2>
+          <span class="pill">人を特定せず控えめに</span>
+        </div>
+        <textarea id="notes" class="note-area" placeholder="例: いつもと文体が少し違う印象。"></textarea>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>LINE への再生成</h2>
+          <span class="pill">原本参照の案内を含める</span>
+        </div>
+        <small>本文や元の添付は送らず、最新の加工状態から再生成します。</small>
+        <div class="frame" id="lineShare">Please verify the original source in your mail client.</div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const sourceInput = document.getElementById("sourceInput");
+    const subjectChip = document.getElementById("subjectChip");
+    const domainChip = document.getElementById("domainChip");
+    const timestampChip = document.getElementById("timestampChip");
+    const linkList = document.getElementById("linkList");
+    const spotlightList = document.getElementById("spotlightList");
+    const frameView = document.getElementById("frameView");
+    const authIndicators = document.getElementById("authIndicators");
+    const attachmentRow = document.getElementById("attachmentRow");
+    const lineShare = document.getElementById("lineShare");
+    const todoList = document.getElementById("todoList");
+    const todoInput = document.getElementById("todoInput");
+    const notes = document.getElementById("notes");
+
+    const AUTH_INDICATORS = [
+      "DKIM signature detected.",
+      "Immediate relay hop identified.",
+      "Sending domain alignment observed.",
+      "SPF result recorded.",
+      "Header path captured.",
+      "Return-Path noted."
+    ];
+
+    function shuffle(list) {
+      const arr = [...list];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function maskTokens(text) {
+      if (!text) return "";
+      return text.replace(/[A-Za-z0-9]{18,}/g, "[masked]");
+    }
+
+    function extractSubject(text) {
+      const match = text.match(/^Subject:\s*(.+)$/im);
+      return match ? match[1].trim() : "(Subject not detected)";
+    }
+
+    function extractDomain(text) {
+      const fromLine = text.match(/^From:\s*(.+)$/im)?.[1] || "";
+      const emailMatch = fromLine.match(/([A-Z0-9._%+-]+)@([A-Z0-9.-]+\.[A-Z]{2,})/i);
+      if (emailMatch) return emailMatch[2].toLowerCase();
+      const fallbackEmail = text.match(/([A-Z0-9._%+-]+)@([A-Z0-9.-]+\.[A-Z]{2,})/i);
+      return fallbackEmail ? fallbackEmail[2].toLowerCase() : "(Domain not detected)";
+    }
+
+    function extractTimestamp(text) {
+      const match = text.match(/^Date:\s*(.+)$/im);
+      if (match) return match[1].trim();
+      const isoMatch = text.match(/(20\d{2}-\d{2}-\d{2}[T\s]\d{2}:\d{2}(?::\d{2})?)/);
+      return isoMatch ? isoMatch[1] : "(Timestamp not detected)";
+    }
+
+    function extractLinkDomains(text) {
+      const urlRegex = /(https?:\/\/[\w.-]+(?:\/[\w./?#=&%-]*)?)/gi;
+      const domains = new Set();
+      for (const match of text.matchAll(urlRegex)) {
+        try {
+          const url = new URL(match[0]);
+          domains.add(url.hostname);
+        } catch (e) {
+          // ignore malformed URLs
+        }
+      }
+      return Array.from(domains);
+    }
+
+    function detectAttachments(text) {
+      const lower = text.toLowerCase();
+      const detected = [];
+      if (/pdf/.test(lower)) detected.push({ label: "PDF", key: "pdf" });
+      if (/(png|jpg|jpeg|gif|image)/.test(lower)) detected.push({ label: "Image", key: "image" });
+      if (/xls|xlsx|csv/.test(lower)) detected.push({ label: "Data", key: "data" });
+      if (!detected.length && /attach|添付/.test(lower)) detected.push({ label: "Attachment referenced", key: "other" });
+      if (!detected.length) detected.push({ label: "No attachment detected", key: "none" });
+      return detected;
+    }
+
+    function buildSpotlights(text, linkDomains) {
+      const notes = [];
+      if (linkDomains.length) notes.push("Includes one or more external links.");
+      if (/confirm|confirmation|確認|返信/.test(text)) notes.push("Contains wording that appears to request confirmation.");
+      if (/締め切り|期限|due date|deadline|\b20\d{2}[\/\-.]\d{1,2}[\/\-.]\d{1,2}/i.test(text)) notes.push("A date resembling a deadline is mentioned.");
+      if (/添付|attachment/.test(text)) notes.push("Attachment references are present.");
+      if (!notes.length) notes.push("Original source available for review without automated interpretation.");
+      return notes.slice(0, 3);
+    }
+
+    function renderList(listEl, items) {
+      listEl.innerHTML = items.map(item => `<li>${item}</li>`).join("");
+    }
+
+    function updateAuthIndicators() {
+      const randomized = shuffle(AUTH_INDICATORS).slice(0, 4);
+      authIndicators.innerHTML = randomized.map(text => `<span class="chip">${text}</span>`).join("");
+    }
+
+    function renderAttachments(items) {
+      attachmentRow.innerHTML = items.map(item => `<span class="chip">${item.label}</span>`).join("");
+    }
+
+    function updateLineShare(subject, domain, linkDomains) {
+      const payload = [
+        `Subject: ${subject || "(none)"}`,
+        `From domain: ${domain || "(unknown)"}`,
+        linkDomains.length ? `Link domains: ${linkDomains.join(", ")}` : "Link domains: (none)",
+        "Please verify the original source in your mail client."
+      ].join("\n");
+      lineShare.textContent = payload;
+    }
+
+    function processSource() {
+      const raw = sourceInput.value || "";
+      const masked = maskTokens(raw);
+      const subject = extractSubject(masked);
+      const domain = extractDomain(masked);
+      const timestamp = extractTimestamp(masked);
+      const links = extractLinkDomains(masked);
+      const attachments = detectAttachments(masked);
+      const spotlights = buildSpotlights(masked, links);
+
+      subjectChip.textContent = subject;
+      domainChip.textContent = domain;
+      timestampChip.textContent = timestamp;
+      renderList(linkList, links.length ? links : ["リンクドメインは検出されていません。"]);
+      renderAttachments(attachments);
+      renderList(spotlightList, spotlights);
+      frameView.textContent = masked || "原文がまだ読み込まれていません。";
+      updateAuthIndicators();
+      updateLineShare(subject, domain, links);
+    }
+
+    document.getElementById("processBtn").addEventListener("click", processSource);
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      sourceInput.value = "";
+      processSource();
+    });
+
+    document.getElementById("addTodo").addEventListener("click", () => {
+      const text = (todoInput.value || "").trim();
+      if (!text) return;
+      const item = document.createElement("li");
+      item.textContent = text;
+      const existed = todoList.querySelectorAll("li");
+      if (existed.length === 1 && existed[0].textContent.includes("まだ追加")) {
+        todoList.innerHTML = "";
+      }
+      todoList.appendChild(item);
+      todoInput.value = "";
+    });
+
+    notes.addEventListener("input", () => {
+      notes.value = notes.value.replace(/[^\S\n]+/g, match => match);
+    });
+
+    processSource();
+  </script>
+  <script>
+    // Initialize smooth swipe scrolling
+    (function() {
+      if (window.SwipeHandler) {
+        window.pageSwipeHandler = new SwipeHandler(document.body, {
+          enableGradient: true,
+          snapToSections: false,
+          enableMomentum: true,
+          showVisualFeedback: true
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

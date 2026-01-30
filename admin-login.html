@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EnCho-エンチョ- | 管理ページログイン</title>
+  <script src="theme.js"></script>
+  <script>
+    window.EnchoTheme?.applyCurrentTheme(document);
+  </script>
+  <style>
+    :root{
+      --accent:#8b5cf6;
+      --accent-2:#f59e0b;
+      --accent-3:#22d3ee;
+      --accent-4:#fb7185;
+      --muted:#14121d;
+      --panel:#1b1827;
+      --panel-sub:#221f30;
+      --border:#2f2a3d;
+      --text:#fefefe;
+      --subtext:#d8d9e4;
+      --bg:linear-gradient(135deg, #0d0b16 0%, #0c1228 55%, #0f162f 100%);
+      --panel-overlay:rgba(19, 18, 28, 0.9);
+      --glow:0 12px 45px rgba(168, 85, 247, 0.28);
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      padding:24px;
+      font-family:"Noto Sans JP","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .card{
+      width:min(760px, 95vw);
+      background:linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.02)), var(--panel);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:26px 24px;
+      box-shadow:var(--glow);
+    }
+    .headline{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .logo{
+      width:62px;height:62px;border-radius:16px;
+      background:conic-gradient(from 180deg, #e0e7ff, #e0f2fe, #fcd34d, #fecdd3, #e0e7ff);
+      display:flex;align-items:center;justify-content:center;
+      color:#1f1b2d;font-weight:900;font-size:26px;
+      box-shadow:0 10px 26px rgba(0,0,0,.3);
+    }
+    h1{margin:0;font-size:24px;letter-spacing:.02em;}
+    p{margin:6px 0 0;color:var(--subtext);}
+    form{margin-top:18px;display:grid;gap:10px;}
+    label{font-weight:800;font-size:13px;color:var(--subtext);}
+    input{
+      width:100%;
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      font:inherit;
+      transition:border-color .2s, box-shadow .2s, background .2s;
+    }
+    input:focus{
+      outline:none;
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(139,92,246,.28);
+      background:rgba(255,255,255,.08);
+    }
+    button{
+      padding:12px 16px;
+      border-radius:12px;
+      border:none;
+      background:linear-gradient(120deg,var(--accent),var(--accent-3));
+      color:#fff;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 12px 30px rgba(139,92,246,.32);
+      transition:transform .2s, box-shadow .2s, filter .2s;
+    }
+    button:hover{transform:translateY(-1px);filter:brightness(1.02);}
+    button:active{transform:translateY(0);}
+    .status{
+      margin-top:6px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.04);
+      color:var(--subtext);
+      font-weight:800;
+    }
+    .status.error{color:#fecdd3;border-color:rgba(248,113,113,.35);}
+    .links{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;}
+    .link-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      color:var(--text);
+      text-decoration:none;
+      font-weight:800;
+      background:rgba(255,255,255,.06);
+    }
+    .info-box{
+      margin-top:16px;
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background:var(--panel-sub);
+      font-size:13px;
+      color:var(--subtext);
+    }
+    .info-box code{
+      background:rgba(255,255,255,.08);
+      padding:2px 6px;
+      border-radius:6px;
+      color:var(--text);
+    }
+    .muted{color:var(--subtext);font-size:12px;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="headline">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="logo">管</div>
+        <div>
+          <h1>管理ページログイン</h1>
+          <p>管理ID/PWで管理ポータルへログインします。</p>
+        </div>
+      </div>
+      <span class="muted">テーマ適用中 / 保存はブラウザ内のみ</span>
+    </div>
+
+    <form id="adminLoginForm">
+      <label for="adminId">管理ID</label>
+      <input id="adminId" type="text" autocomplete="username" placeholder="admin" aria-label="管理IDを入力" value="admin">
+      <label for="adminPassword">管理PW</label>
+      <input id="adminPassword" type="password" autocomplete="current-password" placeholder="admin01" aria-label="管理PWを入力" value="admin01">
+      <button type="submit">管理ページに入る</button>
+    </form>
+    <div id="adminStatus" class="status">管理IDとPWを入力してください。</div>
+
+    <div class="info-box">
+      <strong>現在の管理情報</strong>
+      <ul>
+        <li>初期ID/PW: <code>admin / admin01</code></li>
+        <li>管理コード (初期マスター): <code>administration012345</code></li>
+      </ul>
+      <div>変更済みの場合は最新の情報を使用してください。</div>
+    </div>
+
+    <div class="roadmap" aria-label="ログインシステム刷新計画">
+      <div class="roadmap-card">
+        <h3>先生: ID/PWログイン管理</h3>
+        <p>先生・園長アカウントはID/PW認証のみで運用します。</p>
+      </div>
+      <div class="roadmap-card">
+        <h3>保護者: QR紐付けの通知受け明細表示</h3>
+        <p>QR紐付け完了後の通知と、受け取り明細を一覧で確認できる画面を追加します。</p>
+      </div>
+      <div class="roadmap-card">
+        <h3>管理者: ロックモード/園内端末管理/ユーザー管理</h3>
+        <p>ロックモード切替、ローカルネットワーク園内端末管理、ユーザー管理の統合画面を用意します。</p>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>現在の管理情報</strong>
+      <ul>
+        <li>管理ID: <code>admin</code></li>
+        <li>管理PW: <code>admin01</code></li>
+        <li>管理コード (初期マスター): <code>administration012345</code></li>
+      </ul>
+      <div>変更済みの場合は最新の情報を使用してください。</div>
+    </div>
+
+    <div class="links">
+      <a class="link-btn" href="index.html">← トップに戻る</a>
+      <a class="link-btn" href="login.html">ユーザーログインへ</a>
+      <a class="link-btn" href="admin-code-issue.html">管理コードを発行・検証</a>
+    </div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById("adminStatus");
+    const idInput = document.getElementById("adminId");
+    const passwordInput = document.getElementById("adminPassword");
+    const form = document.getElementById("adminLoginForm");
+
+    function setStatus(message, isError = false) {
+      if (!statusEl) return;
+      statusEl.textContent = message;
+      statusEl.classList.toggle("error", isError);
+    }
+
+    async function attemptLogin(username, password) {
+      const trimmedId = (username || "").trim();
+      const trimmedPw = (password || "").trim();
+      if (!trimmedId || !trimmedPw) {
+        setStatus("管理IDとPWを入力してください。", true);
+        return;
+      }
+      setStatus("認証中...");
+      try {
+        const res = await fetch("/admin/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: trimmedId, password: trimmedPw })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(async (parseError) => {
+            console.error("Failed to parse error response as JSON:", parseError);
+            try {
+              const rawBody = await res.text();
+              console.error("Raw error response body:", rawBody);
+            } catch (textError) {
+              console.error("Additionally failed to read error response text:", textError);
+            }
+            return {};
+          });
+          setStatus(data.detail || "ログインに失敗しました。", true);
+          return;
+        }
+        const data = await res.json();
+        setStatus("ログインに成功しました。管理ページに移動します。");
+        setTimeout(() => {
+          window.location.href = data.must_change_password
+            ? "/admin/change-password"
+            : "/admin/settings/wifi-local";
+        }, 300);
+      } catch (error) {
+        setStatus("サーバーに接続できませんでした。", true);
+      }
+    }
+
+    form?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      attemptLogin(idInput?.value || "", passwordInput?.value || "");
+    });
+  </script>
+</body>
+</html>

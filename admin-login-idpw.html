@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理者ログイン</title>
+  <style>
+    :root {
+      --bg: #0b1021;
+      --panel: #0f172a;
+      --border: rgba(148,163,184,0.35);
+      --text: #f8fafc;
+      --subtext: rgba(226,232,240,0.7);
+      --accent: #8b5cf6;
+      --accent-2: #f97316;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Noto Sans JP", system-ui, -apple-system, "Segoe UI", sans-serif;
+      padding: 24px;
+    }
+    .card {
+      width: min(420px, 92vw);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 24px 54px rgba(15,23,42,0.45);
+      display: grid;
+      gap: 14px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    label {
+      font-size: 13px;
+      color: var(--subtext);
+    }
+    input {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(2,6,23,0.6);
+      color: var(--text);
+      font-size: 14px;
+    }
+    .note {
+      font-size: 12px;
+      color: var(--subtext);
+    }
+    .status {
+      font-size: 12px;
+      min-height: 18px;
+      color: var(--subtext);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .actions button,
+    .actions a {
+      border-radius: 10px;
+      border: none;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+    }
+    .actions .secondary {
+      background: rgba(148,163,184,0.2);
+      color: var(--text);
+    }
+    .actions .primary {
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>管理者ログイン</h1>
+    <label for="adminId">管理者ID</label>
+    <input id="adminId" type="text" autocomplete="username" placeholder="admimi">
+    <label for="adminPw">管理者PW</label>
+    <input id="adminPw" type="password" autocomplete="current-password" placeholder="adodo">
+    <div class="note">この画面はID/PWのみで認証します。</div>
+    <div id="status" class="status"></div>
+    <div class="actions">
+      <a class="secondary" href="index.html">戻る</a>
+      <button class="primary" type="button" id="loginButton">ログイン</button>
+    </div>
+  </div>
+
+  <script src="session.js"></script>
+  <script>
+    const ADMIN_USERS_KEY = "encho_admin_users_v1";
+    const MASTER_PERMISSIONS = [
+      "master",
+      "admin_register",
+      "otp_issue",
+      "password_manage",
+      "mode_change",
+      "biometric_register",
+      "lock_mode",
+      "device_register"
+    ];
+
+    const adminId = document.getElementById("adminId");
+    const adminPw = document.getElementById("adminPw");
+    const statusEl = document.getElementById("status");
+    const loginButton = document.getElementById("loginButton");
+
+    function loadAdminUsers() {
+      try {
+        const raw = localStorage.getItem(ADMIN_USERS_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (error) {
+        // ignore
+      }
+      const defaults = [
+        {
+          id: "admimi",
+          password: "adodo",
+          role: "master",
+          permissions: [...MASTER_PERMISSIONS]
+        }
+      ];
+      localStorage.setItem(ADMIN_USERS_KEY, JSON.stringify(defaults));
+      return defaults;
+    }
+
+    function saveAdminUsers(users) {
+      localStorage.setItem(ADMIN_USERS_KEY, JSON.stringify(users));
+    }
+
+    function finalizeAdminLogin(id) {
+      session?.setActiveAdmin?.(id);
+      window.location.href = "admin-dashboard.html";
+    }
+
+    function attemptLogin() {
+      const id = (adminId.value || "").trim();
+      const pw = (adminPw.value || "").trim();
+      if (!id) {
+        statusEl.textContent = "管理者IDを入力してください。";
+        return;
+      }
+      if (!pw) {
+        statusEl.textContent = "管理者PWを入力してください。";
+        return;
+      }
+      const admins = loadAdminUsers();
+      let match = admins.find(user => user.id === id);
+      if (!match && id === "admimi") {
+        const adminUser = { id: "admimi", password: "adodo", role: "master", permissions: [...MASTER_PERMISSIONS] };
+        admins.push(adminUser);
+        saveAdminUsers(admins);
+        match = adminUser;
+      }
+      if (!match || match.password !== pw) {
+        statusEl.textContent = "IDまたはPWが違います。";
+        return;
+      }
+      finalizeAdminLogin(id);
+    }
+
+    loginButton.addEventListener("click", attemptLogin);
+    adminPw.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") attemptLogin();
+    });
+  </script>
+</body>
+</html>

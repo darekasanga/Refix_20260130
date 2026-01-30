@@ -1,0 +1,3170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SenSei</title>
+  <script src="theme.js"></script>
+
+  <script>
+    window.EnchoTheme?.applyCurrentTheme(document);
+  </script>
+  <script src="session.js"></script>
+  <script src="swipe-handler.js"></script>
+  <link rel="stylesheet" href="swipe-rail.css">
+  <script src="swipe-rail.js" defer></script>
+  <style>
+    :root {
+      --accent: #8b5cf6;
+      --accent-2: #f59e0b;
+      --accent-3: #22d3ee;
+      --accent-4: #fb7185;
+      --muted: #14121d;
+      --panel: #1b1827;
+      --panel-sub: #221f30;
+      --border: #2f2a3d;
+      --text: #fefefe;
+      --subtext: #d8d9e4;
+      --bg: linear-gradient(135deg, #0d0b16 0%, #0c1228 55%, #0f162f 100%);
+      --panel-overlay: rgba(19, 18, 28, 0.9);
+      --glow: 0 12px 45px rgba(168, 85, 247, 0.28);
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: "Noto Sans JP", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+
+    .container {
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      margin: 0 0 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--subtext);
+      margin: 0;
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .news-hero {
+      margin: 6px 0 18px;
+      width: 100%;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: linear-gradient(135deg, rgba(20, 18, 36, 0.95), rgba(18, 28, 54, 0.9));
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .news-hero svg {
+      width: min(720px, 100%);
+      height: auto;
+      opacity: 0.95;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .theme-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .theme-chip {
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .theme-chip.active {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 38px rgba(0, 0, 0, 0.35);
+      border-color: var(--accent);
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
+      color: #1f1b2d;
+    }
+
+    .device-switcher {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .device-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .device-badge {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .device-badge:hover,
+    .device-badge:focus-visible {
+      transform: translateY(-1px);
+      border-color: var(--accent-3);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+      outline: none;
+    }
+
+    .device-bubble {
+      --bubble-arrow-left: 24px;
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 0;
+      min-width: 220px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(20, 18, 30, 0.96);
+      color: var(--text);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 10;
+    }
+
+    .device-bubble::before {
+      content: "";
+      position: absolute;
+      top: -8px;
+      left: var(--bubble-arrow-left);
+      width: 16px;
+      height: 16px;
+      background: rgba(20, 18, 30, 0.96);
+      border-left: 1px solid rgba(255, 255, 255, 0.2);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      transform: rotate(45deg);
+    }
+
+    .device-bubble.is-open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .device-bubble__title {
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .device-bubble__desc {
+      font-size: 12px;
+      margin: 0 0 10px;
+      color: var(--subtext);
+    }
+
+    .device-bubble__action {
+      width: 100%;
+      border-radius: 999px;
+      border: none;
+      padding: 8px 12px;
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+      background: linear-gradient(120deg, var(--accent), var(--accent-3));
+      color: #100f1f;
+    }
+
+    body.device-preview--tablet .container {
+      max-width: 860px;
+    }
+
+    body.device-preview--mobile .container {
+      max-width: 420px;
+    }
+
+    body.device-preview--mobile h1 {
+      font-size: 24px;
+    }
+
+    body.device-preview--mobile .cards {
+      grid-template-columns: 1fr;
+    }
+
+    body.device-preview--mobile .nav-layer {
+      padding: 12px 16px;
+      gap: 12px;
+    }
+
+    body.device-preview--mobile .nav-btn {
+      padding: 10px 20px;
+      font-size: 13px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .line-config-section {
+      margin: 32px 0;
+      position: relative;
+      z-index: 2;
+      isolation: isolate;
+    }
+
+    .line-config-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--glow);
+      display: grid;
+      gap: 18px;
+      position: relative;
+      z-index: 1;
+      color: #111827;
+    }
+
+    .line-config-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .line-config-note {
+      margin: 0;
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .line-config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .line-config-field label {
+      display: block;
+      font-size: 12px;
+      color: #4b5563;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .line-config-field input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      color: #111827;
+    }
+
+    .line-config-card.is-locked {
+      user-select: none;
+    }
+
+    .line-config-card.is-locked .line-config-field input {
+      background: #f3f4f6;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+
+    .line-config-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .line-config-status {
+      display: grid;
+      gap: 8px;
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .line-config-status pre {
+      margin: 0;
+      padding: 12px;
+      border-radius: 12px;
+      background: #f3f4f6;
+      color: #111827;
+      font-size: 12px;
+      overflow-x: auto;
+    }
+
+    .card {
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: var(--glow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: var(--text);
+      display: block;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 50px rgba(139, 92, 246, 0.35);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2), var(--accent-3));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 10px 25px rgba(251, 113, 133, 0.25);
+    }
+
+    .card-description {
+      font-size: 14px;
+      color: var(--subtext);
+      margin: 0 0 16px;
+      line-height: 1.5;
+    }
+
+    .card-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px;
+    }
+
+    .card-features li {
+      font-size: 13px;
+      color: var(--subtext);
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card-features li:last-child {
+      border-bottom: none;
+    }
+
+    .card-features li::before {
+      content: "✓";
+      color: var(--accent);
+      font-weight: bold;
+      margin-right: 8px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2), var(--accent-3));
+      color: #fff;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 14px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(168, 85, 247, 0.45);
+    }
+
+    .info-panel {
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--glow);
+    }
+
+    .info-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0 0 16px;
+      color: var(--text);
+    }
+
+    .info-content {
+      font-size: 14px;
+      color: var(--subtext);
+      line-height: 1.7;
+    }
+
+    .info-content ul {
+      margin: 12px 0;
+      padding-left: 20px;
+    }
+
+    .info-content li {
+      margin: 8px 0;
+    }
+
+    .info-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .info-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.02);
+    }
+
+    .info-chip .icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .news-section {
+      margin: 36px 0 28px;
+    }
+
+    .news-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .news-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .news-filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .news-pill {
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: linear-gradient(120deg, #fef08a, #fbcfe8);
+      color: #0f172a;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.4px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.32);
+      text-shadow: 0 1px 6px rgba(255, 255, 255, 0.5);
+    }
+
+    .news-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .news-date-buttons,
+    .news-category-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .news-filter-button {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .news-filter-button.is-active {
+      border-color: rgba(251, 191, 36, 0.9);
+      box-shadow: 0 10px 24px rgba(251, 191, 36, 0.25);
+      background: rgba(251, 191, 36, 0.2);
+      color: #fff7ed;
+    }
+
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .news-card {
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .news-card-footer {
+      margin-top: auto;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .news-detail-button {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .admin-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(15,23,42,0.9);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 16px 36px rgba(15,23,42,0.35);
+      cursor: pointer;
+      z-index: 30;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .admin-fab:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 44px rgba(15,23,42,0.45);
+    }
+    .admin-fab svg {
+      width: 26px;
+      height: 26px;
+    }
+    .news-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 8, 20, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 1000;
+    }
+
+    .news-modal.is-open {
+      display: flex;
+    }
+
+    .news-modal-content {
+      width: min(720px, 92vw);
+      max-height: 80vh;
+      overflow-y: auto;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: var(--glow);
+      display: grid;
+      gap: 12px;
+    }
+
+    .news-modal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .news-modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .news-modal-close {
+      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .upgrade-icon-btn {
+      position: relative;
+      border: none;
+      background: rgba(255, 255, 255, 0.12);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    .upgrade-icon-btn img {
+      width: 18px;
+      height: 18px;
+      filter: invert(100%);
+    }
+    .upgrade-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #f97316;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      border: 2px solid rgba(11, 15, 26, 0.9);
+      box-sizing: border-box;
+    }
+    .upgrade-badge.is-hidden {
+      display: none;
+    }
+
+    .upgrade-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 9, 19, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 240;
+      padding: 24px;
+    }
+    .upgrade-modal.is-open {
+      display: flex;
+    }
+    .upgrade-modal__panel {
+      width: min(720px, 92vw);
+      max-height: 90vh;
+      background: linear-gradient(160deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: 0 30px 60px rgba(8, 12, 24, 0.4);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .upgrade-modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px 12px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .upgrade-modal__header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+    .upgrade-modal__close {
+      border: none;
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .upgrade-modal__body {
+      padding: 16px 20px 20px;
+      display: grid;
+      gap: 16px;
+      overflow: auto;
+    }
+    .upgrade-target-meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--subtext);
+    }
+    .upgrade-target-meta strong {
+      color: var(--text);
+    }
+    .upgrade-preview {
+      border-radius: 16px;
+      border: 1px dashed rgba(148, 163, 184, 0.4);
+      padding: 12px;
+      background: rgba(15, 23, 42, 0.4);
+      display: grid;
+      gap: 8px;
+      justify-items: center;
+    }
+    .upgrade-preview img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: contain;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .upgrade-preview-note {
+      font-size: 12px;
+      color: var(--subtext);
+    }
+    .upgrade-form label {
+      display: block;
+      font-size: 12px;
+      color: var(--subtext);
+      margin-bottom: 6px;
+    }
+    .upgrade-form textarea {
+      width: 100%;
+      min-height: 90px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.5);
+      color: var(--text);
+      padding: 10px 12px;
+      resize: vertical;
+      font-size: 13px;
+    }
+    .upgrade-priority {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .upgrade-priority label {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      padding: 8px 10px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--text);
+    }
+    .upgrade-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+    .upgrade-actions button {
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(120deg, #38bdf8, #6366f1);
+      color: #fff;
+      font-weight: 700;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+    .upgrade-log {
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      padding-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .upgrade-log h4 {
+      margin: 0;
+      font-size: 13px;
+      color: var(--subtext);
+    }
+    .upgrade-log-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+    }
+    .upgrade-log-item {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      display: grid;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--subtext);
+    }
+    .upgrade-log-item strong {
+      color: var(--text);
+    }
+    .upgrade-log-item img {
+      width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 23, 42, 0.4);
+    }
+    .upgrade-log-empty {
+      text-align: center;
+      color: var(--subtext);
+      font-size: 12px;
+      padding: 12px 0;
+    }
+    .upgrade-note {
+      font-size: 12px;
+      color: var(--subtext);
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(148, 163, 184, 0.1);
+    }
+
+    @media (max-width: 640px) {
+      .news-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 520px) {
+      .news-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .news-image {
+      height: 140px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.45), transparent 40%), radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.5), transparent 35%), linear-gradient(145deg, rgba(30, 27, 75, 0.85), rgba(12, 10, 26, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 10px 30px rgba(0, 0, 0, 0.35);
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+    }
+
+    .news-image::after {
+      content: "AI generated visual";
+      font-size: 12px;
+      letter-spacing: 0.4px;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.55);
+      color: #e0e7ff;
+      border-top-right-radius: 12px;
+      border-bottom-left-radius: 12px;
+    }
+
+    .news-meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .news-source {
+      font-size: 12px;
+      color: var(--subtext);
+    }
+
+    .news-source a {
+      color: var(--text);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      background: linear-gradient(120deg, #fef3c7, #f5d0fe);
+      box-shadow: 0 8px 18px rgba(244, 114, 182, 0.25);
+    }
+
+    .news-title-text {
+      font-weight: 800;
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .news-desc {
+      margin: 0;
+      color: var(--subtext);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .news-keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .keyword-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .keyword-tag:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .favorite-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fcd34d;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(6px);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .favorite-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 56px;
+      color: var(--subtext);
+      font-size: 13px;
+    }
+
+    .footer-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(216, 217, 228, 0.8);
+    }
+
+    .footer-test {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .footer-test-desc {
+      margin: 0;
+      font-size: 12px;
+      color: rgba(216, 217, 228, 0.86);
+    }
+
+    .footer-test-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    .footer-test-btn:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .footer-updated {
+      margin-top: 8px;
+      font-size: 12px;
+      color: rgba(216, 217, 228, 0.7);
+    }
+
+    .user-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      margin-top: 12px;
+      font-weight: 800;
+      color: var(--text);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+      cursor: pointer;
+    }
+
+    .user-chip span {
+      color: var(--subtext);
+      font-size: 12px;
+    }
+
+    .user-menu-wrap {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      z-index: 40;
+    }
+
+    .user-status-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 11px;
+      text-align: left;
+      color: var(--subtext);
+      min-width: 220px;
+    }
+
+    .user-status-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .user-status-item span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .user-status-item strong {
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .user-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 160px;
+      padding: 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(11, 16, 33, 0.92);
+      box-shadow: 0 18px 30px rgba(0, 0, 0, 0.35);
+      display: none;
+      z-index: 30;
+    }
+
+    .user-menu.is-open {
+      display: grid;
+      gap: 6px;
+    }
+
+    .user-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .user-menu-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .user-menu-item span {
+      color: var(--subtext);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .nav-layer {
+      background: #f8f9fa;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      transition: background 0.2s ease, transform 0.2s ease;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-btn:hover {
+      background: #0056b3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      padding: 22px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--subtext);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .ctrl-dock {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 120;
+      padding: 8px 10px;
+      border-radius: 18px;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)), var(--panel);
+      border: 1px solid var(--border);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+        0 12px 28px rgba(15, 23, 42, 0.28);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      touch-action: manipulation;
+      will-change: transform;
+      overflow: visible;
+    }
+    .ctrl-dock.is-collapsed .ctrl-items {
+      max-width: 0;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(8px);
+      overflow: hidden;
+    }
+    .ctrl-dock.is-expanded #ctrlDockExpandBtn {
+      display: none;
+    }
+    .ctrl-dock.is-collapsed #ctrlDockCollapseBtn {
+      display: none;
+    }
+    .ctrl-dock.is-dragging {
+      cursor: grabbing;
+    }
+    .ctrl-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--subtext);
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+    .ctrl-icon {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+    .ctrl-btn .ctrl-icon {
+      width: 16px;
+      height: 16px;
+    }
+    .ctrl-sep {
+      color: var(--subtext);
+      font-weight: 700;
+      padding: 0 2px;
+      opacity: 0.6;
+    }
+    .ctrl-memo {
+      position: relative;
+    }
+    .ctrl-memo-menu {
+      position: absolute;
+      right: -6px;
+      bottom: calc(100% - 6px);
+      width: 120px;
+      height: 120px;
+      z-index: 5;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+    .ctrl-memo.is-open .ctrl-memo-menu {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .ctrl-memo-menu .ctrl-btn {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ctrl-memo-menu .ctrl-btn:nth-child(1) {
+      right: 0;
+      bottom: 0;
+      transform: translate(-48px, -18px);
+    }
+    .ctrl-memo-menu .ctrl-btn:nth-child(2) {
+      right: 0;
+      bottom: 0;
+      transform: translate(-22px, -64px);
+    }
+    .ctrl-memo-menu .ctrl-btn:nth-child(3) {
+      right: 0;
+      bottom: 0;
+      transform: translate(8px, -40px);
+    }
+    .ctrl-drag-handle {
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+    }
+    .ctrl-dock.smoke {
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)), var(--panel-sub);
+      border-color: var(--border);
+    }
+    .ctrl-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .ctrl-primary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+    .ctrl-items {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 520px;
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+      transition: opacity 0.18s ease, transform 0.18s ease, max-width 0.18s ease;
+    }
+    .ctrl-btn {
+      border: none;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 7px 12px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+        0 4px 12px rgba(15, 23, 42, 0.2);
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .ctrl-btn:active {
+      transform: translateY(1px);
+      box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.22),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.24),
+        0 2px 6px rgba(15, 23, 42, 0.24);
+    }
+    .ctrl-btn.is-active,
+    .ctrl-btn.active,
+    .display-tab.active {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.34),
+        inset 0 -2px 0 var(--accent),
+        0 4px 10px rgba(0, 0, 0, 0.18);
+    }
+    .ctrl-dock .display-tabs {
+      gap: 6px;
+    }
+    .ctrl-btn.ctrl-primary-save {
+      font-weight: 900;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 24px;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-layer {
+        padding: 12px 16px;
+        gap: 12px;
+      }
+
+      .nav-btn {
+        padding: 10px 20px;
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="swipe-rail swipe-rail--collapsed" id="swipeRail" aria-label="スワイプ・スクロール操作エリア">
+    <span class="swipe-rail__label">SWIPE &amp; SCROLL</span>
+    <span class="swipe-rail__divider" aria-hidden="true"></span>
+  </div>
+  <div class="container">
+    <header>
+      <h1>SenSei</h1>
+      <div class="top-actions">
+        <div class="device-switcher" id="deviceSwitcher" aria-label="表示モード切り替え">
+          <div class="device-badges" id="deviceBadges"></div>
+          <div class="device-bubble" id="deviceBubble" role="dialog" aria-hidden="true">
+            <div class="device-bubble__title" id="deviceBubbleTitle"></div>
+            <p class="device-bubble__desc" id="deviceBubbleDesc"></p>
+            <button class="device-bubble__action" type="button" id="deviceBubbleAction">この表示に切り替える</button>
+          </div>
+        </div>
+        <div class="theme-chips" id="themeChips" aria-label="カラーテーマ選択"></div>
+        <button class="upgrade-icon-btn" type="button" id="upgradeInboxBtn" aria-label="バージョンアップ希望ログ">
+          <img src="https://www.svgrepo.com/svg/530377/chat-chattu" alt="" />
+          <span class="upgrade-badge is-hidden" id="upgradeBadge">0</span>
+        </button>
+        <button class="btn" type="button" id="logoutBtn" style="padding:8px 14px; font-size:13px;">ログアウト</button>
+        <div class="user-menu-wrap">
+          <div class="user-chip" id="userChip" aria-label="ログインユーザー" role="button" tabindex="0" aria-expanded="false">
+            <span>ユーザー</span>
+            <div id="activeUserName">未ログイン</div>
+          </div>
+          <div class="user-status-list" aria-label="ユーザー接続ステータス一覧">
+            <div class="user-status-item">
+              <strong>mode</strong>
+              <span>STANDARD</span>
+            </div>
+            <div class="user-status-item">
+              <strong>version</strong>
+              <span>v2.4.1</span>
+            </div>
+            <div class="user-status-item">
+              <strong>connect</strong>
+              <span>ONLINE</span>
+            </div>
+            <div class="user-status-item">
+              <strong>ip</strong>
+              <span>192.168.0.2</span>
+            </div>
+            <div class="user-status-item">
+              <strong>network</strong>
+              <span>PRIMARY</span>
+            </div>
+            <div class="user-status-item">
+              <strong>WiFi SSID</strong>
+              <span>Office-WiFi</span>
+            </div>
+            <div class="user-status-item">
+              <strong>node status</strong>
+              <span>FAILURE / PROCEED</span>
+            </div>
+          </div>
+          <div class="user-menu" id="userMenu" role="menu" aria-label="ユーザーメニュー">
+            <a class="user-menu-item" href="Calcu.html#data-reload" role="menuitem">
+              データ読込み
+              <span>メインツールへ移動</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="cards" id="featureCards" aria-label="利用可能なツール一覧"></div>
+
+    <section class="line-config-section" aria-labelledby="lineConfigTitle">
+      <div class="line-config-card">
+        <div>
+          <h2 class="line-config-title" id="lineConfigTitle">LINE Official Account 設定</h2>
+          <p class="line-config-note">公開してよい設定のみ保存します。Channel Access Token / Channel Secret はサーバ環境変数に保管してください。</p>
+        </div>
+        <form id="lineConfigForm" autocomplete="off">
+          <div class="line-config-grid">
+            <div class="line-config-field">
+              <label for="lineDisplayName">表示名（園名など）</label>
+              <input type="text" id="lineDisplayName" placeholder="○○保育園" />
+            </div>
+            <div class="line-config-field">
+              <label for="lineAddFriendUrl">友だち追加URL</label>
+              <input type="url" id="lineAddFriendUrl" placeholder="https://lin.ee/XXXX" />
+            </div>
+            <div class="line-config-field">
+              <label for="lineLiffId">LIFF ID</label>
+              <input type="text" id="lineLiffId" placeholder="123456-abcdef" />
+            </div>
+            <div class="line-config-field">
+              <label for="lineDetailsBaseUrl">詳細ページURL</label>
+              <input type="url" id="lineDetailsBaseUrl" placeholder="https://webpage-three-kohl.vercel.app/detail.html" />
+            </div>
+            <div class="line-config-field">
+              <label for="lineOtpExpireDays">OTP有効日数</label>
+              <input type="number" id="lineOtpExpireDays" min="1" max="30" placeholder="7" />
+            </div>
+          </div>
+          <div class="line-config-actions">
+            <button class="btn" type="button" id="saveLineConfig">保存</button>
+            <button class="btn" type="button" id="resetLineConfig" style="background: rgba(255,255,255,0.12); color: var(--text);">リセット</button>
+            <span class="subtitle" style="padding: 6px 10px;">保管先: localStorage</span>
+          </div>
+        </form>
+        <div class="line-config-status">
+          <div id="lineConfigHealth">サーバ設定: 未確認</div>
+          <div>現在の設定</div>
+          <pre id="lineConfigCurrent">{}</pre>
+        </div>
+      </div>
+    </section>
+
+    <div class="news-section">
+      <div class="news-header">
+        <div class="news-title-group">
+          <div class="news-pill">🧠 COVE AI NEWS</div>
+          <div class="news-filter-group">
+            <div class="news-category-buttons" role="tablist" aria-label="ニュースカテゴリ">
+              <button class="news-filter-button is-active" type="button" data-news-category="all" role="tab" aria-selected="true">すべて</button>
+              <button class="news-filter-button" type="button" data-news-category="government" role="tab" aria-selected="false">政府</button>
+              <button class="news-filter-button" type="button" data-news-category="administration" role="tab" aria-selected="false">行政</button>
+              <button class="news-filter-button" type="button" data-news-category="local" role="tab" aria-selected="false">地方自治</button>
+              <button class="news-filter-button" type="button" data-news-category="legal" role="tab" aria-selected="false">法令改正</button>
+            </div>
+            <div class="news-date-buttons" role="tablist" aria-label="ニュースアーカイブ日付">
+              <button class="news-filter-button is-active" type="button" data-news-date="latest" role="tab" aria-selected="true">最新</button>
+              <button class="news-filter-button" type="button" data-news-date="2025-02-20" role="tab" aria-selected="false">2025/02/20</button>
+              <button class="news-filter-button" type="button" data-news-date="2025-02-19" role="tab" aria-selected="false">2025/02/19</button>
+              <button class="news-filter-button" type="button" data-news-date="2025-02-18" role="tab" aria-selected="false">2025/02/18</button>
+            </div>
+          </div>
+        </div>
+        <p class="subtitle" style="margin: 0;">毎日8:00・12:00・16:30に更新される最新トピックをピックアップしました</p>
+      </div>
+      <div class="news-hero" aria-hidden="true">
+        <svg viewBox="0 0 760 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="newsHeroStroke" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#c4b5fd" />
+              <stop offset="50%" stop-color="#7dd3fc" />
+              <stop offset="100%" stop-color="#fcd34d" />
+            </linearGradient>
+          </defs>
+          <rect x="80" y="50" width="600" height="140" rx="30" stroke="url(#newsHeroStroke)" stroke-width="4" fill="rgba(255,255,255,0.04)"/>
+          <rect x="120" y="80" width="160" height="80" rx="18" stroke="#f8fafc" stroke-width="3" fill="rgba(15,23,42,0.65)"/>
+          <path d="M160 120H240" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/>
+          <path d="M150 104H250" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/>
+          <path d="M150 136H250" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/>
+          <rect x="330" y="70" width="200" height="100" rx="24" stroke="#94a3b8" stroke-width="3" fill="rgba(15,23,42,0.5)"/>
+          <path d="M360 110H500" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round"/>
+          <path d="M360 132H470" stroke="#cbd5f5" stroke-width="4" stroke-linecap="round"/>
+          <rect x="560" y="90" width="90" height="60" rx="18" stroke="#fcd34d" stroke-width="3" fill="rgba(251,191,36,0.18)"/>
+          <path d="M580 120H630" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/>
+          <path d="M100 180H660" stroke="url(#newsHeroStroke)" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="news-grid" id="newsGrid"></div>
+    </div>
+
+    <div class="news-modal" id="newsModal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="news-modal-content">
+        <div class="news-modal-header">
+          <h3 class="news-modal-title" id="newsModalTitle">記事詳細</h3>
+          <button class="news-modal-close" type="button" id="newsModalClose">閉じる</button>
+        </div>
+        <p class="news-desc" id="newsModalDesc"></p>
+        <p class="news-source" id="newsModalSource"></p>
+        <div class="news-meta" id="newsModalTags"></div>
+        <div class="news-keywords" id="newsModalKeywords"></div>
+      </div>
+    </div>
+
+    <div class="upgrade-modal" id="upgradeModal" aria-hidden="true">
+      <div class="upgrade-modal__panel" role="dialog" aria-modal="true" aria-labelledby="upgradeModalTitle">
+        <div class="upgrade-modal__header">
+          <h3 id="upgradeModalTitle">バージョンアップ希望！</h3>
+          <button class="upgrade-modal__close" type="button" id="upgradeModalClose">閉じる</button>
+        </div>
+        <div class="upgrade-modal__body">
+          <div class="upgrade-target-meta">
+            <span>対象:</span>
+            <strong id="upgradeTargetType">未選択</strong>
+          </div>
+          <div class="upgrade-target-meta">
+            <span>検出内容:</span>
+            <strong id="upgradeTargetText">右クリック（長押しタップ）で対象を選択</strong>
+          </div>
+          <div class="upgrade-preview">
+            <img id="upgradeCapture" alt="該当部分のスクリーンショット" />
+            <div class="upgrade-preview-note">該当部分のスクリーンショットイメージ</div>
+          </div>
+          <div class="upgrade-note">
+            送信できる項目: ボタン / 表示テキスト / イメージ画像 / 余白（周囲自動判定）。
+          </div>
+          <div class="upgrade-form">
+            <label for="upgradeMessage">テキスト入力</label>
+            <textarea id="upgradeMessage" placeholder="改善したいポイントを入力してください。"></textarea>
+            <div class="upgrade-priority" role="radiogroup" aria-label="重要度">
+              <label><input type="radio" name="upgradePriority" value="すぐに！" />すぐに！</label>
+              <label><input type="radio" name="upgradePriority" value="検討が必要" />検討が必要</label>
+              <label><input type="radio" name="upgradePriority" value="要望・ご意見" checked />要望・ご意見</label>
+              <label><input type="radio" name="upgradePriority" value="急ぎじゃない" />急ぎじゃない</label>
+            </div>
+            <div class="upgrade-actions">
+              <button type="button" id="upgradeSendBtn">送信</button>
+            </div>
+          </div>
+          <div class="upgrade-log">
+            <h4>送信ログ</h4>
+            <ul class="upgrade-log-list" id="upgradeLogList"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>© <span id="currentYear">2024</span> 保育園延長・預かり保育計算ツール</p>
+      <p class="footer-note">テストモードは管理画面から切り替え、検証用データを取り込むことで本番データに影響せず動作確認できます。</p>
+      <div class="footer-test">
+        <p class="footer-test-desc">テストモードの動作確認をしたい場合は、管理ページから準備を進めてください。</p>
+      </div>
+      <p class="footer-updated" id="lastUpdated"></p>
+    </footer>
+  </div>
+  <div id="ctrlDock" class="ctrl-dock is-collapsed" aria-label="コントローラーバー">
+    <div class="ctrl-label ctrl-drag-handle" id="ctrlDockHandle" aria-label="機能コントローラーをドラッグして移動">
+      <svg class="ctrl-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>
+      </svg>
+    </div>
+    <div class="ctrl-strip">
+      <div class="ctrl-primary" role="group" aria-label="主要操作">
+        <div class="display-tabs ctrl-tabs" role="tablist" aria-label="表示の切替">
+          <button type="button" class="ctrl-btn display-tab" role="tab" data-display-tab="detail" aria-controls="detailPanel" aria-label="日次表示" title="日次表示">
+            <svg class="ctrl-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M21 9H3"/><path d="M21 15H3"/>
+            </svg>
+          </button>
+          <button type="button" class="ctrl-btn display-tab" role="tab" data-display-tab="summary" aria-controls="summaryPanel" aria-label="サマリー表示" title="サマリー表示">
+            <svg class="ctrl-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/>
+            </svg>
+          </button>
+          <span class="ctrl-sep" aria-hidden="true">|</span>
+        </div>
+        <button type="button" id="quickSaveButton" class="ctrl-btn ctrl-primary-save" aria-label="保存" title="保存">
+          <svg class="ctrl-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>
+          </svg>
+        </button>
+        <button type="button" id="ctrlDockExpandBtn" class="ctrl-btn" aria-expanded="false" aria-controls="ctrlDockItems">＞</button>
+      </div>
+      <div class="ctrl-items" id="ctrlDockItems" role="group" aria-label="追加操作">
+        <button type="button" class="ctrl-btn" id="ctrlPrintButton" aria-label="印刷" title="印刷">
+          <svg class="ctrl-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>
+          </svg>
+        </button>
+        <div class="ctrl-memo" id="memoQuickWrap">
+          <button type="button" class="ctrl-btn" id="memoQuickBtn" aria-label="付箋" title="付箋" aria-expanded="false" aria-controls="memoQuickMenu">
+            <svg class="ctrl-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M21 9a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/><path d="M15 3v5a1 1 0 0 0 1 1h5"/>
+            </svg>
+          </button>
+          <div class="ctrl-memo-menu" id="memoQuickMenu" role="menu" aria-label="付箋の種類">
+            <button type="button" class="ctrl-btn" id="memoHandwriteBtn" role="menuitem" aria-label="付箋（手書き）" title="付箋（手書き）">
+              <svg class="ctrl-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <circle cx="7" cy="12" r="3"/><path d="M10 9v6"/><circle cx="17" cy="12" r="3"/><path d="M14 7v8"/><path d="M22 17v1c0 .5-.5 1-1 1H3c-.5 0-1-.5-1-1v-1"/>
+              </svg>
+            </button>
+            <button type="button" class="ctrl-btn" id="memoTextBtn" role="menuitem" aria-label="付箋（文字）" title="付箋（文字）">
+              <svg class="ctrl-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <circle cx="7" cy="12" r="3"/><path d="M10 9v6"/><circle cx="17" cy="12" r="3"/><path d="M14 7v8"/><path d="M22 17v1c0 .5-.5 1-1 1H3c-.5 0-1-.5-1-1v-1"/>
+              </svg>
+            </button>
+            <button type="button" class="ctrl-btn" id="memoImageBtn" role="menuitem" aria-label="付箋（画像）" title="付箋（画像）">
+              <svg class="ctrl-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button type="button" class="ctrl-btn" id="logWindowButton" aria-label="ログ" title="ログ">
+          <svg class="ctrl-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M7 11h10"/><path d="M7 15h6"/><path d="M7 7h8"/>
+          </svg>
+        </button>
+        <button type="button" class="ctrl-btn" id="memoPlacementBtn" aria-label="設置モード" title="設置モード" aria-pressed="false">
+          <svg class="ctrl-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
+          </svg>
+        </button>
+        <button type="button" class="ctrl-btn" id="ctrlDockCollapseBtn" aria-expanded="true" aria-controls="ctrlDockItems">＜</button>
+      </div>
+    </div>
+  </div>
+  <a class="admin-fab" id="adminFab" href="admin-management-menu.html" aria-label="管理者ログイン">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M7 11a4 4 0 1 1 6.8 2.8L11 16.6V19H8v-2.4l2.8-2.8" />
+      <path d="M15.5 8.5h4.5v3l-2 2v2H16v-2l-2-2v-1" />
+    </svg>
+  </a>
+  <script>
+    (function(){
+      const session = window.EnchoSession;
+      const user = session?.getActiveUser();
+      const nameEl = document.getElementById("activeUserName");
+      if (nameEl) nameEl.textContent = user || "未ログイン";
+      window.addEventListener("load", () => {
+        if (user) session?.storeLastPageIfSignedIn();
+      });
+
+      const chipRoot = document.getElementById("themeChips");
+      const renderChips = () => {
+        if (!chipRoot || !window.EnchoTheme?.THEMES) return;
+        const active = window.EnchoTheme.getActiveThemeName();
+        const items = Object.entries(window.EnchoTheme.THEMES).map(([key, value]) => {
+          const label = value?.label || key;
+          const activeClass = key === active ? "active" : "";
+          return `<button class="theme-chip ${activeClass}" data-theme="${key}">${label}</button>`;
+        }).join("");
+        chipRoot.innerHTML = items;
+        chipRoot.querySelectorAll(".theme-chip").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const themeKey = btn.dataset.theme;
+            window.EnchoTheme?.applyTheme(themeKey);
+            window.EnchoTheme?.saveActiveThemeName(themeKey);
+            renderChips();
+          });
+        });
+      };
+      renderChips();
+
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn){
+        if (user) {
+          logoutBtn.addEventListener("click", () => {
+            session?.clearActiveUser?.();
+            window.location.href = "login.html";
+          });
+        } else {
+          logoutBtn.textContent = "ログイン";
+          logoutBtn.addEventListener("click", () => {
+            window.location.href = "login.html";
+          });
+        }
+      }
+
+      const userChip = document.getElementById("userChip");
+      const userMenu = document.getElementById("userMenu");
+      const closeUserMenu = () => {
+        if (!userMenu || !userChip) return;
+        userMenu.classList.remove("is-open");
+        userChip.setAttribute("aria-expanded", "false");
+      };
+      const toggleUserMenu = () => {
+        if (!userMenu || !userChip) return;
+        const isOpen = userMenu.classList.toggle("is-open");
+        userChip.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      };
+      if (userChip && userMenu) {
+        userChip.addEventListener("click", (event) => {
+          event.stopPropagation();
+          toggleUserMenu();
+        });
+        userChip.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            toggleUserMenu();
+          } else if (event.key === "Escape") {
+            closeUserMenu();
+          }
+        });
+        document.addEventListener("click", (event) => {
+          if (!userMenu.contains(event.target) && !userChip.contains(event.target)) {
+            closeUserMenu();
+          }
+        });
+      }
+
+      document.querySelectorAll("[data-admin-only]").forEach((element) => {
+        if (user !== "admin") {
+          element.setAttribute("aria-hidden", "true");
+          element.hidden = true;
+        }
+      });
+
+      const subtitleEl = document.getElementById("homepageSubtitle");
+      const subtitleText = session?.getHomepageSubtitle?.() || session?.DEFAULT_HOMEPAGE_SUBTITLE;
+      if (subtitleEl && subtitleText) subtitleEl.textContent = subtitleText;
+
+      const featureCardsRoot = document.getElementById("featureCards");
+      const createFeatureCard = (feature) => {
+        const bullets = Array.isArray(feature.featureList) ? feature.featureList : [];
+        const featureItems = bullets.map((item) => `<li>${item}</li>`).join("");
+        const ctaText = feature.cta || "開く →";
+        return `
+          <a href="${feature.href}" class="card" data-feature-id="${feature.id}">
+            <div class="card-title">
+              <div class="card-icon">${feature.icon || "⭐️"}</div>
+              ${feature.title}
+            </div>
+            <p class="card-description">${feature.description || ""}</p>
+            <ul class="card-features">
+              ${featureItems}
+            </ul>
+            <div class="btn">${ctaText}</div>
+          </a>
+        `;
+      };
+
+      const renderFeatureCards = () => {
+        if (!featureCardsRoot) return;
+        const allFeatures = session?.getFeatures?.() || session?.getDefaultFeatures?.() || [];
+        const enabled = allFeatures.filter((item) => item.enabled !== false);
+        if (!enabled.length) {
+          featureCardsRoot.innerHTML = `
+            <div class="empty-state">
+              利用可能な機能がありません。管理ページで有効化してください。
+            </div>
+          `;
+          return;
+        }
+        featureCardsRoot.innerHTML = enabled.map(createFeatureCard).join("");
+        if (!user) {
+          const loginRedirectBase = "login.html?redirect=";
+          const redirectCard = featureCardsRoot.querySelector('[data-feature-id="calcu"]');
+          if (redirectCard) {
+            const target = redirectCard.getAttribute("href") || "Calcu.html";
+            redirectCard.setAttribute("href", `${loginRedirectBase}${encodeURIComponent(target)}`);
+          }
+        }
+      };
+
+      renderFeatureCards();
+
+      const LINE_CONFIG_KEY = "encho_line_config";
+      const lineConfigForm = document.getElementById("lineConfigForm");
+      const lineConfigCard = document.querySelector(".line-config-card");
+      const lineDisplayName = document.getElementById("lineDisplayName");
+      const lineAddFriendUrl = document.getElementById("lineAddFriendUrl");
+      const lineLiffId = document.getElementById("lineLiffId");
+      const lineDetailsBaseUrl = document.getElementById("lineDetailsBaseUrl");
+      const lineOtpExpireDays = document.getElementById("lineOtpExpireDays");
+      const saveLineConfig = document.getElementById("saveLineConfig");
+      const resetLineConfig = document.getElementById("resetLineConfig");
+      const lineConfigCurrent = document.getElementById("lineConfigCurrent");
+      const lineConfigHealth = document.getElementById("lineConfigHealth");
+
+      const readLineConfig = () => {
+        const raw = localStorage.getItem(LINE_CONFIG_KEY);
+        if (!raw) return {};
+        try {
+          return JSON.parse(raw);
+        } catch (error) {
+          console.warn("Failed to parse line config", error);
+          return {};
+        }
+      };
+
+      const renderLineConfigCurrent = (config) => {
+        if (lineConfigCurrent) {
+          lineConfigCurrent.textContent = JSON.stringify(config || {}, null, 2);
+        }
+      };
+
+      const hasLineConfigValues = (config) => {
+        if (!config) return false;
+        return Boolean(
+          config.displayName ||
+          config.addFriendUrl ||
+          config.liffId ||
+          config.detailsBaseUrl ||
+          config.otpExpireDays
+        );
+      };
+
+      const setLineConfigLock = (isLocked) => {
+        if (lineConfigCard) lineConfigCard.classList.toggle("is-locked", isLocked);
+        if (lineConfigForm) lineConfigForm.classList.toggle("is-locked", isLocked);
+        [
+          lineDisplayName,
+          lineAddFriendUrl,
+          lineLiffId,
+          lineDetailsBaseUrl,
+          lineOtpExpireDays
+        ].forEach((input) => {
+          if (input) input.readOnly = isLocked;
+        });
+      };
+
+      const applyLineConfigToForm = (config) => {
+        if (!config) return;
+        if (lineDisplayName) lineDisplayName.value = config.displayName || "";
+        if (lineAddFriendUrl) lineAddFriendUrl.value = config.addFriendUrl || "";
+        if (lineLiffId) lineLiffId.value = config.liffId || "";
+        if (lineDetailsBaseUrl) lineDetailsBaseUrl.value = config.detailsBaseUrl || "";
+        if (lineOtpExpireDays) lineOtpExpireDays.value = config.otpExpireDays ?? "";
+      };
+
+      const collectLineConfigFromForm = () => {
+        const otpDays = Number(lineOtpExpireDays?.value);
+        return {
+          displayName: lineDisplayName?.value.trim() || "",
+          addFriendUrl: lineAddFriendUrl?.value.trim() || "",
+          liffId: lineLiffId?.value.trim() || "",
+          detailsBaseUrl: lineDetailsBaseUrl?.value.trim() || "",
+          otpExpireDays: Number.isFinite(otpDays) && otpDays > 0 ? otpDays : null
+        };
+      };
+
+      const saveLineConfigToStorage = () => {
+        const config = collectLineConfigFromForm();
+        localStorage.setItem(LINE_CONFIG_KEY, JSON.stringify(config));
+        renderLineConfigCurrent(config);
+        setLineConfigLock(true);
+      };
+
+      const resetLineConfigForm = () => {
+        localStorage.removeItem(LINE_CONFIG_KEY);
+        if (lineConfigForm) lineConfigForm.reset();
+        renderLineConfigCurrent({});
+        setLineConfigLock(false);
+      };
+
+      if (saveLineConfig) {
+        saveLineConfig.addEventListener("click", saveLineConfigToStorage);
+      }
+      if (resetLineConfig) {
+        resetLineConfig.addEventListener("click", resetLineConfigForm);
+      }
+      if (lineConfigForm) {
+        ["copy", "cut", "dragstart", "contextmenu", "selectstart"].forEach((eventName) => {
+          lineConfigForm.addEventListener(eventName, (event) => {
+            if (lineConfigForm.classList.contains("is-locked")) {
+              event.preventDefault();
+            }
+          });
+        });
+      }
+
+      const initialConfig = readLineConfig();
+      applyLineConfigToForm(initialConfig);
+      renderLineConfigCurrent(initialConfig);
+      setLineConfigLock(hasLineConfigValues(initialConfig));
+
+      const checkLineHealth = async () => {
+        if (!lineConfigHealth) return;
+        try {
+          const res = await fetch("/api/health/line");
+          lineConfigHealth.textContent = res.ok ? "サーバ設定: OK" : "サーバ設定: NG";
+        } catch (error) {
+          lineConfigHealth.textContent = "サーバ設定: NG";
+        }
+      };
+      checkLineHealth();
+
+      const NEWS_ITEMS = [
+        {
+          title: "預かり保育料の補助額、来年度から段階的に拡充へ",
+          desc: "自治体が行う保護者負担軽減策として、月額上限補助が+1,500円拡充予定。AIで補助対象を自動判定する実証も同時に進行中。",
+          category: "local",
+          source: { label: "京都府", url: "https://www.pref.kyoto.jp/shinchaku/index.html" },
+          tags: [
+            { label: "助成・補助" },
+            { label: "自治体", style: "background: linear-gradient(120deg, #e0f2fe, #cffafe);" }
+          ],
+          background: "radial-gradient(circle at 20% 20%, rgba(236, 72, 153, 0.5), transparent 40%), radial-gradient(circle at 70% 10%, rgba(59, 130, 246, 0.5), transparent 40%), linear-gradient(135deg, rgba(30, 27, 75, 0.9), rgba(17, 24, 39, 0.95))",
+          link: "https://example.com/news1",
+          keywords: ["預かり保育", "補助金", "保護者負担"]
+        },
+        {
+          title: "夕方の見守り体制を強化、延長保育で看護師配置拡大",
+          desc: "16:30以降の時間帯に看護師・保育士を追加配置。AIで混雑予測を出し、ピーク帯の配置が10分単位で最適化されました。",
+          category: "administration",
+          source: { label: "厚生労働省", url: "https://www.mhlw.go.jp/stf/houdou/" },
+          tags: [
+            { label: "園の動き", style: "background: linear-gradient(120deg, #ffe4e6, #fef9c3);" },
+            { label: "延長保育", style: "background: linear-gradient(120deg, #ede9fe, #f5d0fe);" }
+          ],
+          background: "radial-gradient(circle at 18% 30%, rgba(74, 222, 128, 0.48), transparent 45%), radial-gradient(circle at 80% 20%, rgba(251, 191, 36, 0.42), transparent 40%), linear-gradient(145deg, rgba(9, 9, 11, 0.92), rgba(6, 95, 70, 0.9))",
+          link: "https://example.com/news2",
+          keywords: ["延長保育", "看護師配置", "安全対策"]
+        },
+        {
+          title: "お迎え後のスイッチング遊びで「帰宅ぐずり」軽減",
+          desc: "AIがお迎え時間帯の気分を予測し、園内で3分ミニ遊びを提案。家庭への共有で「帰宅導線がスムーズに」と好評。",
+          category: "administration",
+          source: { label: "こども家庭庁", url: "https://www.cfa.go.jp/news" },
+          tags: [
+            { label: "アイデア", style: "background: linear-gradient(120deg, #d9f99d, #bef264);" },
+            { label: "家庭連携", style: "background: linear-gradient(120deg, #fbcfe8, #e9d5ff);" }
+          ],
+          background: "radial-gradient(circle at 30% 25%, rgba(14, 165, 233, 0.45), transparent 50%), radial-gradient(circle at 90% 0%, rgba(236, 72, 153, 0.42), transparent 35%), linear-gradient(150deg, rgba(9, 9, 11, 0.92), rgba(30, 41, 59, 0.94))",
+          link: "https://example.com/news3",
+          keywords: ["帰宅ぐずり", "親子遊び", "家庭連携"]
+        },
+        {
+          title: "園だよりをAIで自動レイアウト、週1時間分の作業を削減",
+          desc: "写真と短いメモを投入すると季節の飾り枠付きPDFを生成。配布前の誤字チェックもAIが自動で提案します。",
+          category: "administration",
+          source: { label: "文部科学省", url: "https://www.mext.go.jp/b_menu/b002.htm" },
+          tags: [
+            { label: "デジタル", style: "background: linear-gradient(120deg, #fef9c3, #bbf7d0);" },
+            { label: "業務効率", style: "background: linear-gradient(120deg, #e9d5ff, #c7d2fe);" }
+          ],
+          background: "radial-gradient(circle at 15% 35%, rgba(59, 130, 246, 0.45), transparent 45%), radial-gradient(circle at 90% 15%, rgba(244, 114, 182, 0.5), transparent 35%), linear-gradient(135deg, rgba(24, 24, 27, 0.92), rgba(17, 24, 39, 0.95))",
+          link: "https://example.com/news4",
+          keywords: ["園だより", "AIレイアウト", "業務効率"]
+        },
+        {
+          title: "夕方のおやつにたんぱく質追加、延長帯の集中力アップ",
+          desc: "枝豆チーズやギリシャヨーグルトなど、5分で出せる補食メニューを導入。AIで栄養バランスを自動スコア化。",
+          category: "administration",
+          source: { label: "厚生労働省", url: "https://www.mhlw.go.jp/stf/new-info/" },
+          tags: [
+            { label: "食育", style: "background: linear-gradient(120deg, #ffedd5, #fed7aa);" },
+            { label: "健康", style: "background: linear-gradient(120deg, #bae6fd, #bfdbfe);" }
+          ],
+          background: "radial-gradient(circle at 25% 20%, rgba(253, 224, 71, 0.5), transparent 40%), radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.45), transparent 40%), linear-gradient(150deg, rgba(19, 22, 34, 0.94), rgba(8, 47, 73, 0.9))",
+          link: "https://example.com/news5",
+          keywords: ["補食メニュー", "たんぱく質", "集中力アップ"]
+        },
+        {
+          title: "災害時引き渡しの訓練をAIシナリオで自動生成、職員研修に",
+          desc: "地域のハザードマップを読み込み、避難経路と役割分担を可視化した訓練台本を作成。振り返りレポートも即時出力。",
+          category: "government",
+          source: { label: "内閣府", url: "https://www.cao.go.jp/press/houdou.html" },
+          tags: [
+            { label: "防災", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "安全", style: "background: linear-gradient(120deg, #dcfce7, #bbf7d0);" }
+          ],
+          background: "radial-gradient(circle at 18% 28%, rgba(52, 211, 153, 0.5), transparent 40%), radial-gradient(circle at 80% 12%, rgba(147, 197, 253, 0.48), transparent 35%), linear-gradient(140deg, rgba(12, 10, 26, 0.92), rgba(24, 24, 27, 0.94))",
+          link: "https://example.com/news6",
+          keywords: ["防災訓練", "引き渡し", "研修シナリオ"]
+        },
+        {
+          title: "睡眠ログをAIが要約、昼寝の質を「色」で共有",
+          desc: "園内センサーと手入力の睡眠記録をAIが要約し、保護者には3色の「眠りメーター」で通知。家庭の就寝リズムも整いやすいと話題。",
+          category: "government",
+          source: { label: "内閣府", url: "https://www.cao.go.jp/rss/news.rdf" },
+          tags: [
+            { label: "AI活用", style: "background: linear-gradient(120deg, #a7f3d0, #99f6e4);" },
+            { label: "睡眠", style: "background: linear-gradient(120deg, #dbeafe, #e0e7ff);" }
+          ],
+          background: "radial-gradient(circle at 24% 18%, rgba(14, 165, 233, 0.45), transparent 40%), radial-gradient(circle at 70% 15%, rgba(16, 185, 129, 0.42), transparent 35%), linear-gradient(140deg, rgba(9, 9, 11, 0.92), rgba(15, 23, 42, 0.94))",
+          link: "https://example.com/news7",
+          keywords: ["睡眠ログ", "昼寝", "保護者共有"]
+        },
+        {
+          title: "園児の「今日の気分」をAIで可視化、配慮ポイントを提案",
+          desc: "朝の一言メモや表情チェックをもとに、AIが「静かな活動」「外遊び」などのおすすめを提示。クラス運営のバランスが改善。",
+          category: "administration",
+          source: { label: "こども家庭庁", url: "https://www.cfa.go.jp/news" },
+          tags: [
+            { label: "観察支援", style: "background: linear-gradient(120deg, #fde68a, #fcd34d);" },
+            { label: "保育", style: "background: linear-gradient(120deg, #fecdd3, #fbcfe8);" }
+          ],
+          background: "radial-gradient(circle at 18% 30%, rgba(244, 114, 182, 0.5), transparent 40%), radial-gradient(circle at 85% 10%, rgba(234, 179, 8, 0.45), transparent 35%), linear-gradient(140deg, rgba(24, 24, 27, 0.92), rgba(30, 41, 59, 0.94))",
+          link: "https://example.com/news8",
+          keywords: ["園児の気分", "活動提案", "観察支援"]
+        },
+        {
+          title: "保護者向けおたよりを多言語同時配信、翻訳チェックもAIで",
+          desc: "日々の連絡帳文を10言語に自動翻訳し、誤訳リスクをAIが警告。配信までの時間が平均40%短縮されたとの報告。",
+          category: "administration",
+          source: { label: "文部科学省", url: "https://www.mext.go.jp/b_menu/b002.htm" },
+          tags: [
+            { label: "多言語", style: "background: linear-gradient(120deg, #c7d2fe, #a5b4fc);" },
+            { label: "コミュニケーション", style: "background: linear-gradient(120deg, #bae6fd, #e0f2fe);" }
+          ],
+          background: "radial-gradient(circle at 20% 26%, rgba(59, 130, 246, 0.5), transparent 40%), radial-gradient(circle at 85% 15%, rgba(168, 85, 247, 0.45), transparent 35%), linear-gradient(140deg, rgba(9, 9, 11, 0.92), rgba(15, 23, 42, 0.94))",
+          link: "https://example.com/news9",
+          keywords: ["多言語配信", "翻訳チェック", "連絡帳"]
+        },
+        {
+          title: "連絡帳テンプレの「感謝ワード」自動生成が人気に",
+          desc: "先生のメモから温かい一文をAIが提案。「今日もありがとう」などの丁寧な表現が自動で差し込まれ、保護者の満足度が向上。",
+          category: "administration",
+          source: { label: "厚生労働省", url: "https://www.mhlw.go.jp/stf/new-info/" },
+          tags: [
+            { label: "文章生成", style: "background: linear-gradient(120deg, #fbcfe8, #fda4af);" },
+            { label: "保護者対応", style: "background: linear-gradient(120deg, #fef08a, #fde047);" }
+          ],
+          background: "radial-gradient(circle at 22% 22%, rgba(244, 114, 182, 0.5), transparent 40%), radial-gradient(circle at 70% 12%, rgba(251, 191, 36, 0.42), transparent 35%), linear-gradient(140deg, rgba(15, 23, 42, 0.92), rgba(30, 27, 75, 0.94))",
+          link: "https://example.com/news10",
+          keywords: ["感謝ワード", "文章生成", "保護者対応"]
+        },
+        {
+          title: "児童福祉法 改正動向のチェックポイント",
+          desc: "児童福祉法の最新改正情報を確認し、園内の運用フローや保護者案内の見直しを準備。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=児童福祉法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.45), transparent 40%), radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.4), transparent 35%), linear-gradient(140deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.94))",
+          keywords: ["児童福祉法", "法令改正", "運用準備"]
+        },
+        {
+          title: "子ども子育て支援法 改正情報の要点",
+          desc: "支援制度の改正点を整理し、補助申請や保護者対応の変更点を事前共有。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=子ども子育て支援法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 18% 30%, rgba(56, 189, 248, 0.45), transparent 40%), radial-gradient(circle at 80% 15%, rgba(14, 165, 233, 0.4), transparent 35%), linear-gradient(140deg, rgba(9, 9, 11, 0.92), rgba(30, 27, 75, 0.94))",
+          keywords: ["子ども子育て支援法", "制度改正", "保護者対応"]
+        },
+        {
+          title: "学校教育法 改正情報の整理",
+          desc: "学校教育法の改正ポイントを確認し、園の連携先や文書の更新計画を整理。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=学校教育法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 22% 22%, rgba(99, 102, 241, 0.45), transparent 40%), radial-gradient(circle at 75% 10%, rgba(59, 130, 246, 0.4), transparent 35%), linear-gradient(140deg, rgba(17, 24, 39, 0.92), rgba(30, 41, 59, 0.94))",
+          keywords: ["学校教育法", "法令改正", "連携先"]
+        },
+        {
+          title: "教育基本法 改正動向の確認",
+          desc: "教育基本法の更新内容をチェックし、教育方針や園内研修の整理に活用。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=教育基本法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 20% 15%, rgba(129, 140, 248, 0.45), transparent 40%), radial-gradient(circle at 85% 10%, rgba(59, 130, 246, 0.4), transparent 35%), linear-gradient(140deg, rgba(24, 24, 27, 0.92), rgba(30, 27, 75, 0.94))",
+          keywords: ["教育基本法", "改正", "研修"]
+        },
+        {
+          title: "就学前教育・保育総合提供推進法の改正確認",
+          desc: "就学前の子どもに関する教育・保育の総合的な提供に関する法改正を確認し、運用改善に備える。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=就学前の子どもに関する教育、保育等の総合的な提供の推進に関する法律&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 18% 30%, rgba(14, 165, 233, 0.45), transparent 40%), radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.4), transparent 35%), linear-gradient(140deg, rgba(12, 10, 26, 0.92), rgba(17, 24, 39, 0.94))",
+          keywords: ["就学前", "総合提供", "法改正"]
+        },
+        {
+          title: "社会福祉法 改正動向の共有",
+          desc: "社会福祉法の改正点を整理し、園の運営ルールや届出に影響する項目を洗い出し。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=社会福祉法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 24% 18%, rgba(56, 189, 248, 0.45), transparent 40%), radial-gradient(circle at 80% 12%, rgba(14, 165, 233, 0.4), transparent 35%), linear-gradient(140deg, rgba(15, 23, 42, 0.92), rgba(24, 24, 27, 0.94))",
+          keywords: ["社会福祉法", "改正", "運営ルール"]
+        },
+        {
+          title: "障害者基本法 改正情報のチェック",
+          desc: "障害者基本法の改正情報を確認し、園内の合理的配慮や支援体制の更新に備える。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=障害者基本法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 22% 22%, rgba(125, 211, 252, 0.45), transparent 40%), radial-gradient(circle at 75% 10%, rgba(59, 130, 246, 0.4), transparent 35%), linear-gradient(140deg, rgba(17, 24, 39, 0.92), rgba(15, 23, 42, 0.94))",
+          keywords: ["障害者基本法", "合理的配慮", "支援体制"]
+        },
+        {
+          title: "母子及び父子並びに寡婦福祉法の改正確認",
+          desc: "母子・父子・寡婦福祉法の最新改正を確認し、支援制度案内の更新に活用。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=母子及び父子並びに寡婦福祉法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 18% 30%, rgba(96, 165, 250, 0.45), transparent 40%), radial-gradient(circle at 80% 15%, rgba(14, 165, 233, 0.4), transparent 35%), linear-gradient(140deg, rgba(12, 10, 26, 0.92), rgba(15, 23, 42, 0.94))",
+          keywords: ["母子福祉", "父子福祉", "寡婦福祉"]
+        },
+        {
+          title: "育児・介護休業法の改正ポイント整理",
+          desc: "育児休業・介護休業等の法改正を確認し、就業規則や職員向け案内の更新準備。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=育児休業、介護休業等育児又は家族介護を行う労働者の福祉に関する法律&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.45), transparent 40%), radial-gradient(circle at 80% 0%, rgba(37, 99, 235, 0.4), transparent 35%), linear-gradient(140deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.94))",
+          keywords: ["育児休業", "介護休業", "就業規則"]
+        },
+        {
+          title: "児童手当法の改正情報を確認",
+          desc: "児童手当法の最新改正内容を把握し、保護者向け案内をアップデート。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=児童手当法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 24% 18%, rgba(59, 130, 246, 0.45), transparent 40%), radial-gradient(circle at 80% 12%, rgba(14, 165, 233, 0.4), transparent 35%), linear-gradient(140deg, rgba(17, 24, 39, 0.92), rgba(15, 23, 42, 0.94))",
+          keywords: ["児童手当", "給付", "保護者案内"]
+        },
+        {
+          title: "児童扶養手当法の改正ポイント",
+          desc: "児童扶養手当法の改正情報を整理し、相談対応や案内資料の更新に備える。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=児童扶養手当法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 18% 30%, rgba(125, 211, 252, 0.45), transparent 40%), radial-gradient(circle at 85% 10%, rgba(59, 130, 246, 0.4), transparent 35%), linear-gradient(140deg, rgba(12, 10, 26, 0.92), rgba(17, 24, 39, 0.94))",
+          keywords: ["児童扶養手当", "改正", "相談対応"]
+        },
+        {
+          title: "特別児童扶養手当等の改正情報",
+          desc: "特別児童扶養手当等の支給に関する法律の改正点を確認し、案内文書の更新に反映。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=特別児童扶養手当等の支給に関する法律&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.45), transparent 40%), radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.4), transparent 35%), linear-gradient(140deg, rgba(15, 23, 42, 0.92), rgba(24, 24, 27, 0.94))",
+          keywords: ["特別児童扶養手当", "支給", "改正"]
+        },
+        {
+          title: "子どもの貧困対策推進法 改正情報",
+          desc: "子どもの貧困対策の推進に関する法律の改正点を整理し、支援策の案内を更新。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=子どもの貧困対策の推進に関する法律&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 22% 22%, rgba(14, 165, 233, 0.45), transparent 40%), radial-gradient(circle at 80% 12%, rgba(37, 99, 235, 0.4), transparent 35%), linear-gradient(140deg, rgba(17, 24, 39, 0.92), rgba(30, 41, 59, 0.94))",
+          keywords: ["子どもの貧困", "支援策", "改正"]
+        },
+        {
+          title: "学校保健安全法の改正ポイント",
+          desc: "学校保健安全法の改正情報を確認し、園内の安全・健康管理の運用に反映。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=学校保健安全法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 18% 30%, rgba(59, 130, 246, 0.45), transparent 40%), radial-gradient(circle at 85% 10%, rgba(14, 165, 233, 0.4), transparent 35%), linear-gradient(140deg, rgba(12, 10, 26, 0.92), rgba(15, 23, 42, 0.94))",
+          keywords: ["学校保健安全法", "安全管理", "改正"]
+        },
+        {
+          title: "母子保健法の改正情報",
+          desc: "母子保健法の改正点を整理し、保健指導や周知資料の更新準備。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=母子保健法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 20% 20%, rgba(125, 211, 252, 0.45), transparent 40%), radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.4), transparent 35%), linear-gradient(140deg, rgba(17, 24, 39, 0.92), rgba(15, 23, 42, 0.94))",
+          keywords: ["母子保健法", "保健指導", "改正"]
+        },
+        {
+          title: "予防接種法の改正動向",
+          desc: "予防接種法の改正情報を確認し、園内の接種案内や記録運用を更新。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=予防接種法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 18% 28%, rgba(14, 165, 233, 0.45), transparent 40%), radial-gradient(circle at 80% 12%, rgba(59, 130, 246, 0.4), transparent 35%), linear-gradient(140deg, rgba(12, 10, 26, 0.92), rgba(24, 24, 27, 0.94))",
+          keywords: ["予防接種法", "接種案内", "改正"]
+        },
+        {
+          title: "児童虐待防止法の改正確認",
+          desc: "児童虐待の防止等に関する法律の改正点を確認し、通報・連携フローを見直し。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=児童虐待の防止等に関する法律&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 22% 22%, rgba(59, 130, 246, 0.45), transparent 40%), radial-gradient(circle at 85% 10%, rgba(14, 165, 233, 0.4), transparent 35%), linear-gradient(140deg, rgba(17, 24, 39, 0.92), rgba(30, 41, 59, 0.94))",
+          keywords: ["児童虐待防止", "連携フロー", "改正"]
+        },
+        {
+          title: "児童買春・児童ポルノ関連法の改正動向",
+          desc: "児童買春・児童ポルノ規制等に関する法律の改正情報を確認し、啓発資料の更新に備える。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=児童買春、児童ポルノに係る行為等の規制及び処罰並びに児童の保護等に関する法律&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.45), transparent 40%), radial-gradient(circle at 80% 0%, rgba(37, 99, 235, 0.4), transparent 35%), linear-gradient(140deg, rgba(15, 23, 42, 0.92), rgba(24, 24, 27, 0.94))",
+          keywords: ["児童買春", "児童ポルノ", "規制"]
+        },
+        {
+          title: "食育基本法の改正情報",
+          desc: "食育基本法の改正内容を確認し、園内の食育計画や発信内容を更新。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=食育基本法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 18% 30%, rgba(59, 130, 246, 0.45), transparent 40%), radial-gradient(circle at 85% 10%, rgba(14, 165, 233, 0.4), transparent 35%), linear-gradient(140deg, rgba(12, 10, 26, 0.92), rgba(17, 24, 39, 0.94))",
+          keywords: ["食育基本法", "食育計画", "改正"]
+        },
+        {
+          title: "少子化社会対策基本法の改正確認",
+          desc: "少子化社会対策基本法の改正情報を確認し、園の支援策や共有内容に反映。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=少子化社会対策基本法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 22% 22%, rgba(56, 189, 248, 0.45), transparent 40%), radial-gradient(circle at 80% 12%, rgba(14, 165, 233, 0.4), transparent 35%), linear-gradient(140deg, rgba(17, 24, 39, 0.92), rgba(30, 41, 59, 0.94))",
+          keywords: ["少子化対策", "改正", "支援策"]
+        },
+        {
+          title: "次世代育成支援対策推進法の改正動向",
+          desc: "次世代育成支援対策推進法の最新情報を確認し、園内の支援施策や研修計画を調整。",
+          category: "legal",
+          source: { label: "SN法令検索", url: "https://www.sn-hoki.co.jp/article_list/pickup_hourei_top/?page_num=1&state=更新日&keyword=次世代育成支援対策推進法&searchtype=and" },
+          tags: [
+            { label: "法令" },
+            { label: "施行規則", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" },
+            { label: "省令名", style: "background: linear-gradient(120deg, #fef3c7, #fde68a);" }
+          ],
+          background: "radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.45), transparent 40%), radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.4), transparent 35%), linear-gradient(140deg, rgba(15, 23, 42, 0.92), rgba(24, 24, 27, 0.94))",
+          keywords: ["次世代育成", "支援対策", "改正"]
+        }
+      ];
+
+      const NEWS_ARCHIVES = {
+        latest: NEWS_ITEMS,
+        "2025-02-20": [
+          {
+            title: "制度改正の整理が急務、園内周知のテンプレ整備へ",
+            desc: "こども家庭庁の新通知に合わせ、園内掲示と保護者配布向けのテンプレを更新。FAQの差し替えも進行中。",
+            category: "administration",
+            source: { label: "こども家庭庁", url: "https://www.cfa.go.jp/news" },
+            tags: [
+              { label: "制度動向", style: "background: linear-gradient(120deg, #fef9c3, #fde68a);" }
+            ],
+            background: "radial-gradient(circle at 20% 20%, rgba(251, 191, 36, 0.45), transparent 40%), radial-gradient(circle at 80% 0%, rgba(236, 72, 153, 0.4), transparent 35%), linear-gradient(145deg, rgba(17, 24, 39, 0.9), rgba(30, 27, 75, 0.92))",
+            keywords: ["こども家庭庁", "制度改正", "園内周知"]
+          },
+          {
+            title: "補助金の対象拡大で申請フローを簡素化",
+            desc: "厚生労働省の補助要件見直しに合わせ、申請フォームの項目を半減。担当者の工数が週2時間削減。",
+            category: "administration",
+            source: { label: "厚生労働省", url: "https://www.mhlw.go.jp/stf/houdou/" },
+            tags: [
+              { label: "助成・補助", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" }
+            ],
+            background: "radial-gradient(circle at 25% 15%, rgba(59, 130, 246, 0.45), transparent 40%), radial-gradient(circle at 80% 10%, rgba(14, 165, 233, 0.4), transparent 35%), linear-gradient(140deg, rgba(15, 23, 42, 0.92), rgba(17, 24, 39, 0.94))",
+            keywords: ["厚労省", "補助金", "申請簡素化"]
+          },
+          {
+            title: "京都府の子育て支援ニュース、園内掲示に反映",
+            desc: "地域の子育て支援イベント情報をまとめ、玄関ボードとLINE配信に追加。参加率の底上げが期待。",
+            category: "local",
+            source: { label: "京都府", url: "https://www.pref.kyoto.jp/shinchaku/index.html" },
+            tags: [
+              { label: "地域ニュース", style: "background: linear-gradient(120deg, #fce7f3, #fbcfe8);" }
+            ],
+            background: "radial-gradient(circle at 18% 30%, rgba(244, 114, 182, 0.5), transparent 40%), radial-gradient(circle at 85% 10%, rgba(236, 72, 153, 0.4), transparent 35%), linear-gradient(145deg, rgba(30, 27, 75, 0.92), rgba(15, 23, 42, 0.94))",
+            keywords: ["京都府", "子育て支援", "地域イベント"]
+          }
+        ],
+        "2025-02-19": [
+          {
+            title: "文科省の教育関連ニュース、園内研修で共有",
+            desc: "教育DXの最新動向を共有し、園内ICT計画の見直しを検討。次回会議で具体案を提出予定。",
+            category: "administration",
+            source: { label: "文部科学省", url: "https://www.mext.go.jp/b_menu/b002.htm" },
+            tags: [
+              { label: "文科省", style: "background: linear-gradient(120deg, #dbeafe, #bfdbfe);" }
+            ],
+            background: "radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.45), transparent 40%), radial-gradient(circle at 80% 10%, rgba(99, 102, 241, 0.4), transparent 35%), linear-gradient(140deg, rgba(9, 9, 11, 0.92), rgba(15, 23, 42, 0.94))",
+            keywords: ["文科省", "教育DX", "研修"]
+          },
+          {
+            title: "予算概要の要点を整理、園内配分の確認を開始",
+            desc: "新年度予算の重点項目を整理し、設備投資と人員配置の見直しに着手。関係者への説明資料を作成中。",
+            category: "government",
+            source: { label: "内閣府", url: "https://www.cao.go.jp/press/houdou.html" },
+            tags: [
+              { label: "予算概要", style: "background: linear-gradient(120deg, #fef9c3, #fcd34d);" }
+            ],
+            background: "radial-gradient(circle at 18% 30%, rgba(250, 204, 21, 0.5), transparent 40%), radial-gradient(circle at 75% 10%, rgba(251, 191, 36, 0.4), transparent 35%), linear-gradient(140deg, rgba(24, 24, 27, 0.92), rgba(30, 41, 59, 0.94))",
+            keywords: ["予算", "重点項目", "配分"]
+          },
+          {
+            title: "新着ニュース要約で保護者への案内文を更新",
+            desc: "今週の主要ニュースを抜粋し、保護者向けお知らせの冒頭文を刷新。短時間で要点が伝わる構成に調整。",
+            category: "administration",
+            source: { label: "厚生労働省", url: "https://www.mhlw.go.jp/stf/new-info/" },
+            tags: [
+              { label: "新着ニュース", style: "background: linear-gradient(120deg, #fee2e2, #fecaca);" }
+            ],
+            background: "radial-gradient(circle at 22% 22%, rgba(248, 113, 113, 0.45), transparent 40%), radial-gradient(circle at 80% 12%, rgba(244, 63, 94, 0.4), transparent 35%), linear-gradient(140deg, rgba(30, 27, 75, 0.92), rgba(17, 24, 39, 0.94))",
+            keywords: ["ニュース要約", "保護者案内", "共有文"]
+          }
+        ],
+        "2025-02-18": [
+          {
+          title: "法令改正の主要ポイントを一枚に整理",
+          desc: "保育関連の法令改正を要点化し、現場での対応フローを1枚で共有。職員向けの確認会を実施。",
+          category: "administration",
+          source: { label: "こども家庭庁", url: "https://www.cfa.go.jp/policies" },
+            tags: [
+              { label: "法令改正", style: "background: linear-gradient(120deg, #e0f2fe, #bae6fd);" }
+            ],
+            background: "radial-gradient(circle at 25% 15%, rgba(14, 165, 233, 0.45), transparent 40%), radial-gradient(circle at 80% 10%, rgba(56, 189, 248, 0.4), transparent 35%), linear-gradient(140deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.94))",
+            keywords: ["法令改正", "対応フロー", "共有"]
+          },
+          {
+          title: "こども家庭庁の新着通知をFAQに反映",
+          desc: "保護者から多い質問に対して、新通知内容を反映した回答を追加。受付対応の標準化を進行中。",
+          category: "administration",
+          source: { label: "こども家庭庁", url: "https://www.cfa.go.jp/policies" },
+            tags: [
+              { label: "こども家庭庁", style: "background: linear-gradient(120deg, #d9f99d, #bef264);" }
+            ],
+            background: "radial-gradient(circle at 20% 25%, rgba(163, 230, 53, 0.45), transparent 40%), radial-gradient(circle at 80% 12%, rgba(132, 204, 22, 0.4), transparent 35%), linear-gradient(140deg, rgba(24, 24, 27, 0.92), rgba(15, 23, 42, 0.94))",
+            keywords: ["FAQ", "通知反映", "保護者対応"]
+          },
+          {
+            title: "京都府の子ども関連ニュースを週報に追加",
+            desc: "地域の子育て施策やイベント情報を週報に掲載し、職員間の共有を強化。園内ポータルにも掲載。",
+            category: "local",
+            source: { label: "京都府", url: "https://www.pref.kyoto.jp/shinchaku/index.html" },
+            tags: [
+              { label: "地域ニュース", style: "background: linear-gradient(120deg, #fce7f3, #fbcfe8);" }
+            ],
+            background: "radial-gradient(circle at 18% 30%, rgba(236, 72, 153, 0.45), transparent 40%), radial-gradient(circle at 85% 10%, rgba(244, 114, 182, 0.4), transparent 35%), linear-gradient(140deg, rgba(30, 27, 75, 0.92), rgba(15, 23, 42, 0.94))",
+            keywords: ["京都府", "週報", "地域情報"]
+          }
+        ]
+      };
+
+      const renderTags = (tags = []) => tags.map(tag => `<span class="tag"${tag.style ? ` style="${tag.style}"` : ""}>${tag.label}</span>`).join("");
+
+      const createNewsCard = (item, variant = "grid") => {
+        const cardClass = variant === "slider" ? "news-slide-card" : "news-card";
+        const favorite = variant === "grid"
+          ? `<button class="favorite-btn" type="button" aria-label="お気に入りに追加">⭐️</button>`
+          : "";
+        const keywordTags = (item.keywords || []).map((keyword) => {
+          const query = encodeURIComponent(keyword);
+          return `<a class="keyword-tag" href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener">${keyword}</a>`;
+        }).join("");
+        return `
+          <div class="${cardClass}">
+            ${favorite}
+            <div class="news-image" style="background: ${item.background};"></div>
+            <div class="news-meta">${renderTags(item.tags)}</div>
+            <p class="news-title-text">${item.title}</p>
+            <p class="news-desc">${item.desc}</p>
+            ${item.source ? `<p class="news-source">出典: <a href="${item.source.url}" target="_blank" rel="noopener">${item.source.label}</a></p>` : ""}
+            <div class="news-keywords" aria-label="キーワード検索">
+              ${keywordTags}
+            </div>
+            <div class="news-card-footer">
+              <button class="news-detail-button" type="button" data-news-detail="${item.id}">記事を開く</button>
+            </div>
+          </div>
+        `;
+      };
+
+      const grid = document.getElementById("newsGrid");
+      let currentItems = [];
+      const renderNewsGrid = (items = NEWS_ITEMS) => {
+        currentItems = items.map((item, index) => ({
+          ...item,
+          id: item.id || `news-${index}`
+        }));
+        if (grid) grid.innerHTML = currentItems.map(item => createNewsCard(item, "grid")).join("");
+      };
+      renderNewsGrid(NEWS_ITEMS);
+
+      const dateButtons = document.querySelectorAll("[data-news-date]");
+      const categoryButtons = document.querySelectorAll("[data-news-category]");
+      let activeDate = "latest";
+      let activeCategory = "all";
+
+      const applyNewsFilters = () => {
+        const items = NEWS_ARCHIVES[activeDate] || NEWS_ITEMS;
+        const filtered = activeCategory === "all"
+          ? items
+          : items.filter((item) => item.category === activeCategory);
+        renderNewsGrid(filtered);
+      };
+
+      const setActiveDate = (dateKey) => {
+        activeDate = dateKey;
+        dateButtons.forEach((button) => {
+          const isActive = button.dataset.newsDate === dateKey;
+          button.classList.toggle("is-active", isActive);
+          button.setAttribute("aria-selected", isActive ? "true" : "false");
+        });
+        applyNewsFilters();
+      };
+
+      const setActiveCategory = (categoryKey) => {
+        activeCategory = categoryKey;
+        categoryButtons.forEach((button) => {
+          const isActive = button.dataset.newsCategory === categoryKey;
+          button.classList.toggle("is-active", isActive);
+          button.setAttribute("aria-selected", isActive ? "true" : "false");
+        });
+        applyNewsFilters();
+      };
+
+      dateButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          setActiveDate(button.dataset.newsDate);
+        });
+      });
+
+      categoryButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          setActiveCategory(button.dataset.newsCategory);
+        });
+      });
+
+      const modal = document.getElementById("newsModal");
+      const modalTitle = document.getElementById("newsModalTitle");
+      const modalDesc = document.getElementById("newsModalDesc");
+      const modalSource = document.getElementById("newsModalSource");
+      const modalTags = document.getElementById("newsModalTags");
+      const modalKeywords = document.getElementById("newsModalKeywords");
+      const modalClose = document.getElementById("newsModalClose");
+
+      const openModal = (item) => {
+        if (!modal || !item) return;
+        if (modalTitle) modalTitle.textContent = item.title;
+        if (modalDesc) modalDesc.textContent = item.detail || item.desc;
+        if (modalTags) modalTags.innerHTML = renderTags(item.tags);
+        if (modalKeywords) {
+          modalKeywords.innerHTML = (item.keywords || []).map((keyword) => {
+            const query = encodeURIComponent(keyword);
+            return `<a class="keyword-tag" href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener">${keyword}</a>`;
+          }).join("");
+        }
+        if (modalSource) {
+          modalSource.innerHTML = item.source
+            ? `出典: <a href="${item.source.url}" target="_blank" rel="noopener">${item.source.label}</a>`
+            : "";
+        }
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+      };
+
+      const closeModal = () => {
+        if (!modal) return;
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+      };
+
+      if (modalClose) {
+        modalClose.addEventListener("click", closeModal);
+      }
+
+      if (modal) {
+        modal.addEventListener("click", (event) => {
+          if (event.target === modal) closeModal();
+        });
+      }
+
+      if (grid) {
+        grid.addEventListener("click", (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLElement)) return;
+          const button = target.closest("[data-news-detail]");
+          if (!button) return;
+          const id = button.getAttribute("data-news-detail");
+          const item = currentItems.find((entry) => entry.id === id);
+          openModal(item);
+        });
+      }
+
+      const yearEl = document.getElementById("currentYear");
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+      const updatedEl = document.getElementById("lastUpdated");
+      if (updatedEl) {
+        const today = new Date();
+        updatedEl.textContent = `最終更新: ${today.toLocaleDateString("ja-JP")}`;
+      }
+
+    })();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    (function() {
+      const modal = document.getElementById("upgradeModal");
+      const closeBtn = document.getElementById("upgradeModalClose");
+      const inboxBtn = document.getElementById("upgradeInboxBtn");
+      const badge = document.getElementById("upgradeBadge");
+      const captureImg = document.getElementById("upgradeCapture");
+      const previewNote = document.querySelector(".upgrade-preview-note");
+      const targetTypeEl = document.getElementById("upgradeTargetType");
+      const targetTextEl = document.getElementById("upgradeTargetText");
+      const messageEl = document.getElementById("upgradeMessage");
+      const sendBtn = document.getElementById("upgradeSendBtn");
+      const logList = document.getElementById("upgradeLogList");
+      const priorityInputs = document.querySelectorAll("input[name='upgradePriority']");
+      const STORAGE_KEY = "upgradeRequests";
+      let currentTarget = null;
+      let currentCapture = "";
+
+      const readLogs = () => {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        try {
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          console.warn("Failed to parse upgrade logs", error);
+          return [];
+        }
+      };
+
+      const writeLogs = (logs) => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+      };
+
+      const updateBadge = (count) => {
+        if (!badge) return;
+        if (count > 0) {
+          badge.textContent = count > 99 ? "99+" : String(count);
+          badge.classList.remove("is-hidden");
+        } else {
+          badge.classList.add("is-hidden");
+        }
+      };
+
+      const getPriorityValue = () => {
+        const selected = Array.from(priorityInputs).find((input) => input.checked);
+        return selected?.value || "要望・ご意見";
+      };
+
+      const setTargetInfo = (targetInfo) => {
+        currentTarget = targetInfo;
+        if (targetTypeEl) targetTypeEl.textContent = targetInfo?.type || "未選択";
+        if (targetTextEl) targetTextEl.textContent = targetInfo?.label || "未選択";
+        currentCapture = "";
+        if (captureImg) captureImg.src = "";
+        if (previewNote) previewNote.textContent = "該当部分のスクリーンショットイメージ";
+      };
+
+      const openModal = () => {
+        if (!modal) return;
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        renderLogList();
+      };
+
+      const closeModal = () => {
+        if (!modal) return;
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+      };
+
+      const renderLogList = () => {
+        if (!logList) return;
+        const logs = readLogs();
+        const filteredLogs = currentTarget?.key
+          ? logs.filter((entry) => entry.key === currentTarget.key)
+          : logs;
+        logList.innerHTML = "";
+        if (filteredLogs.length === 0) {
+          const empty = document.createElement("li");
+          empty.className = "upgrade-log-empty";
+          empty.textContent = "まだ同じ項目の送信はありません。";
+          logList.appendChild(empty);
+          return;
+        }
+        filteredLogs.slice().reverse().forEach((entry) => {
+          const item = document.createElement("li");
+          item.className = "upgrade-log-item";
+
+          const title = document.createElement("strong");
+          title.textContent = entry.type;
+
+          const label = document.createElement("span");
+          label.textContent = entry.label;
+
+          const priority = document.createElement("span");
+          priority.textContent = `重要度: ${entry.priority}`;
+
+          const message = document.createElement("span");
+          message.textContent = entry.message || "（内容なし）";
+
+          const createdAt = document.createElement("span");
+          createdAt.textContent = entry.createdAt;
+
+          if (entry.image) {
+            const img = document.createElement("img");
+            img.src = entry.image;
+            img.alt = "送信したスクリーンショット";
+            item.appendChild(img);
+          }
+
+          item.append(title, label, priority, message, createdAt);
+          logList.appendChild(item);
+        });
+      };
+
+      const captureArea = async (rect) => {
+        if (!captureImg || !window.html2canvas) return;
+        try {
+          currentCapture = "";
+          if (previewNote) previewNote.textContent = "スクリーンショットを取得中...";
+          const canvas = await window.html2canvas(document.body, {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+            useCORS: true,
+            backgroundColor: null
+          });
+          currentCapture = canvas.toDataURL("image/png");
+          captureImg.src = currentCapture;
+          if (previewNote) previewNote.textContent = "スクリーンショットを取得しました。";
+        } catch (error) {
+          console.warn("Failed to capture screenshot", error);
+          if (previewNote) previewNote.textContent = "スクリーンショットの取得に失敗しました。";
+        }
+      };
+
+      const getTargetInfo = (target) => {
+        if (!(target instanceof HTMLElement)) return null;
+        const button = target.closest("button, [role='button']");
+        if (button) {
+          const label = button.getAttribute("aria-label") || button.textContent.trim() || "ボタン";
+          return { type: "ボタン", label, key: `button:${button.id || label}` };
+        }
+        const image = target.closest("img");
+        if (image) {
+          const label = image.getAttribute("alt") || image.getAttribute("src") || "イメージ画像";
+          return { type: "イメージ画像", label, key: `image:${image.getAttribute("src") || label}` };
+        }
+        const textContent = target.textContent?.trim();
+        if (textContent) {
+          const shortText = textContent.length > 30 ? `${textContent.slice(0, 30)}…` : textContent;
+          return { type: "表示テキスト", label: shortText, key: `text:${shortText}` };
+        }
+        return { type: "余白", label: "余白（自動判定）", key: "margin" };
+      };
+
+      const getCaptureRect = (target, point, type) => {
+        const padding = 16;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        if (type === "余白") {
+          const width = 280;
+          const height = 180;
+          const x = Math.min(Math.max(point.x - width / 2, 0), viewportWidth - width);
+          const y = Math.min(Math.max(point.y - height / 2, 0), viewportHeight - height);
+          return { x, y, width, height };
+        }
+        const rect = target.getBoundingClientRect();
+        const x = Math.min(Math.max(rect.left - padding, 0), viewportWidth - rect.width - padding);
+        const y = Math.min(Math.max(rect.top - padding, 0), viewportHeight - rect.height - padding);
+        return { x, y, width: rect.width + padding * 2, height: rect.height + padding * 2 };
+      };
+
+      const handleContextRequest = (target, point) => {
+        const targetInfo = getTargetInfo(target);
+        if (!targetInfo) return;
+        setTargetInfo(targetInfo);
+        captureArea(getCaptureRect(target, point, targetInfo.type));
+        openModal();
+      };
+
+      document.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+        handleContextRequest(event.target, { x: event.clientX, y: event.clientY });
+      });
+
+      let longPressTimer = null;
+      document.addEventListener("touchstart", (event) => {
+        if (event.touches.length !== 1) return;
+        const touch = event.touches[0];
+        longPressTimer = window.setTimeout(() => {
+          handleContextRequest(event.target, { x: touch.clientX, y: touch.clientY });
+        }, 600);
+      });
+      ["touchend", "touchmove", "touchcancel"].forEach((eventName) => {
+        document.addEventListener(eventName, () => {
+          if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+          }
+        });
+      });
+
+      if (closeBtn) {
+        closeBtn.addEventListener("click", closeModal);
+      }
+      if (modal) {
+        modal.addEventListener("click", (event) => {
+          if (event.target === modal) closeModal();
+        });
+      }
+      if (inboxBtn) {
+        inboxBtn.addEventListener("click", () => {
+          setTargetInfo(currentTarget || { type: "未選択", label: "未選択", key: null });
+          openModal();
+        });
+      }
+      if (sendBtn) {
+        sendBtn.addEventListener("click", () => {
+          if (!currentTarget) {
+            alert("右クリック（長押しタップ）で対象を選択してください。");
+            return;
+          }
+          const logs = readLogs();
+          const entry = {
+            type: currentTarget.type,
+            label: currentTarget.label,
+            key: currentTarget.key,
+            priority: getPriorityValue(),
+            message: messageEl?.value.trim() || "",
+            image: currentCapture || captureImg?.src || "",
+            createdAt: new Date().toLocaleString("ja-JP")
+          };
+          logs.push(entry);
+          writeLogs(logs.slice(-100));
+          updateBadge(logs.length);
+          renderLogList();
+          if (messageEl) messageEl.value = "";
+        });
+      }
+
+      updateBadge(readLogs().length);
+    })();
+  </script>
+  <script>
+    // Initialize smooth swipe scrolling
+    (function() {
+      if (window.SwipeHandler) {
+        window.pageSwipeHandler = new SwipeHandler(document.body, {
+          enableGradient: true,
+          snapToSections: false,
+          enableMomentum: true,
+          showVisualFeedback: true
+        });
+      }
+    })();
+  </script>
+  <script>
+    (function() {
+      const ctrlDock = document.getElementById("ctrlDock");
+      const ctrlDockHandle = document.getElementById("ctrlDockHandle");
+      const ctrlDockExpandBtn = document.getElementById("ctrlDockExpandBtn");
+      const ctrlDockCollapseBtn = document.getElementById("ctrlDockCollapseBtn");
+      const memoQuickBtn = document.getElementById("memoQuickBtn");
+      const memoQuickWrap = document.getElementById("memoQuickWrap");
+
+      const enableCtrlDockDragging = (dock, handle) => {
+        if (!dock || !handle) return;
+        let dragging = false;
+        let pointerId = null;
+        let startX = 0;
+        let startY = 0;
+        let startLeft = 0;
+        let startTop = 0;
+        let dockWidth = 0;
+        let dockHeight = 0;
+        const margin = 12;
+        const clampValue = (value, min, max) => Math.min(max, Math.max(min, value));
+        const setPosition = (left, top) => {
+          dock.style.left = `${left}px`;
+          dock.style.top = `${top}px`;
+          dock.style.right = "auto";
+          dock.style.bottom = "auto";
+        };
+        handle.addEventListener("pointerdown", (e) => {
+          if (e.button !== 0) return;
+          const rect = dock.getBoundingClientRect();
+          dockWidth = rect.width;
+          dockHeight = rect.height;
+          startLeft = rect.left;
+          startTop = rect.top;
+          startX = e.clientX;
+          startY = e.clientY;
+          dragging = true;
+          pointerId = e.pointerId;
+          handle.setPointerCapture(pointerId);
+          dock.classList.add("is-dragging");
+          setPosition(startLeft, startTop);
+          e.preventDefault();
+        });
+        handle.addEventListener("pointermove", (e) => {
+          if (!dragging || e.pointerId !== pointerId) return;
+          const nextLeft = startLeft + (e.clientX - startX);
+          const nextTop = startTop + (e.clientY - startY);
+          const maxLeft = Math.max(margin, window.innerWidth - dockWidth - margin);
+          const maxTop = Math.max(margin, window.innerHeight - dockHeight - margin);
+          setPosition(clampValue(nextLeft, margin, maxLeft), clampValue(nextTop, margin, maxTop));
+        });
+        const stopDrag = (e) => {
+          if (!dragging || (pointerId !== null && e.pointerId !== pointerId)) return;
+          dragging = false;
+          dock.classList.remove("is-dragging");
+          if (pointerId !== null) {
+            handle.releasePointerCapture(pointerId);
+          }
+          pointerId = null;
+        };
+        handle.addEventListener("pointerup", stopDrag);
+        handle.addEventListener("pointercancel", stopDrag);
+      };
+
+      const setCtrlDockExpanded = (dock, expandBtn, collapseBtn, expanded) => {
+        if (!dock) return;
+        dock.classList.toggle("is-collapsed", !expanded);
+        dock.classList.toggle("is-expanded", expanded);
+        if (expandBtn) expandBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+        if (collapseBtn) collapseBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+      };
+
+      const closeMemoQuickMenu = () => {
+        if (!memoQuickWrap) return;
+        memoQuickWrap.classList.remove("is-open");
+        memoQuickBtn?.setAttribute("aria-expanded", "false");
+      };
+
+      const toggleMemoQuickMenu = () => {
+        if (!memoQuickWrap) return;
+        const isOpen = memoQuickWrap.classList.contains("is-open");
+        if (isOpen) {
+          closeMemoQuickMenu();
+        } else {
+          memoQuickWrap.classList.add("is-open");
+          memoQuickBtn?.setAttribute("aria-expanded", "true");
+        }
+      };
+
+      enableCtrlDockDragging(ctrlDock, ctrlDockHandle);
+      setCtrlDockExpanded(ctrlDock, ctrlDockExpandBtn, ctrlDockCollapseBtn, false);
+      ctrlDockExpandBtn?.addEventListener("click", () => {
+        setCtrlDockExpanded(ctrlDock, ctrlDockExpandBtn, ctrlDockCollapseBtn, true);
+      });
+      ctrlDockCollapseBtn?.addEventListener("click", () => {
+        setCtrlDockExpanded(ctrlDock, ctrlDockExpandBtn, ctrlDockCollapseBtn, false);
+      });
+      memoQuickBtn?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleMemoQuickMenu();
+      });
+      memoQuickWrap?.addEventListener("click", (event) => {
+        event.stopPropagation();
+      });
+      document.addEventListener("click", () => closeMemoQuickMenu());
+    })();
+  </script>
+  <script>
+    (() => {
+      const switcher = document.getElementById("deviceSwitcher");
+      const badges = document.getElementById("deviceBadges");
+      const bubble = document.getElementById("deviceBubble");
+      const bubbleTitle = document.getElementById("deviceBubbleTitle");
+      const bubbleDesc = document.getElementById("deviceBubbleDesc");
+      const bubbleAction = document.getElementById("deviceBubbleAction");
+      if (!switcher || !badges || !bubble || !bubbleTitle || !bubbleDesc || !bubbleAction) return;
+
+      const STORAGE_KEY = "devicePreviewMode";
+      const LABELS = {
+        pc: "パソコン表示",
+        tablet: "タブレット表示",
+        mobile: "スマートフォン表示"
+      };
+      const DESCRIPTIONS = {
+        pc: "PC向けレイアウトに切り替えます。",
+        tablet: "タブレット向けレイアウトに切り替えます。",
+        mobile: "スマートフォン向けレイアウトに切り替えます。"
+      };
+      let pendingMode = null;
+
+      const detectMode = () => {
+        const width = window.innerWidth;
+        if (width < 768) return "mobile";
+        if (width < 1024) return "tablet";
+        return "pc";
+      };
+
+      const getStoredMode = () => {
+        const value = localStorage.getItem(STORAGE_KEY);
+        if (value === "pc" || value === "tablet" || value === "mobile") return value;
+        return null;
+      };
+
+      const applyModeClass = (mode) => {
+        document.body.classList.remove("device-preview--tablet", "device-preview--mobile");
+        if (mode === "tablet") {
+          document.body.classList.add("device-preview--tablet");
+        }
+        if (mode === "mobile") {
+          document.body.classList.add("device-preview--mobile");
+        }
+      };
+
+      const closeBubble = () => {
+        pendingMode = null;
+        bubble.classList.remove("is-open");
+        bubble.setAttribute("aria-hidden", "true");
+      };
+
+      const openBubble = (button, mode, currentMode) => {
+        pendingMode = mode;
+        bubbleTitle.textContent = `${LABELS[mode]}に切り替え`;
+        bubbleDesc.textContent = `${DESCRIPTIONS[mode]} 現在は${LABELS[currentMode]}です。`;
+        bubble.classList.add("is-open");
+        bubble.setAttribute("aria-hidden", "false");
+
+        const switcherRect = switcher.getBoundingClientRect();
+        const buttonRect = button.getBoundingClientRect();
+        const buttonCenter = buttonRect.left + buttonRect.width / 2 - switcherRect.left;
+        const bubbleWidth = bubble.offsetWidth;
+        const maxLeft = Math.max(0, switcher.offsetWidth - bubbleWidth);
+        const nextLeft = Math.min(Math.max(buttonRect.left - switcherRect.left, 0), maxLeft);
+        const arrowLeft = Math.min(Math.max(buttonCenter - nextLeft - 8, 12), bubbleWidth - 28);
+        bubble.style.left = `${nextLeft}px`;
+        bubble.style.setProperty("--bubble-arrow-left", `${arrowLeft}px`);
+      };
+
+      const renderBadges = (currentMode) => {
+        const modes = ["pc", "tablet", "mobile"].filter((mode) => mode !== currentMode);
+        badges.innerHTML = "";
+        modes.forEach((mode) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "device-badge";
+          button.textContent = LABELS[mode];
+          button.dataset.mode = mode;
+          button.addEventListener("click", (event) => {
+            event.stopPropagation();
+            if (pendingMode === mode && bubble.classList.contains("is-open")) {
+              closeBubble();
+              return;
+            }
+            openBubble(button, mode, currentMode);
+          });
+          badges.appendChild(button);
+        });
+      };
+
+      const setMode = (mode) => {
+        localStorage.setItem(STORAGE_KEY, mode);
+        applyModeClass(mode);
+        renderBadges(mode);
+        closeBubble();
+      };
+
+      const sync = () => {
+        const stored = getStoredMode();
+        if (stored) {
+          applyModeClass(stored);
+          renderBadges(stored);
+        } else {
+          applyModeClass(null);
+          renderBadges(detectMode());
+        }
+      };
+
+      bubbleAction.addEventListener("click", () => {
+        if (!pendingMode) return;
+        setMode(pendingMode);
+      });
+
+      document.addEventListener("click", () => {
+        closeBubble();
+      });
+
+      window.addEventListener("resize", () => {
+        if (!getStoredMode()) {
+          sync();
+        }
+      });
+
+      sync();
+    })();
+  </script>
+</body>
+</html>

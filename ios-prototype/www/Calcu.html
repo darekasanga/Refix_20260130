@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Calcu - ローカル（オフライン）版</title>
+  <style>body{font-family:system-ui, -apple-system, "Helvetica Neue", Arial;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f7fbff;color:#1f2937} .card{padding:24px;border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(16,24,40,.08);max-width:640px;text-align:center}</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Calcu（オフライン版）</h1>
+    <p>このページはアプリにバンドルされたオフライン向けの簡易版です。</p>
+    <p>オンライン時は右上の更新ボタンで最新のリモートページを読み込めます。</p>
+    <p>
+      <a href="#" id="openRemote">リモートを開く（テスト）</a>
+      <button id="showLast" style="margin-left:12px">最後の描画を表示</button>
+      <button id="showAll" style="margin-left:8px">ページ表示</button>
+      <button id="prevPage" style="margin-left:8px;display:none">前へ</button>
+      <button id="nextPage" style="margin-left:8px;display:none">次へ</button>
+      <span id="pageInfo" style="margin-left:8px;color:#666"></span>
+      <button id="clearDrawings" style="margin-left:8px">描画をクリア</button>
+      <button id="insertTest" style="margin-left:8px">テスト画像投入 (50)</button>
+    </p>
+
+    <div id="drawings" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;align-items:center"></div>
+
+    <!-- Modal for preview -->
+    <div id="previewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;z-index:1000">
+      <div style="background:#fff;padding:12px;border-radius:12px;max-width:90%;max-height:90%;overflow:auto;display:flex;flex-direction:column;gap:8px;align-items:center">
+        <img id="previewImg" src="" style="max-width:100%;max-height:80vh;border-radius:8px;" />
+        <div style="display:flex;gap:8px">
+          <button id="downloadPreview">ダウンロード</button>
+          <button id="closePreview">閉じる</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const DB_NAME = 'CalcuDrawings';
+      const DB_VERSION = 1;
+      const STORE_NAME = 'images';
+      const MAX_TOTAL_BYTES = 20 * 1024 * 1024; // 20 MB
+      const MAX_ITEMS = 50;
+      const PAGE_SIZE = 6;
+
+      let currentPage = 0;
+      let cachedItems = [];
+
+      // Save queue to avoid concurrent IndexedDB transactions
+      const saveQueue = [];
+      let saveWorkerRunning = false;
+
+      function humanSize(n){
+        if(!n) return '—';
+        if(n<1024) return n + 'B';
+        if(n<1024*1024) return (n/1024).toFixed(1) + 'KB';
+        return (n/(1024*1024)).toFixed(1) + 'MB';
+      }
+
+      function addImageCard(item){
+        const container = document.getElementById('drawings');
+        const card = document.createElement('div');
+        card.style.width = '100%';
+        card.style.maxWidth = '640px';
+        card.style.background = '#fff';
+        card.style.borderRadius = '8px';
+        card.style.boxShadow = '0 6px 18px rgba(0,0,0,.06)';
+        card.style.padding = '8px';
+        card.style.display = 'flex';
+        card.style.alignItems = 'center';
+        card.style.justifyContent = 'space-between';
+
+        const left = document.createElement('div');
+        left.style.display = 'flex';
+        left.style.gap = '12px';
+        left.style.alignItems = 'center';
+
+        const img = new Image();
+        if(item.blob){
+          const url = URL.createObjectURL(item.blob);
+          img.src = url;
+          img.onload = () => URL.revokeObjectURL(url);
+        } else if(item.dataUrl){
+          img.src = item.dataUrl;
+        }
+        img.style.maxWidth = '220px';
+        img.style.maxHeight = '140px';
+        img.style.borderRadius = '6px';
+        img.style.objectFit = 'contain';
+
+        img.style.cursor = 'pointer';
+        img.onclick = () => openPreview(item);
+
+        const meta = document.createElement('div');
+        meta.innerHTML = `<div style="font-weight:700">${new Date(item.timestamp).toLocaleString()}</div><div style="font-size:12px;color:#666">${humanSize(item.size || (item.dataUrl?item.dataUrl.length:0))}</div>`;
+
+        left.appendChild(img);
+        left.appendChild(meta);
+
+        const actions = document.createElement('div');
+        actions.style.display = 'flex';
+        actions.style.gap = '8px';
+
+        const download = document.createElement('button');
+        download.textContent = 'ダウンロード';
+        download.onclick = () => {
+          if(item.blob){
+            const url = URL.createObjectURL(item.blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `drawing-${item.id || Date.now()}.png`;
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(()=>URL.revokeObjectURL(url), 10000);
+          } else if(item.dataUrl){
+            const a = document.createElement('a');
+            a.href = item.dataUrl; a.download = `drawing-${item.id || Date.now()}.png`;
+            document.body.appendChild(a); a.click(); a.remove();
+          }
+        };
+
+        const del = document.createElement('button');
+        del.textContent = '削除';
+        del.onclick = async () => {
+          if(item.id) await deleteImageById(item.id);
+          await refreshPage();
+        };
+
+        actions.appendChild(download);
+        actions.appendChild(del);
+
+        card.appendChild(left);
+        card.appendChild(actions);
+        if(container) container.prepend(card);
+      }
+
+      function openPreview(item){
+        const modal = document.getElementById('previewModal');
+        const img = document.getElementById('previewImg');
+        if(item.blob){
+          const url = URL.createObjectURL(item.blob);
+          img.src = url; img.dataset.objecturl = url;
+        } else if(item.dataUrl){
+          img.src = item.dataUrl;
+        }
+        modal.style.display = 'flex';
+        const dl = document.getElementById('downloadPreview');
+        dl.onclick = () => {
+          if(img.dataset.objecturl){
+            const a = document.createElement('a'); a.href = img.dataset.objecturl; a.download = `preview.png`; document.body.appendChild(a); a.click(); a.remove();
+          } else {
+            const a = document.createElement('a'); a.href = img.src; a.download = `preview.png`; document.body.appendChild(a); a.click(); a.remove();
+          }
+        };
+      }
+
+      document.getElementById('closePreview').onclick = () => {
+        const modal = document.getElementById('previewModal');
+        const img = document.getElementById('previewImg');
+        if(img.dataset.objecturl){ URL.revokeObjectURL(img.dataset.objecturl); img.dataset.objecturl = ''; }
+        img.src = '';
+        modal.style.display = 'none';
+      };
+
+      function base64ToBlob(dataURL){
+        const parts = dataURL.split(',');
+        const meta = parts[0];
+        const base64 = parts[1];
+        const mime = (meta.match(/:(.*?);/) || [,'image/png'])[1];
+        const binary = atob(base64);
+        const len = binary.length;
+        const u8 = new Uint8Array(len);
+        for(let i=0;i<len;i++) u8[i] = binary.charCodeAt(i);
+        return new Blob([u8], { type: mime });
+      }
+
+      function openDB(){
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open(DB_NAME, DB_VERSION);
+          req.onupgradeneeded = (ev) => {
+            const db = ev.target.result;
+            if(!db.objectStoreNames.contains(STORE_NAME)){
+              const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+              store.createIndex('timestamp', 'timestamp');
+            }
+          };
+          req.onsuccess = (ev) => resolve(ev.target.result);
+          req.onerror = (ev) => reject(ev.target.error);
+        });
+      }
+
+      async function enforceLimits(db){
+        try{
+          const tx = db.transaction(STORE_NAME, 'readwrite');
+          const store = tx.objectStore(STORE_NAME);
+          let total = 0; let items = [];
+          const req = store.openCursor();
+          await new Promise((resolve, reject)=>{
+            req.onsuccess = (e) => { const cursor = e.target.result; if(cursor){ const val = cursor.value; total += val.size || 0; items.push({id: val.id, timestamp: val.timestamp, size: val.size || 0}); cursor.continue(); } else resolve(); };
+            req.onerror = (e) => reject(e.target.error);
+          });
+          items.sort((a,b)=>a.timestamp - b.timestamp);
+          while((total > MAX_TOTAL_BYTES || items.length > MAX_ITEMS) && items.length){
+            const oldest = items.shift();
+            const delReq = store.delete(oldest.id);
+            await new Promise((resolve, reject)=>{ delReq.onsuccess = ()=>resolve(); delReq.onerror = (e)=>reject(e.target.error); });
+            total -= oldest.size;
+          }
+        }catch(err){ console.warn('enforceLimits failed', err); }
+      }
+
+      async function saveBlobToDB(blob){
+        try{
+          const db = await openDB();
+          await new Promise((resolve, reject)=>{
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            const item = { blob: blob, timestamp: Date.now(), size: blob.size };
+            const req = store.add(item);
+            req.onsuccess = (e)=> resolve(e.target.result);
+            req.onerror = (e)=> reject(e.target.error);
+          });
+          await enforceLimits(db);
+        }catch(err){ console.warn('saveBlobToDB failed', err); throw err; }
+      }
+
+      async function enqueueSave(blob){
+        saveQueue.push(blob);
+        if(!saveWorkerRunning) processQueue();
+      }
+
+      async function processQueue(){
+        saveWorkerRunning = true;
+        while(saveQueue.length){
+          const blob = saveQueue.shift();
+          try{ await saveBlobToDB(blob); } catch(e){ console.warn('processQueue save failed', e); }
+          // small delay to reduce contention
+          await new Promise(r=>setTimeout(r, 50));
+        }
+        saveWorkerRunning = false;
+      }
+
+      async function compressDataUrl(dataUrl, maxWidth=1200, quality=0.75){
+        try{
+          const img = await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=dataUrl; });
+          let ratio = 1;
+          if(img.width > maxWidth) ratio = maxWidth / img.width;
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.width * ratio);
+          canvas.height = Math.round(img.height * ratio);
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          return await new Promise((res)=> canvas.toBlob(b=>res(b), 'image/webp', quality));
+        }catch(err){ console.warn('compress failed', err); return base64ToBlob(dataUrl); }
+      }
+
+      async function saveImageToDB(dataUrl){
+        try{
+          const blob = await compressDataUrl(dataUrl);
+          await enqueueSave(blob);
+        }catch(err){ console.warn('saveImageToDB failed', err); try{ localStorage.setItem('lastPencilImage', dataUrl);}catch(e){}
+        }
+      }
+
+      async function getLastImageFromDB(){
+        try{
+          const db = await openDB();
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const index = store.index('timestamp');
+            const req = index.openCursor(null, 'prev');
+            req.onsuccess = (e) => {
+              const cursor = e.target.result;
+              if(cursor) resolve({ id: cursor.value.id, blob: cursor.value.blob, timestamp: cursor.value.timestamp, size: cursor.value.size });
+              else resolve(null);
+            };
+            req.onerror = (e) => reject(e.target.error);
+          });
+        }catch(err){ console.warn('getLastImageFromDB failed', err); return null; }
+      }
+
+      async function getAllImagesFromDB(){
+        try{
+          const db = await openDB();
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const items = [];
+            const req = store.openCursor();
+            req.onsuccess = (e) => {
+              const cursor = e.target.result;
+              if(cursor){ items.push({ id: cursor.value.id, blob: cursor.value.blob, timestamp: cursor.value.timestamp, size: cursor.value.size }); cursor.continue(); } else { resolve(items); }
+            };
+            req.onerror = (e) => reject(e.target.error);
+          });
+        }catch(err){ console.warn('getAllImagesFromDB failed', err); return []; }
+      }
+
+      async function deleteImageById(id){
+        try{
+          const db = await openDB();
+          return new Promise((resolve, reject)=>{
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            const req = store.delete(id);
+            req.onsuccess = ()=>resolve();
+            req.onerror = (e)=>reject(e.target.error);
+          });
+        }catch(err){ console.warn('deleteImageById failed', err); }
+      }
+
+      async function getAllImagesForUI(){
+        const all = await getAllImagesFromDB();
+        return all.slice(); // return array
+      }
+
+      async function clearDB(){
+        try{
+          const db = await openDB();
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            const req = store.clear();
+            req.onsuccess = () => resolve();
+            req.onerror = (e) => reject(e.target.error);
+          });
+        }catch(err){ console.warn('clearDB failed', err); }
+      }
+
+      // ----- event handlers -----
+      window.addEventListener('pencilImage', async (e) => {
+        const dataUrl = e.detail;
+        // immediate small preview
+        addImageCard({ dataUrl: dataUrl, timestamp: Date.now(), size: (dataUrl.length || 0) });
+        await saveImageToDB(dataUrl);
+      });
+
+      document.getElementById('openRemote').addEventListener('click', ()=>{
+        alert('このリンクはアプリ内からリモートに切り替える動作を想定しています。');
+      });
+
+      async function refreshPage(){
+        cachedItems = await getAllImagesForUI();
+        const totalPages = Math.ceil(cachedItems.length / PAGE_SIZE) || 1;
+        if(currentPage >= totalPages) currentPage = totalPages - 1;
+        renderPage();
+      }
+
+      function renderPage(){
+        const container = document.getElementById('drawings');
+        container.innerHTML = '';
+        const totalPages = Math.ceil(cachedItems.length / PAGE_SIZE) || 1;
+        const start = currentPage * PAGE_SIZE;
+        const pageItems = cachedItems.slice().reverse().slice(start, start + PAGE_SIZE);
+        pageItems.forEach(item => addImageCard(item));
+        document.getElementById('prevPage').style.display = (currentPage>0)?'inline-block':'none';
+        document.getElementById('nextPage').style.display = (currentPage < totalPages-1)?'inline-block':'none';
+        document.getElementById('pageInfo').textContent = `Page ${currentPage+1}/${totalPages}`;
+      }
+
+      document.getElementById('showLast').addEventListener('click', async ()=>{
+        const last = await getLastImageFromDB();
+        if(last && last.blob){ addImageCard(last); }
+        else {
+          const saved = localStorage.getItem('lastPencilImage');
+          if(saved){ addImageCard({ dataUrl: saved, timestamp: Date.now(), size: saved.length }); } else { alert('保存された描画がありません'); }
+        }
+      });
+
+      document.getElementById('showAll').addEventListener('click', async ()=>{
+        currentPage = 0; cachedItems = await getAllImagesForUI(); renderPage();
+      });
+
+      document.getElementById('prevPage').addEventListener('click', ()=>{ if(currentPage>0){ currentPage--; renderPage(); } });
+      document.getElementById('nextPage').addEventListener('click', ()=>{ const totalPages = Math.ceil(cachedItems.length / PAGE_SIZE) || 1; if(currentPage < totalPages-1){ currentPage++; renderPage(); } });
+
+      document.getElementById('clearDrawings').addEventListener('click', async ()=>{
+        document.getElementById('drawings').innerHTML = '';
+        try{ await clearDB(); } catch(e){ console.warn('clear db failed', e); }
+        localStorage.removeItem('lastPencilImage');
+        cachedItems = [];
+        renderPage();
+      });
+
+      // Test insertion: create dummy images and dispatch pencilImage events
+      document.getElementById('insertTest').addEventListener('click', async ()=>{
+        const count = 50;
+        for(let i=0;i<count;i++){
+          const canvas = document.createElement('canvas'); canvas.width=1024; canvas.height=768;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = `hsl(${(i*37)%360} 70% 60%)`;
+          ctx.fillRect(0,0,canvas.width,canvas.height);
+          ctx.fillStyle = '#222'; ctx.font='48px sans-serif'; ctx.fillText(`Test ${i+1}`, 40, 120);
+          const dataUrl = canvas.toDataURL('image/png');
+          window.dispatchEvent(new CustomEvent('pencilImage', { detail: dataUrl }));
+          // throttle
+          await new Promise(r=>setTimeout(r, 30));
+        }
+        // refresh listing after a moment
+        setTimeout(()=>{ document.getElementById('showAll').click(); }, 1500);
+      });
+
+      // Preview modal download button
+      document.getElementById('downloadPreview').addEventListener('click', ()=>{});
+
+      window.addEventListener('DOMContentLoaded', async ()=>{
+        // initial load: show page view
+        currentPage = 0; cachedItems = await getAllImagesForUI(); renderPage();
+      });
+    </script>
+  </div>
+</body>
+</html>

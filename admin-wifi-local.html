@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Wi-Fiローカルネットワーク設定</title>
+    <style>
+      body { font-family: sans-serif; padding: 32px; background: #f6f7fb; }
+      .card { max-width: 760px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+      label { display: block; margin-top: 12px; font-weight: 600; }
+      input, textarea { width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #ccc; }
+      .row { display: flex; gap: 16px; }
+      .row > div { flex: 1; }
+      button { margin-top: 16px; padding: 10px 16px; border: none; border-radius: 8px; background: #275efe; color: #fff; font-weight: bold; cursor: pointer; }
+      .secondary { background: #607d8b; }
+      .status { margin-top: 12px; }
+      .links { margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap; }
+      .link-btn { text-decoration: none; color: #275efe; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Wi-Fiローカルネットワーク設定</h1>
+      <div class="links">
+        <a class="link-btn" href="/admin/login">管理ログイン</a>
+        <a class="link-btn" href="/admin/change-password">パスワード変更</a>
+      </div>
+      <label><input id="enabled" type="checkbox" /> ローカルネットワーク機能を有効化</label>
+      <label>SSID（表示用）</label>
+      <input id="ssid" />
+      <label>ローカルAPI Base URL</label>
+      <input id="base-url" placeholder="http://192.168.10.2:8787" />
+      <label>ローカルAPIポート（任意）</label>
+      <input id="base-port" type="number" />
+      <label>許可CIDR（カンマ区切り）</label>
+      <textarea id="cidr-list" rows="3" placeholder="192.168.10.0/24,10.0.0.0/24"></textarea>
+      <label>端末登録用共有キー</label>
+      <div class="row">
+        <div><input id="shared-secret" type="password" /></div>
+        <div><button class="secondary" type="button" onclick="regenerate()">再生成</button></div>
+      </div>
+      <label>Heartbeat間隔（秒）</label>
+      <input id="heartbeat" type="number" min="5" />
+      <div class="row">
+        <button type="button" onclick="saveSettings()">保存</button>
+        <button class="secondary" type="button" onclick="testConnection()">接続テスト</button>
+      </div>
+      <div id="status" class="status"></div>
+    </div>
+    <script>
+      let currentSettings = null;
+      async function loadSettings() {
+        const res = await fetch('/admin/settings/wifi-local', {
+          headers: { 'Accept': 'application/json' }
+        });
+        if (!res.ok) {
+          document.getElementById('status').textContent = '設定取得に失敗しました';
+          return;
+        }
+        const data = await res.json();
+        currentSettings = data;
+        document.getElementById('enabled').checked = data.enabled;
+        document.getElementById('ssid').value = data.ssid || '';
+        document.getElementById('base-url').value = data.local_api_base_url || '';
+        document.getElementById('cidr-list').value = (data.allowed_cidr_list || []).join(', ');
+        document.getElementById('shared-secret').value = data.device_shared_secret || '';
+        document.getElementById('heartbeat').value = data.heartbeat_interval_sec || 15;
+        document.getElementById('base-port').value = data.local_api_port || '';
+      }
+      async function saveSettings() {
+        const payload = {
+          id: currentSettings ? currentSettings.id : null,
+          site_id: currentSettings ? currentSettings.site_id : null,
+          enabled: document.getElementById('enabled').checked,
+          ssid: document.getElementById('ssid').value || null,
+          local_api_base_url: document.getElementById('base-url').value,
+          local_api_port: document.getElementById('base-port').value
+            ? parseInt(document.getElementById('base-port').value, 10)
+            : null,
+          allowed_cidr_list: document.getElementById('cidr-list').value.split(',')
+            .map(v => v.trim()).filter(v => v.length > 0),
+          device_shared_secret: document.getElementById('shared-secret').value,
+          heartbeat_interval_sec: parseInt(document.getElementById('heartbeat').value || '15', 10)
+        };
+        const res = await fetch('/admin/settings/wifi-local', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          document.getElementById('status').textContent = data.detail || '保存に失敗しました';
+          return;
+        }
+        currentSettings = data;
+        document.getElementById('status').textContent = '保存しました';
+      }
+      async function testConnection() {
+        const res = await fetch('/admin/settings/wifi-local/test-connection', { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          document.getElementById('status').textContent = '接続テスト失敗: ' + (data.reason || 'unknown');
+          return;
+        }
+        document.getElementById('status').textContent = '接続テスト成功';
+      }
+      function regenerate() {
+        const array = new Uint8Array(18);
+        crypto.getRandomValues(array);
+        const token = btoa(String.fromCharCode(...array)).replace(/=/g, '');
+        document.getElementById('shared-secret').value = token;
+      }
+      loadSettings();
+    </script>
+  </body>
+</html>

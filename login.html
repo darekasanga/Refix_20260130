@@ -1,0 +1,2396 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EnCho-エンチョ- | ログイン</title>
+  <script src="theme.js"></script>
+  <script>
+    window.EnchoTheme?.applyCurrentTheme(document);
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
+  <script src="session.js"></script>
+  <style>
+    :root {
+      --login-accent: var(--accent, #8b5cf6);
+      --login-accent-2: var(--accent-2, #f97316);
+      --login-panel: var(--panel, #0f172a);
+      --login-panel-2: var(--panel-sub, #111827);
+      --login-border: var(--border, #1f2937);
+      --login-text: var(--text, #f8fafc);
+      --login-sub: var(--subtext, #cbd5e1);
+      --login-bg: var(--bg, #0b1021);
+      --login-glow: var(--glow, 0 10px 30px rgba(139,92,246,.22));
+      --login-font-family: "Noto Sans JP", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --login-font-size: 16px;
+      --login-button-radius: 12px;
+      --login-button-padding: 12px 16px;
+      --login-card-width: min(560px, 95vw);
+      --login-card-gap: 10px;
+      --login-card-padding: 18px;
+      --ui-scale: 1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--login-font-family);
+      font-size: var(--login-font-size);
+      background: var(--login-bg);
+      color: var(--login-text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      position: relative;
+      overflow: hidden;
+      zoom: var(--ui-scale);
+    }
+    body::before, body::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--login-accent) 28%, transparent), transparent 36%),
+        radial-gradient(circle at 80% 12%, color-mix(in srgb, var(--login-accent-2) 24%, transparent), transparent 36%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      background:
+        radial-gradient(circle at 18% 86%, color-mix(in srgb, var(--login-accent) 22%, transparent), transparent 40%),
+        radial-gradient(circle at 84% 78%, color-mix(in srgb, var(--login-accent-2) 18%, transparent), transparent 36%);
+      mix-blend-mode: screen;
+    }
+    .card {
+      width: var(--login-card-width);
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04)), var(--login-panel-2);
+      border: 1px solid var(--login-border);
+      border-radius: 18px;
+      padding: var(--login-card-padding);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35), var(--login-glow);
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: var(--login-card-gap);
+    }
+    .login-header {
+      display: grid;
+      gap: 4px;
+      text-align: center;
+    }
+    .login-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .login-header h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0.04em;
+    }
+    .login-header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+    }
+    .login-header-actions .header-action {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid color-mix(in srgb, var(--login-border) 70%, transparent);
+      color: var(--login-sub);
+      cursor: pointer;
+      transition: border-color .2s, color .2s, background .2s, transform .2s;
+    }
+    .login-header-actions .header-action:hover {
+      border-color: color-mix(in srgb, var(--login-accent) 65%, transparent);
+      color: var(--login-text);
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-1px);
+    }
+    .login-header-actions .header-action:active {
+      transform: translateY(0);
+    }
+    .login-header .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--login-sub);
+      border: 1px solid color-mix(in srgb, var(--login-border) 70%, transparent);
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .login-header p {
+      margin: 0;
+      color: var(--login-sub);
+      font-size: 13px;
+    }
+    .section {
+      padding-top: 6px;
+    }
+    input {
+      flex: 1;
+      min-width: 200px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--login-border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--login-text);
+      font: inherit;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--login-accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--login-accent) 30%, transparent);
+      background: rgba(255,255,255,0.08);
+    }
+    button {
+      padding: var(--login-button-padding);
+      border-radius: var(--login-button-radius);
+      border: none;
+      background: linear-gradient(120deg, var(--login-accent), var(--login-accent-2));
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 28px color-mix(in srgb, var(--login-accent) 35%, transparent);
+      transition: transform .2s, box-shadow .2s, filter .2s;
+    }
+    button.secondary {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--login-border);
+      color: var(--login-sub);
+      box-shadow: none;
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(1.02); }
+    button:active { transform: translateY(0); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .small-muted { color: var(--login-sub); font-size: 12px; margin-top: 6px; }
+    .button-helper {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--login-sub);
+      margin-top: 4px;
+    }
+    .enroll-callout {
+      display: flex;
+      justify-content: center;
+    }
+    .enroll-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 14px;
+    }
+    .enroll-trigger svg {
+      width: 20px;
+      height: 20px;
+    }
+    .enroll-choice {
+      display: grid;
+      gap: 10px;
+    }
+    .enroll-choice button.secondary {
+      display: grid;
+      gap: 4px;
+      text-align: left;
+    }
+    .enroll-choice span {
+      font-size: 12px;
+      color: var(--login-sub);
+    }
+    .initial-login {
+      border: 1px solid color-mix(in srgb, var(--login-border) 70%, transparent);
+      border-radius: 14px;
+      padding: 8px;
+      background: color-mix(in srgb, var(--login-panel) 60%, transparent);
+      display: grid;
+      gap: 10px;
+      text-align: center;
+    }
+    .initial-login-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .passkey-spinner {
+      position: relative;
+      width: 250px;
+      height: 140px;
+      margin: 0 auto;
+      perspective: 1300px;
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+    .passkey-spinner .spinner-cube {
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      border-radius: 28px;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      background: transparent;
+      box-shadow: none;
+      animation: cubeSpin 3.4s cubic-bezier(.46, .03, .52, .96) infinite;
+      transform-style: preserve-3d;
+      border: none;
+    }
+    .passkey-spinner .cube-face svg {
+      width: 64px;
+      height: 64px;
+      animation: iconMorph 3.4s ease-in-out infinite;
+      transform-origin: center;
+      filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55));
+    }
+    .passkey-spinner .spinner-cube.core {
+      left: calc(50% - 80px);
+      top: calc(50% - 80px);
+    }
+    .passkey-spinner .cube-face {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      border-radius: inherit;
+      background: transparent;
+      backface-visibility: hidden;
+    }
+    .passkey-spinner .cube-face.fingerprint {
+      color: color-mix(in srgb, var(--login-accent) 78%, #ffffff);
+      transform: rotateY(0deg) translateZ(76px);
+    }
+    .passkey-spinner .cube-face.face {
+      color: color-mix(in srgb, var(--login-accent-2) 78%, #ffffff);
+      transform: rotateY(180deg) translateZ(76px);
+    }
+    .passkey-spinner.large {
+      width: 280px;
+      height: 160px;
+    }
+    .passkey-spinner.large .spinner-cube {
+      width: 180px;
+      height: 180px;
+    }
+    .passkey-spinner.large .spinner-cube.core {
+      left: calc(50% - 90px);
+      top: calc(50% - 90px);
+    }
+    .passkey-spinner.large .cube-face.fingerprint,
+    .passkey-spinner.large .cube-face.face {
+      transform: rotateY(0deg) translateZ(82px);
+    }
+    .passkey-spinner.large .cube-face.face {
+      transform: rotateY(180deg) translateZ(82px);
+    }
+    @keyframes cubeSpin {
+      0% {
+        transform: translateZ(28px) rotateY(0deg) rotateX(12deg) rotateZ(-4deg) scale(1.02);
+        border-radius: 22px;
+      }
+      25% {
+        transform: translateZ(12px) rotateY(90deg) rotateX(24deg) rotateZ(6deg) scale(0.84);
+        border-radius: 34px;
+      }
+      50% {
+        transform: translateZ(28px) rotateY(180deg) rotateX(10deg) rotateZ(4deg) scale(1.02);
+        border-radius: 22px;
+      }
+      75% {
+        transform: translateZ(12px) rotateY(270deg) rotateX(-18deg) rotateZ(-6deg) scale(0.84);
+        border-radius: 34px;
+      }
+      100% {
+        transform: translateZ(28px) rotateY(360deg) rotateX(12deg) rotateZ(-4deg) scale(1.02);
+        border-radius: 22px;
+      }
+    }
+    @keyframes iconMorph {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(0.78) rotate(-8deg); }
+      50% { transform: scale(0.95) rotate(0deg); }
+      75% { transform: scale(0.76) rotate(8deg); }
+    }
+    .notice {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid color-mix(in srgb, var(--login-border) 70%, transparent);
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 12px;
+      color: var(--login-sub);
+      text-align: center;
+    }
+    .password-panel {
+      border: 1px solid color-mix(in srgb, var(--login-border) 80%, transparent);
+      border-radius: 14px;
+      padding: 14px;
+      background: color-mix(in srgb, var(--login-panel) 60%, transparent);
+      display: grid;
+      gap: 12px;
+      text-align: center;
+    }
+    .password-display {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      font-weight: 900;
+      letter-spacing: 0.4em;
+      color: var(--login-sub);
+      font-size: 18px;
+    }
+    .password-display span {
+      display: inline-block;
+      min-width: 16px;
+      text-align: center;
+      border-bottom: 2px solid rgba(148, 163, 184, 0.5);
+      padding-bottom: 4px;
+    }
+    .password-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .password-keypad button {
+      padding: 10px 0;
+      border-radius: 10px;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid color-mix(in srgb, var(--login-border) 60%, transparent);
+      box-shadow: none;
+      color: var(--login-sub);
+    }
+    .password-keypad button.action {
+      background: rgba(248, 113, 113, 0.15);
+      border-color: rgba(248, 113, 113, 0.4);
+    }
+    .admin-trigger {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--login-panel) 70%, transparent);
+      border: 1px solid color-mix(in srgb, var(--login-border) 70%, transparent);
+      color: var(--login-sub);
+      z-index: 900;
+      padding: 0;
+      text-decoration: none;
+    }
+    .admin-trigger svg { width: 26px; height: 26px; }
+    .hidden { display: none !important; }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: color-mix(in srgb, var(--login-panel) 70%, transparent);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+    .modal-backdrop.is-open { display: flex; }
+    .modal {
+      width: min(420px, 92vw);
+      background: var(--login-panel);
+      border: 1px solid color-mix(in srgb, var(--login-border) 70%, transparent);
+      border-radius: 16px;
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .modal h2 { margin: 0; font-size: 18px; }
+    .modal label { font-size: 12px; color: var(--login-sub); }
+    .modal input {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid color-mix(in srgb, var(--login-border) 70%, transparent);
+      background: color-mix(in srgb, var(--login-panel) 80%, transparent);
+      color: var(--login-text);
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .modal .secondary {
+      background: color-mix(in srgb, var(--login-border) 40%, transparent);
+      color: var(--login-text);
+    }
+    .otp-display {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      font-weight: 900;
+      letter-spacing: 0.4em;
+      color: var(--login-sub);
+      font-size: 18px;
+    }
+    .otp-display span {
+      display: inline-block;
+      min-width: 14px;
+      text-align: center;
+      border-bottom: 2px solid rgba(148, 163, 184, 0.5);
+      padding-bottom: 4px;
+    }
+    .otp-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .otp-keypad button {
+      padding: 10px 0;
+      border-radius: 10px;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid color-mix(in srgb, var(--login-border) 60%, transparent);
+      box-shadow: none;
+      color: var(--login-sub);
+    }
+    .otp-keypad button.action {
+      background: rgba(248, 113, 113, 0.15);
+      border-color: rgba(248, 113, 113, 0.4);
+    }
+    @media (max-width: 1024px) and (max-height: 1366px) {
+      :root {
+        --login-font-size: 15px;
+        --login-button-padding: 10px 14px;
+        --login-card-padding: 18px;
+        --login-card-gap: 10px;
+        --ui-scale: 0.94;
+      }
+      body {
+        padding: 12px;
+      }
+      .login-title-row {
+        gap: 8px;
+      }
+      .login-header h1 {
+        font-size: 20px;
+      }
+      .login-header-actions .header-action {
+        padding: 6px 10px;
+        font-size: 10px;
+      }
+      .passkey-spinner {
+        width: 210px;
+        height: 140px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <header class="login-header">
+      <div class="login-title-row">
+        <h1 id="loginTitleText">SenSei ログイン</h1>
+      </div>
+      <p id="loginSubtitleText"></p>
+      <span class="badge" aria-label="テストモード">テストモード</span>
+    </header>
+    <section class="section initial-login" aria-live="polite">
+      <div class="passkey-spinner" aria-hidden="true">
+        <span class="spinner-cube core" aria-hidden="true">
+          <span class="cube-face fingerprint">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/>
+              <path d="M14 13.12c0 2.38 0 6.38-1 8.88"/>
+              <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/>
+              <path d="M2 12a10 10 0 0 1 18-6"/>
+              <path d="M2 16h.01"/>
+              <path d="M21.8 16c.2-2 .131-5.354 0-6"/>
+              <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/>
+              <path d="M8.65 22c.21-.66.45-1.32.57-2"/>
+              <path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>
+            </svg>
+          </span>
+          <span class="cube-face face">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+              <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+              <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+              <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+              <path d="M9 9h.01"/>
+              <path d="M15 9h.01"/>
+            </svg>
+          </span>
+        </span>
+      </div>
+      <button type="button" id="biometricLoginButton" class="secondary">
+        生体認証を開始
+        <span id="humanStatus" class="button-helper">タップすると生体認証がスタートします。</span>
+      </button>
+      <div class="enroll-callout">
+        <button type="button" class="secondary enroll-trigger" id="enrollChoiceTrigger" aria-haspopup="dialog">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 12c2.761 0 5-2.239 5-5S14.761 2 12 2 7 4.239 7 7s2.239 5 5 5Z" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M17 8h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M19.5 5.5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          ID登録はこちら
+        </button>
+      </div>
+    </section>
+
+    <section id="passwordPanel" class="section password-panel" aria-live="polite" hidden>
+      <div id="passwordTitle"><strong>パスワード入力</strong></div>
+      <div id="passwordDisplay" class="password-display" aria-hidden="true"></div>
+      <input id="passwordInput" type="password" class="hidden" autocomplete="off" inputmode="numeric">
+      <div id="passwordStatus" class="small-muted">番号を入力してください。</div>
+      <div class="password-keypad" id="passwordKeypad"></div>
+      <button type="button" id="passwordUnlockButton">ID登録</button>
+    </section>
+
+  </div>
+
+  <a href="admin-management-menu.html" class="admin-trigger" aria-label="管理者ログイン">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20.3142 3.68576L20.8446 3.15543L20.3142 3.68576ZM20.3142 11.8253L20.8446 12.3557L20.3142 11.8253ZM10.4547 10.057L9.92432 9.52663L9.92432 9.52663L10.4547 10.057ZM7.36124 13.1504L7.89157 13.6807H7.89157L7.36124 13.1504ZM10.8496 16.6388L10.3193 16.1084L10.3193 16.1084L10.8496 16.6388ZM13.9433 13.5451L13.4129 13.0148L13.9433 13.5451ZM7.00755 14.1587L6.26214 14.2415L6.26214 14.2415L7.00755 14.1587ZM7.20094 15.8992L6.45553 15.982L6.45553 15.982L7.20094 15.8992ZM8.10084 16.7991L8.01802 17.5445L8.01802 17.5445L8.10084 16.7991ZM9.84133 16.9924L9.92416 16.247H9.92416L9.84133 16.9924ZM7.43673 16.3898L7.96707 15.8594L7.96706 15.8594L7.43673 16.3898ZM7.61025 16.5633L7.07991 17.0936L7.07992 17.0936L7.61025 16.5633ZM10.6703 9.1926L9.94383 9.37914L9.94383 9.37914L10.6703 9.1926ZM14.8074 13.3297L14.6209 14.0562H14.6209L14.8074 13.3297ZM10.9532 13.6303C10.6587 13.339 10.1838 13.3416 9.89252 13.6361C9.60124 13.9306 9.60385 14.4055 9.89835 14.6967L10.9532 13.6303ZM15.5185 8.48151C15.1605 8.12353 15.1605 7.54313 15.5185 7.18515L14.4578 6.12449C13.5141 7.06826 13.5141 8.59841 14.4578 9.54217L15.5185 8.48151ZM16.8148 8.48151C16.4569 8.83949 15.8765 8.83949 15.5185 8.48151L14.4578 9.54217C15.4016 10.4859 16.9317 10.4859 17.8755 9.54217L16.8148 8.48151ZM16.8148 7.18515C17.1728 7.54313 17.1728 8.12353 16.8148 8.48151L17.8755 9.54217C18.8193 8.59841 18.8193 7.06826 17.8755 6.12449L16.8148 7.18515ZM17.8755 6.12449C16.9317 5.18072 15.4016 5.18072 14.4578 6.12449L15.5185 7.18515C15.8765 6.82717 16.4569 6.82717 16.8148 7.18515L17.8755 6.12449ZM19.7839 4.21609C21.7387 6.17088 21.7387 9.34021 19.7839 11.295L20.8446 12.3557C23.3851 9.81509 23.3851 5.696 20.8446 3.15543L19.7839 4.21609ZM20.8446 3.15543C18.304 0.614857 14.1849 0.614857 11.6443 3.15543L12.705 4.21609C14.6598 2.2613 17.8291 2.2613 19.7839 4.21609L20.8446 3.15543ZM9.92432 9.52663L6.83091 12.62L7.89157 13.6807L10.985 10.5873L9.92432 9.52663ZM11.38 17.1691L12.4136 16.1354L11.353 15.0748L10.3193 16.1084L11.38 17.1691ZM12.4136 16.1354L14.4736 14.0754L13.4129 13.0148L11.353 15.0748L12.4136 16.1354ZM6.26214 14.2415L6.45553 15.982L7.94635 15.8163L7.75296 14.0758L6.26214 14.2415ZM8.01802 17.5445L9.75851 17.7379L9.92416 16.247L8.18367 16.0536L8.01802 17.5445ZM6.9064 16.9201L7.07991 17.0936L8.14058 16.0329L7.96707 15.8594L6.9064 16.9201ZM8.18367 16.0536C8.16736 16.0518 8.15217 16.0445 8.14058 16.0329L7.07992 17.0936C7.33236 17.346 7.6632 17.505 8.01802 17.5445L8.18367 16.0536ZM6.45553 15.982C6.49495 16.3368 6.65396 16.6676 6.9064 16.9201L7.96706 15.8594C7.95547 15.8478 7.94816 15.8326 7.94635 15.8163L6.45553 15.982ZM10.3193 16.1084C10.2155 16.2122 10.0701 16.2633 9.92416 16.247L9.75851 17.7379C10.3573 17.8044 10.9539 17.5951 11.38 17.1691L10.3193 16.1084ZM6.83091 12.62C6.40488 13.0461 6.1956 13.6427 6.26214 14.2415L7.75296 14.0758C7.73675 13.9299 7.78775 13.7845 7.89157 13.6807L6.83091 12.62ZM11.3967 9.00605C10.9704 7.34603 11.4077 5.51341 12.705 4.21609L11.6443 3.15543C9.95676 4.84301 9.3911 7.22673 9.94383 9.37914L11.3967 9.00605ZM19.7839 11.295C18.4866 12.5923 16.654 13.0296 14.9939 12.6033L14.6209 14.0562C16.7733 14.6089 19.157 14.0432 20.8446 12.3557L19.7839 11.295ZM14.4736 14.0754C14.4807 14.0684 14.4935 14.0591 14.5182 14.0532C14.5444 14.047 14.5805 14.0458 14.6209 14.0562L14.9939 12.6033C14.4675 12.4681 13.8509 12.5768 13.4129 13.0148L14.4736 14.0754ZM10.985 10.5873C11.4227 10.1495 11.532 9.53285 11.3967 9.00605L9.94383 9.37914C9.95415 9.41931 9.95302 9.45541 9.94673 9.48175C9.94081 9.50657 9.93144 9.51951 9.92432 9.52663L10.985 10.5873ZM12.4107 15.0719L10.9532 13.6303L9.89835 14.6967L11.3559 16.1383L12.4107 15.0719Z" fill="#1C274C"/>
+      <path d="M2 11.9899C2 16.7087 2 19.0681 3.46594 20.5341C4.93188 22 7.29127 22 12.0101 22C16.7288 22 19.0882 22 20.5542 20.5341C21.6692 19.419 21.9361 17.787 22 14.993M9.00704 2C6.21298 2.06388 4.58099 2.33078 3.46594 3.44584C2.48914 4.42263 2.16321 5.79612 2.05446 8" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </a>
+
+  <div id="adminModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+      <h2 id="adminModalTitle">管理者ログイン</h2>
+      <label for="adminId">管理者ID</label>
+      <input id="adminId" type="text" autocomplete="username" placeholder="admin">
+      <div id="adminStatus" class="small-muted"></div>
+      <div class="modal-actions">
+        <button type="button" class="secondary hidden" id="forceInitTrigger">管理者データ初期化</button>
+        <button type="button" class="secondary" id="adminCancel">閉じる</button>
+        <button type="button" id="adminSubmit">認証開始</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="masterChangeModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="masterChangeTitle">
+      <h2 id="masterChangeTitle">マスター登録</h2>
+      <label for="masterIdInput">管理者ID</label>
+      <input id="masterIdInput" type="text" autocomplete="username" placeholder="master-id">
+      <label for="masterNextPw">新しいPW</label>
+      <input id="masterNextPw" type="password" autocomplete="new-password" placeholder="新しいPW">
+      <div id="masterChangeStatus" class="small-muted">初回ログインのためIDと生体認証の登録が必要です。</div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="masterChangeCancel">閉じる</button>
+        <button type="button" id="masterChangeSubmit">生体情報登録</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminBiometricModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="adminBiometricTitle">
+      <h2 id="adminBiometricTitle">生体情報登録</h2>
+      <div class="notice" id="adminBiometricId"></div>
+      <div id="adminBiometricStatus" class="small-muted">管理者IDに生体情報を登録します。</div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="adminBiometricCancel">閉じる</button>
+        <button type="button" id="adminBiometricSubmit">登録開始</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="userEnrollModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="userEnrollTitle">
+      <h2 id="userEnrollTitle">初回登録</h2>
+      <label for="userEnrollId">ログインID</label>
+      <input id="userEnrollId" type="text" autocomplete="username" placeholder="user-id">
+      <div class="notice" id="userEnrollNotice">ID登録をタップすると生体認証ウィンドウが表示されます。</div>
+      <div id="userEnrollPasswordGroup" class="hidden">
+        <label for="userEnrollPassword">認証パスワード</label>
+        <input id="userEnrollPassword" type="password" autocomplete="new-password" placeholder="認証パスワード" inputmode="numeric" minlength="4" maxlength="6" pattern="\d{4,6}">
+      </div>
+      <div class="passkey-spinner" aria-hidden="true">
+        <span class="spinner-cube core" aria-hidden="true">
+          <span class="cube-face fingerprint">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/>
+              <path d="M14 13.12c0 2.38 0 6.38-1 8.88"/>
+              <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/>
+              <path d="M2 12a10 10 0 0 1 18-6"/>
+              <path d="M2 16h.01"/>
+              <path d="M21.8 16c.2-2 .131-5.354 0-6"/>
+              <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/>
+              <path d="M8.65 22c.21-.66.45-1.32.57-2"/>
+              <path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>
+            </svg>
+          </span>
+          <span class="cube-face face">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+              <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+              <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+              <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+              <path d="M9 9h.01"/>
+              <path d="M15 9h.01"/>
+            </svg>
+          </span>
+        </span>
+      </div>
+      <div id="userEnrollStatus" class="small-muted">ログインIDを入力してください。</div>
+      <div class="modal-actions">
+        <button type="button" id="userEnrollSubmit">ID登録</button>
+        <button type="button" class="secondary" id="userEnrollCancel">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="enrollChoiceModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="enrollChoiceTitle">
+      <h2 id="enrollChoiceTitle">ID登録方法を選択</h2>
+      <div class="enroll-choice">
+        <button type="button" class="secondary" id="enrollChoicePasskey">
+          ID/Passkey登録
+          <span>パスキーで生体情報を登録します。</span>
+        </button>
+        <button type="button" class="secondary" id="enrollChoicePassword">
+          ID/PW指定登録
+          <span>IDと固定パスワードを登録します。</span>
+        </button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="enrollChoiceCancel">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="otpModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="otpModalTitle">
+      <h2 id="otpModalTitle">ワンタイムコード入力</h2>
+      <div id="otpDisplay" class="otp-display" aria-hidden="true"></div>
+      <label for="otpCode">ワンタイムコード</label>
+      <input id="otpCode" type="text" inputmode="numeric" placeholder="コード入力">
+      <div id="fixedCodeGroup" class="hidden">
+        <label for="fixedCode">固定番号</label>
+        <input id="fixedCode" type="text" inputmode="numeric" placeholder="固定番号">
+      </div>
+      <div id="otpStatus" class="small-muted">コード確認後に指紋（パスキー）登録を開始します。</div>
+      <div class="otp-keypad" id="otpKeypad"></div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="otpCancel">閉じる</button>
+        <button type="button" id="otpSubmit">確認</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const session = window.EnchoSession;
+    if (!session) {
+      alert("ブラウザの保存領域にアクセスできません。");
+    }
+
+    const statusEl = document.getElementById("loginStatus");
+    const initialLoginButton = document.getElementById("initialLoginButton");
+    const biometricLoginButton = document.getElementById("biometricLoginButton");
+    const humanStatus = document.getElementById("humanStatus");
+    const loginTitleText = document.getElementById("loginTitleText");
+    const loginSubtitleText = document.getElementById("loginSubtitleText");
+    const passwordPanel = document.getElementById("passwordPanel");
+    const passwordTitle = document.getElementById("passwordTitle");
+    const passwordDisplay = document.getElementById("passwordDisplay");
+    const passwordInput = document.getElementById("passwordInput");
+    const passwordStatus = document.getElementById("passwordStatus");
+    const passwordKeypad = document.getElementById("passwordKeypad");
+    const passwordUnlockButton = document.getElementById("passwordUnlockButton");
+    const adminModal = document.getElementById("adminModal");
+    const adminLoginTrigger = document.getElementById("adminLoginTrigger");
+    const adminIdInput = document.getElementById("adminId");
+    const adminStatus = document.getElementById("adminStatus");
+    const adminSubmit = document.getElementById("adminSubmit");
+    const adminCancel = document.getElementById("adminCancel");
+    const otpModal = document.getElementById("otpModal");
+    const otpCodeInput = document.getElementById("otpCode");
+    const fixedCodeInput = document.getElementById("fixedCode");
+    const fixedCodeGroup = document.getElementById("fixedCodeGroup");
+    const otpStatus = document.getElementById("otpStatus");
+    const otpSubmit = document.getElementById("otpSubmit");
+    const otpCancel = document.getElementById("otpCancel");
+    const otpDisplay = document.getElementById("otpDisplay");
+    const otpKeypad = document.getElementById("otpKeypad");
+    const masterChangeModal = document.getElementById("masterChangeModal");
+    const masterNextPw = document.getElementById("masterNextPw");
+    const masterChangeStatus = document.getElementById("masterChangeStatus");
+    const masterChangeCancel = document.getElementById("masterChangeCancel");
+    const masterChangeSubmit = document.getElementById("masterChangeSubmit");
+    const masterIdInput = document.getElementById("masterIdInput");
+    const adminBiometricModal = document.getElementById("adminBiometricModal");
+    const adminBiometricId = document.getElementById("adminBiometricId");
+    const adminBiometricStatus = document.getElementById("adminBiometricStatus");
+    const adminBiometricCancel = document.getElementById("adminBiometricCancel");
+    const adminBiometricSubmit = document.getElementById("adminBiometricSubmit");
+    const userEnrollModal = document.getElementById("userEnrollModal");
+    const enrollChoiceModal = document.getElementById("enrollChoiceModal");
+    const enrollChoiceTrigger = document.getElementById("enrollChoiceTrigger");
+    const enrollChoicePasskey = document.getElementById("enrollChoicePasskey");
+    const enrollChoicePassword = document.getElementById("enrollChoicePassword");
+    const enrollChoiceCancel = document.getElementById("enrollChoiceCancel");
+    const userEnrollId = document.getElementById("userEnrollId");
+    const userEnrollNotice = document.getElementById("userEnrollNotice");
+    const userEnrollPasswordGroup = document.getElementById("userEnrollPasswordGroup");
+    const userEnrollPassword = document.getElementById("userEnrollPassword");
+    const userEnrollSpinner = userEnrollModal?.querySelector(".passkey-spinner");
+    const userEnrollStatus = document.getElementById("userEnrollStatus");
+    const userEnrollSubmit = document.getElementById("userEnrollSubmit");
+    const userEnrollCancel = document.getElementById("userEnrollCancel");
+    const forceInitTrigger = document.getElementById("forceInitTrigger");
+    const biometricSpinner = document.querySelector(".passkey-spinner");
+
+    const state = session?.loadUserState() || { activeUser: null, profiles: {} };
+    let isHumanVerified = sessionStorage.getItem("enchoHumanVerified") === "true";
+    let pendingAdminBiometric = null;
+    let userEnrollMode = "biometric_enroll";
+    const FALLBACK_PASSWORD_MIN_LENGTH = 4;
+    const FALLBACK_PASSWORD_MAX_LENGTH = 6;
+
+    const MASTER_OTP_ENABLED_KEY = "encho_master_otp_enabled";
+    const MASTER_OTP_CODE_KEY = "encho_master_otp_code";
+    const MASTER_OTP_MODE_KEY = "encho_master_otp_mode";
+    const AUTH_MODE_KEY = "encho_auth_mode_v2";
+    const OTP_LENGTH_KEY = "encho_otp_length";
+    const FIXED_CODE_LENGTH_KEY = "encho_fixed_code_length";
+    const OTP_CODES_KEY = "encho_otp_codes_v1";
+    const SYSTEM_KEYS_KEY = "encho_system_keys_v1";
+    const FIXED_KEYS_KEY = "encho_fixed_codes_v1";
+    const LOGIN_HISTORY_KEY = "encho_login_history_v1";
+    const SECRET_MODE_KEY = "encho_secret_mode";
+    const TEST_MODE_KEY = "encho_test_mode";
+    const UI_SCALE_KEY = "encho_ui_scale";
+    const PASSWORD_SETTINGS_KEY = "encho_password_settings_v1";
+    const OTP_SETTINGS_KEY = "encho_otp_settings_v1";
+    const FIXED_PASSWORD_SETTINGS_KEY = "encho_fixed_password_settings_v1";
+    const MULTI_PASSWORD_SETTINGS_KEY = "encho_multi_password_settings_v1";
+    const ADMIN_USERS_KEY = "encho_admin_users_v1";
+    const ADMIN_DEVICES_KEY = "encho_admin_devices_v1";
+    const ACTIVE_ADMIN_ROLE_KEY = "encho_active_admin_role";
+    const MASTER_PASSWORD_CHANGED_KEY = "encho_master_pw_changed";
+    const FORCE_MASTER_SETUP_ENABLED_KEY = "encho_force_master_setup_enabled";
+    const FORCE_MASTER_SETUP_SEEN_KEY = "encho_force_master_setup_seen";
+    const ADMIN_BIOMETRIC_KEY = "encho_admin_biometric_v1";
+    const USER_BIOMETRIC_KEY = "encho_user_biometric_v1";
+    const USER_FALLBACK_KEY = "encho_user_fallback_v1";
+    let loginManagementEntries = [];
+    let loginManagementLoaded = false;
+    const LOGIN_MANAGEMENT_KEY = "encho_login_management_v1";
+
+    const MASTER_PERMISSIONS = [
+      "master",
+      "admin_register",
+      "otp_issue",
+      "password_manage",
+      "mode_change",
+      "biometric_register",
+      "lock_mode",
+      "device_register"
+    ];
+
+    const AUTH_MODES = {
+      password_only: "パスワード運用",
+      otp_only: "ワンタイムパスワード運用",
+      fixed_and_otp: "固定＋ワンタイム併用運用",
+      biometric_only: "生体情報認証運用",
+      password_then_biometric: "初回パスワード＞生体登録運用",
+      pre_registered_biometric: "事前生体情報登録運用",
+      multi_password: "複数パスワード運用",
+      instant_issue_fixed_biometric: "即時ID発行（事前固定パスワード/生体情報認証）",
+      sms_auth: "SMS認証",
+      csv_fixed_pw: "CSVから固定PWを設定"
+    };
+
+    function getDefaultLoginLayoutSettings() {
+      return {
+        titleText: "SenSei ログイン",
+        subtitleText: "",
+        helperText: "タップすると生体認証がスタートします。",
+        biometricButtonText: "生体認証を開始",
+        initialLoginButtonText: "",
+        initialLoginDescription: "",
+        passwordUnlockText: "ID登録",
+        fontFamily: "\"Noto Sans JP\", \"Inter\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        fontSize: 16,
+        buttonShape: "rounded",
+        buttonSize: "standard",
+        cardWidth: 560,
+        cardSpacing: "standard"
+      };
+    }
+
+    function loadLoginLayoutSettings() {
+      try {
+        const raw = localStorage.getItem(LOGIN_LAYOUT_SETTINGS_KEY);
+        const stored = raw ? JSON.parse(raw) : {};
+        return { ...getDefaultLoginLayoutSettings(), ...(stored || {}) };
+      } catch (error) {
+        return getDefaultLoginLayoutSettings();
+      }
+    }
+
+    function applyLoginLayoutSettings(settings) {
+      const layout = settings || getDefaultLoginLayoutSettings();
+      const root = document.documentElement;
+      const shapeMap = {
+        rounded: "12px",
+        pill: "999px",
+        square: "8px"
+      };
+      const sizeMap = {
+        compact: "10px 14px",
+        standard: "12px 16px",
+        large: "14px 20px"
+      };
+      const spacingMap = {
+        compact: "12px",
+        standard: "16px",
+        spacious: "22px"
+      };
+      const paddingMap = {
+        compact: "18px",
+        standard: "26px",
+        spacious: "32px"
+      };
+      root.style.setProperty("--login-font-family", layout.fontFamily || "\"Noto Sans JP\", \"Inter\", system-ui, -apple-system, \"Segoe UI\", sans-serif");
+      root.style.setProperty("--login-font-size", `${layout.fontSize || 16}px`);
+      root.style.setProperty("--login-button-radius", shapeMap[layout.buttonShape] || "12px");
+      root.style.setProperty("--login-button-padding", sizeMap[layout.buttonSize] || "12px 16px");
+      root.style.setProperty("--login-card-width", `min(${layout.cardWidth || 560}px, 95vw)`);
+      root.style.setProperty("--login-card-gap", spacingMap[layout.cardSpacing] || "16px");
+      root.style.setProperty("--login-card-padding", paddingMap[layout.cardSpacing] || "26px");
+      if (loginTitleText) loginTitleText.textContent = layout.titleText || "SenSei ログイン";
+      if (loginSubtitleText) loginSubtitleText.textContent = layout.subtitleText || "";
+      if (humanStatus) humanStatus.textContent = layout.helperText || "タップすると生体認証がスタートします。";
+      if (biometricLoginButton) biometricLoginButton.textContent = layout.biometricButtonText || "生体認証を開始";
+      if (initialLoginButton) initialLoginButton.textContent = layout.initialLoginButtonText || "";
+      if (passwordUnlockButton) passwordUnlockButton.textContent = layout.passwordUnlockText || "ID登録";
+      if (statusEl && statusEl.querySelector("span")) {
+        statusEl.querySelector("span").textContent = layout.initialLoginDescription || "";
+      }
+    }
+
+    function applyUiScale() {
+      const scale = Number(localStorage.getItem(UI_SCALE_KEY) || "1");
+      if (!Number.isFinite(scale) || scale <= 0) return;
+      document.documentElement.style.setProperty("--ui-scale", String(scale));
+    }
+
+    async function fetchLoginManagementEntries() {
+      try {
+        const res = await fetch("/login-management", {
+          headers: { accept: "application/json" }
+        });
+        if (!res.ok) throw new Error("ログイン管理の取得に失敗しました。");
+        const data = await res.json();
+        loginManagementEntries = Array.isArray(data.entries) ? data.entries : [];
+        loginManagementLoaded = true;
+        return loginManagementEntries;
+      } catch (error) {
+        console.warn("ログイン管理の取得に失敗しました", error);
+        loginManagementEntries = [];
+        loginManagementLoaded = true;
+        return loginManagementEntries;
+      }
+    }
+
+    function loadLoginManagementEntries() {
+      return loginManagementEntries;
+    }
+
+    function normalizeLoginUrl(value) {
+      if (!value) return "";
+      try {
+        const url = new URL(value, window.location.origin);
+        return `${url.origin}${url.pathname}`;
+      } catch (error) {
+        if (value.startsWith(window.location.origin)) {
+          return value.slice(window.location.origin.length).split("?")[0];
+        }
+        return value.split("?")[0];
+      }
+    }
+
+    function getLoginManagementEntryForCurrent() {
+      const entries = loadLoginManagementEntries();
+      if (!entries.length) return null;
+      const redirectTarget = getRedirectTarget();
+      if (redirectTarget) {
+        const normalizedRedirect = normalizeLoginUrl(redirectTarget);
+        const redirectMatch = entries.find((entry) => {
+          const entryUrl = normalizeLoginUrl(entry?.url || "");
+          return entryUrl && entryUrl === normalizedRedirect;
+        });
+        if (redirectMatch) return redirectMatch;
+      }
+      const currentUrl = normalizeLoginUrl(window.location.href);
+      return entries.find((entry) => normalizeLoginUrl(entry?.loginUrl || "") === currentUrl) || null;
+    }
+
+    function isValidFallbackPassword(value) {
+      const pattern = new RegExp(`^\\d{${FALLBACK_PASSWORD_MIN_LENGTH},${FALLBACK_PASSWORD_MAX_LENGTH}}$`);
+      return pattern.test(value);
+    }
+
+    function getRedirectTarget() {
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get("redirect");
+      if (!redirect) return null;
+      if (/^https?:/i.test(redirect) || redirect.startsWith("//")) return null;
+      if (redirect.includes("..")) return null;
+      return redirect;
+    }
+
+    function getAuthMode() {
+      const mode = localStorage.getItem(AUTH_MODE_KEY);
+      if (mode && AUTH_MODES[mode]) return mode;
+      return "biometric_only";
+    }
+
+    function isTestModeEnabled() {
+      return localStorage.getItem(TEST_MODE_KEY) === "true";
+    }
+
+    function isLoginManagementTestModeEnabled() {
+      const entry = getLoginManagementEntryForCurrent();
+      return !!entry?.testMode;
+    }
+
+    function isTestModeActive() {
+      return isTestModeEnabled() || isLoginManagementTestModeEnabled();
+    }
+
+    function getOtpLength() {
+      const settings = getOtpSettings();
+      const length = Number(settings.length || localStorage.getItem(OTP_LENGTH_KEY) || "6");
+      return Number.isFinite(length) && length > 0 ? length : 6;
+    }
+
+    function getFixedCodeLength() {
+      const length = Number(localStorage.getItem(FIXED_CODE_LENGTH_KEY) || "5");
+      return Number.isFinite(length) && length > 0 ? length : 5;
+    }
+
+    function getMasterOtpSettings() {
+      const enabled = localStorage.getItem(MASTER_OTP_ENABLED_KEY) === "true";
+      const code = localStorage.getItem(MASTER_OTP_CODE_KEY) || "";
+      const mode = localStorage.getItem(MASTER_OTP_MODE_KEY) || "disabled";
+      return { enabled, code, mode };
+    }
+
+    function loadOtpCodes() {
+      try {
+        const raw = localStorage.getItem(OTP_CODES_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveOtpCodes(codes) {
+      localStorage.setItem(OTP_CODES_KEY, JSON.stringify(codes));
+    }
+
+    function loadSystemKeys() {
+      try {
+        const raw = localStorage.getItem(SYSTEM_KEYS_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function loadFixedKeys() {
+      try {
+        const raw = localStorage.getItem(FIXED_KEYS_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function loadPasswordSettings(key, fallback = {}) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function getPasswordConfig() {
+      return loadPasswordSettings(PASSWORD_SETTINGS_KEY, { password: "", length: 6, expiresAt: "" });
+    }
+
+    function getFixedPasswordConfig() {
+      const config = loadPasswordSettings(FIXED_PASSWORD_SETTINGS_KEY, { password: "", length: 6, expiresAt: "" });
+      config.password = "123456";
+      if (!config.length) {
+        config.length = 6;
+      }
+      return config;
+    }
+
+    function getMultiPasswordConfig() {
+      return loadPasswordSettings(MULTI_PASSWORD_SETTINGS_KEY, { passwords: [] });
+    }
+
+    function getOtpSettings() {
+      return loadPasswordSettings(OTP_SETTINGS_KEY, { length: 6, expiresAt: "" });
+    }
+
+    function recordLoginLog(username, destination, method) {
+      const secret = localStorage.getItem(SECRET_MODE_KEY) === "true";
+      if (secret) return;
+      const entries = (() => {
+        try {
+          const raw = localStorage.getItem(LOGIN_HISTORY_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch (error) {
+          return [];
+        }
+      })();
+      const now = new Date();
+      entries.unshift({
+        username,
+        destination,
+        method,
+        mode: getAuthMode(),
+        timestamp: now.toISOString()
+      });
+      localStorage.setItem(LOGIN_HISTORY_KEY, JSON.stringify(entries.slice(0, 500)));
+    }
+
+    function goToLastPage(username, method = "login") {
+      if (!username) return;
+      const saved = session.setActiveUser(username);
+      if (!saved) {
+        alert("ブラウザの保存領域にアクセスできませんでした。プライベートモードを解除するか、保存を許可してください。");
+        return;
+      }
+      const redirectTarget = getRedirectTarget();
+      const page = redirectTarget || session.getLastPage(username) || "index.html";
+      if (redirectTarget) {
+        session.updateLastPageForActive(redirectTarget);
+      }
+      recordLoginLog(username, page, method);
+      window.location.href = page;
+    }
+
+    function setStatus(message, isError = false) {
+      if (!statusEl) return;
+      statusEl.querySelector("span").textContent = message;
+      statusEl.style.borderColor = isError ? "rgba(248,113,113,.35)" : "color-mix(in srgb, var(--login-border) 70%, transparent)";
+      statusEl.style.color = isError ? "#fecdd3" : "var(--login-sub)";
+    }
+
+    function updateHumanCheckUI() {
+      if (isHumanVerified) {
+        humanStatus.textContent = "初回認証が完了しました。ログインできます。";
+      }
+    }
+
+    function requireHumanVerification(messageTarget) {
+      if (isHumanVerified) return true;
+      if (messageTarget) {
+        messageTarget.textContent = "初回認証が完了していません。";
+      }
+      return false;
+    }
+
+    function updateInitialLoginCopy() {
+      const mode = getAuthMode();
+      const layout = loadLoginLayoutSettings();
+      const helperFallbacks = {
+        password_only: "パスワードのみで解錠します。",
+        otp_only: "ワンタイムパスワードのみで解錠します。",
+        fixed_and_otp: "固定パスワードまたはワンタイムパスワードで解錠します。",
+        biometric_only: "生体情報認証のみで解錠します。",
+        password_then_biometric: "初回はパスワードで解錠し、その場で生体登録します。",
+        pre_registered_biometric: "事前登録済みの生体情報で解錠します。",
+        multi_password: "複数登録済みパスワードで解錠します。",
+        instant_issue_fixed_biometric: "登録済みユーザーは生体認証のみでログインできます。",
+        sms_auth: "SMS認証を開始します。",
+        csv_fixed_pw: "固定パスワードで解錠します。"
+      };
+      const statusFallbacks = {
+        password_only: "パスワードを入力してログインします。",
+        otp_only: "ワンタイムパスワードでログインします。",
+        fixed_and_otp: "固定パスワード/ワンタイムパスワードでログインします。",
+        biometric_only: "生体認証でログインします。",
+        password_then_biometric: "初回パスワード後に生体登録を行います。",
+        pre_registered_biometric: "生体認証でログインします。",
+        multi_password: "登録済みパスワードでログインします。",
+        instant_issue_fixed_biometric: "固定パスワードを入力してログインします。",
+        sms_auth: "SMSワンタイムパスワードでログインします。",
+        csv_fixed_pw: "CSVで設定した固定パスワードでログインします。"
+      };
+      const helperText = layout.helperText?.trim() || helperFallbacks[mode] || "";
+      const statusText = layout.initialLoginDescription?.trim() || statusFallbacks[mode] || "";
+      const statusSpan = statusEl?.querySelector("span");
+      if (mode === "password_only") {
+        humanStatus.textContent = helperText;
+        if (statusSpan) statusSpan.textContent = statusText;
+      } else if (mode === "otp_only") {
+        humanStatus.textContent = helperText;
+        if (statusSpan) statusSpan.textContent = statusText;
+      } else if (mode === "fixed_and_otp") {
+        humanStatus.textContent = helperText;
+        if (statusSpan) statusSpan.textContent = statusText;
+      } else if (mode === "biometric_only") {
+        humanStatus.textContent = helperText;
+        if (statusSpan) statusSpan.textContent = statusText;
+      } else if (mode === "password_then_biometric") {
+        humanStatus.textContent = helperText;
+        if (statusSpan) statusSpan.textContent = statusText;
+      } else if (mode === "pre_registered_biometric") {
+        humanStatus.textContent = helperText;
+        if (statusSpan) statusSpan.textContent = statusText;
+      } else if (mode === "multi_password") {
+        humanStatus.textContent = helperText;
+        if (statusSpan) statusSpan.textContent = statusText;
+      } else if (mode === "instant_issue_fixed_biometric") {
+        humanStatus.textContent = helperText;
+        if (statusSpan) statusSpan.textContent = statusText;
+      } else if (mode === "sms_auth") {
+        humanStatus.textContent = helperText;
+        if (statusSpan) statusSpan.textContent = statusText;
+      } else if (mode === "csv_fixed_pw") {
+        humanStatus.textContent = helperText;
+        if (statusSpan) statusSpan.textContent = statusText;
+      }
+    }
+
+    function toBase64Url(buffer) {
+      const bytes = new Uint8Array(buffer);
+      let binary = "";
+      bytes.forEach((byte) => {
+        binary += String.fromCharCode(byte);
+      });
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+
+    function fromBase64Url(value) {
+      const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+      const padding = "=".repeat((4 - (normalized.length % 4)) % 4);
+      const binary = atob(normalized + padding);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i += 1) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    function loadAdminBiometricStore() {
+      try {
+        const raw = localStorage.getItem(ADMIN_BIOMETRIC_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function loadUserBiometricStore() {
+      try {
+        const raw = localStorage.getItem(USER_BIOMETRIC_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function saveAdminBiometricStore(store) {
+      localStorage.setItem(ADMIN_BIOMETRIC_KEY, JSON.stringify(store));
+    }
+
+    function saveUserBiometricStore(store) {
+      localStorage.setItem(USER_BIOMETRIC_KEY, JSON.stringify(store));
+    }
+
+    function loadUserFallbackStore() {
+      try {
+        const raw = localStorage.getItem(USER_FALLBACK_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function saveUserFallbackStore(store) {
+      localStorage.setItem(USER_FALLBACK_KEY, JSON.stringify(store));
+    }
+
+    function hasUserBiometricRegistrations() {
+      return Object.keys(loadUserBiometricStore()).length > 0;
+    }
+
+    function hasUserFallbackRegistrations() {
+      return Object.keys(loadUserFallbackStore()).length > 0;
+    }
+
+    function hasAnyUserRegistrations() {
+      return hasUserBiometricRegistrations() || hasUserFallbackRegistrations();
+    }
+
+    function getAdminCredentialId(id) {
+      const store = loadAdminBiometricStore();
+      return store[id]?.credentialId || "";
+    }
+
+    function getUserCredentialId(id) {
+      const store = loadUserBiometricStore();
+      return store[id]?.credentialId || "";
+    }
+
+    function setAdminCredentialId(id, credentialId) {
+      const store = loadAdminBiometricStore();
+      store[id] = { credentialId, enrolledAt: Date.now() };
+      saveAdminBiometricStore(store);
+    }
+
+    function isBiometricSupported() {
+      return "credentials" in navigator && !!window.PublicKeyCredential;
+    }
+
+    function setUserCredentialId(id, credentialId) {
+      const store = loadUserBiometricStore();
+      store[id] = { credentialId, enrolledAt: Date.now() };
+      saveUserBiometricStore(store);
+    }
+
+    function setUserFallbackPassword(id, password) {
+      const store = loadUserFallbackStore();
+      store[id] = { password, enrolledAt: Date.now() };
+      saveUserFallbackStore(store);
+    }
+
+    function getUserFallbackPassword(id) {
+      const store = loadUserFallbackStore();
+      return store[id]?.password || "";
+    }
+
+    function findUserByFallbackPassword(password) {
+      const store = loadUserFallbackStore();
+      return Object.keys(store).find((id) => store[id]?.password === password) || "";
+    }
+
+    function isSixDigitNumeric(value) {
+      return /^[0-9]{6}$/.test(value);
+    }
+
+    function getUserIdByCredentialId(credentialId) {
+      const store = loadUserBiometricStore();
+      return Object.keys(store).find((key) => store[key]?.credentialId === credentialId) || "";
+    }
+
+    function getPreferredUser() {
+      const entries = Object.keys(state.profiles || {});
+      if (state.activeUser && entries.includes(state.activeUser)) return state.activeUser;
+      if (entries.length === 1) return entries[0];
+      return null;
+    }
+
+    function openModal(modal) {
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal(modal) {
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function buildOtpDisplay(length) {
+      otpDisplay.innerHTML = Array.from({ length }).map(() => "<span>_</span>").join("");
+    }
+
+    function buildPasswordDisplay(length) {
+      passwordDisplay.innerHTML = Array.from({ length }).map(() => "<span>_</span>").join("");
+    }
+
+    function refreshOtpDisplay(input, length) {
+      const value = (input.value || "").trim();
+      const chars = value.split("");
+      const spans = otpDisplay.querySelectorAll("span");
+      spans.forEach((span, index) => {
+        span.textContent = chars[index] || "_";
+      });
+    }
+
+    function refreshPasswordDisplay(input, length) {
+      const value = (input.value || "").trim();
+      const chars = value.split("");
+      const spans = passwordDisplay.querySelectorAll("span");
+      spans.forEach((span, index) => {
+        span.textContent = chars[index] || "_";
+      });
+    }
+
+    function setupKeypad(targetInput, length) {
+      if (!otpKeypad) return;
+      otpKeypad.innerHTML = "";
+      const keys = ["1","2","3","4","5","6","7","8","9","0"];
+      keys.forEach((key) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = key;
+        btn.addEventListener("click", () => {
+          if (targetInput.value.length >= length) return;
+          targetInput.value += key;
+          refreshOtpDisplay(targetInput, length);
+        });
+        otpKeypad.appendChild(btn);
+      });
+      const clearBtn = document.createElement("button");
+      clearBtn.type = "button";
+      clearBtn.textContent = "クリア";
+      clearBtn.classList.add("action");
+      clearBtn.addEventListener("click", () => {
+        targetInput.value = "";
+        refreshOtpDisplay(targetInput, length);
+      });
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.textContent = "削除";
+      deleteBtn.classList.add("action");
+      deleteBtn.addEventListener("click", () => {
+        targetInput.value = targetInput.value.slice(0, -1);
+        refreshOtpDisplay(targetInput, length);
+      });
+      otpKeypad.appendChild(clearBtn);
+      otpKeypad.appendChild(deleteBtn);
+    }
+
+    function setupPasswordKeypad(targetInput, length) {
+      if (!passwordKeypad) return;
+      passwordKeypad.innerHTML = "";
+      const keys = ["1","2","3","4","5","6","7","8","9","0"];
+      keys.forEach((key) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = key;
+        btn.addEventListener("click", () => {
+          if (targetInput.value.length >= length) return;
+          targetInput.value += key;
+          refreshPasswordDisplay(targetInput, length);
+        });
+        passwordKeypad.appendChild(btn);
+      });
+      const clearBtn = document.createElement("button");
+      clearBtn.type = "button";
+      clearBtn.textContent = "クリア";
+      clearBtn.classList.add("action");
+      clearBtn.addEventListener("click", () => {
+        targetInput.value = "";
+        refreshPasswordDisplay(targetInput, length);
+      });
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.textContent = "削除";
+      deleteBtn.classList.add("action");
+      deleteBtn.addEventListener("click", () => {
+        targetInput.value = targetInput.value.slice(0, -1);
+        refreshPasswordDisplay(targetInput, length);
+      });
+      passwordKeypad.appendChild(clearBtn);
+      passwordKeypad.appendChild(deleteBtn);
+    }
+
+    function updateLoginLayout() {
+      const mode = getAuthMode();
+      const usePasswordPanel = ["password_only", "otp_only", "fixed_and_otp", "multi_password", "password_then_biometric", "instant_issue_fixed_biometric", "sms_auth", "csv_fixed_pw"].includes(mode);
+      if (passwordPanel) {
+        passwordPanel.hidden = !usePasswordPanel;
+      }
+      if (biometricSpinner) {
+        biometricSpinner.classList.toggle("large", mode === "instant_issue_fixed_biometric");
+      }
+      if (biometricLoginButton) {
+        biometricLoginButton.textContent = "生体認証を開始";
+      }
+      if (initialLoginButton) {
+        initialLoginButton.textContent = "";
+      }
+      if (passwordUnlockButton) {
+        passwordUnlockButton.textContent = "ID登録";
+      }
+      if (passwordPanel && passwordTitle) {
+        const title = mode === "instant_issue_fixed_biometric" ? "初回ログイン（パスワード入力）" : "パスワード入力";
+        passwordTitle.innerHTML = `<strong>${title}</strong>`;
+      }
+      if (usePasswordPanel && passwordInput) {
+        let length = getPasswordConfig().length || 6;
+        const fallbackEnabled = hasUserFallbackRegistrations();
+        if (mode === "otp_only") {
+          length = getOtpSettings().length || length;
+          passwordStatus.textContent = "ワンタイムパスワードを入力してください。";
+        } else if (mode === "fixed_and_otp") {
+          length = getFixedPasswordConfig().length || length;
+          passwordStatus.textContent = "固定パスワードまたはワンタイムを入力してください。";
+        } else if (mode === "multi_password") {
+          passwordStatus.textContent = "登録済みパスワードを入力してください。";
+        } else if (mode === "instant_issue_fixed_biometric") {
+          length = getFixedPasswordConfig().length || length;
+          passwordStatus.textContent = "固定パスワードを入力してください。";
+        } else if (mode === "sms_auth") {
+          length = getOtpSettings().length || length;
+          passwordStatus.textContent = "SMSワンタイムパスワードを入力してください。";
+        } else if (mode === "csv_fixed_pw") {
+          length = getFixedPasswordConfig().length || length;
+          passwordStatus.textContent = "パスワードを入力してください。";
+        } else {
+          passwordStatus.textContent = "パスワードを入力してください。";
+        }
+        if (fallbackEnabled && !["otp_only", "fixed_and_otp", "sms_auth"].includes(mode)) {
+          length = Math.max(length, 6);
+          passwordStatus.textContent = "登録済みの6桁パスワードを入力してください。";
+        }
+        passwordInput.value = "";
+        passwordInput.maxLength = length;
+        buildPasswordDisplay(length);
+        refreshPasswordDisplay(passwordInput, length);
+        setupPasswordKeypad(passwordInput, length);
+      }
+    }
+
+    function updateInstantIssueTestModeGuidance() {
+      if (getAuthMode() !== "instant_issue_fixed_biometric" || !isTestModeActive()) return;
+      if (!humanStatus) return;
+      if (isBiometricSupported() && hasUserBiometricRegistrations()) {
+        humanStatus.textContent = "生体認証はこちらタップで生体認証Passkey開始。";
+        return;
+      }
+      if (!isBiometricSupported() && hasUserFallbackRegistrations()) {
+        humanStatus.textContent = "固定パスワード入力後に認証パスワードを入力してください。";
+        return;
+      }
+      humanStatus.textContent = "固定パスワードを入力してください。";
+    }
+
+    function isFixedCodeRequired() {
+      return getAuthMode() === "otp_ticket";
+    }
+
+    updateHumanCheckUI();
+    updateInitialLoginCopy();
+    applyUiScale();
+    updateLoginLayout();
+    updateInstantIssueTestModeGuidance();
+    fetchLoginManagementEntries().then(() => {
+      updateInstantIssueTestModeGuidance();
+    });
+
+    otpCodeInput.addEventListener("input", () => {
+      const otpLength = getOtpLength();
+      refreshOtpDisplay(otpCodeInput, otpLength);
+    });
+
+    if (passwordInput) {
+      const { length } = getPasswordConfig();
+      const fallbackEnabled = hasUserFallbackRegistrations();
+      const passLength = fallbackEnabled ? Math.max(length, 6) : length;
+      passwordInput.maxLength = passLength;
+      buildPasswordDisplay(passLength);
+      refreshPasswordDisplay(passwordInput, passLength);
+      setupPasswordKeypad(passwordInput, passLength);
+      passwordInput.addEventListener("input", () => {
+        const configuredLength = getPasswordConfig().length || length;
+        const nextLength = fallbackEnabled ? Math.max(configuredLength, 6) : configuredLength;
+        refreshPasswordDisplay(passwordInput, nextLength);
+      });
+    }
+
+    async function startFingerprintAuth(messageTarget, publicKeyRequestOptions) {
+      if (!("credentials" in navigator) || !window.PublicKeyCredential) {
+        if (messageTarget) {
+          messageTarget.textContent = "この端末では指紋認証に対応していません。";
+        }
+        return false;
+      }
+
+      // WebAuthn 認証のオプション（challenge / allowCredentials など）は
+      // 必ずサーバーから取得したものを渡してください。
+      if (!publicKeyRequestOptions || !publicKeyRequestOptions.publicKey) {
+        if (messageTarget) {
+          messageTarget.textContent = "指紋認証の設定が正しく行われていません。再度お試しください。";
+        }
+        return false;
+      }
+
+      try {
+        const assertion = await navigator.credentials.get({
+          ...publicKeyRequestOptions,
+          mediation: "optional"
+        });
+        // 検証はサーバー側で行うことを前提に、取得したアサーションを返す
+        return assertion;
+      } catch (error) {
+        if (messageTarget) {
+          messageTarget.textContent = "指紋認証に失敗しました。もう一度お試しください。";
+        }
+        return false;
+      }
+    }
+
+    async function startAdminBiometricEnrollment(id, messageTarget) {
+      if (!isBiometricSupported()) {
+        if (messageTarget) {
+          messageTarget.textContent = "この端末では生体情報登録に対応していません。";
+        }
+        return false;
+      }
+      try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+        const userId = new Uint8Array(16);
+        window.crypto.getRandomValues(userId);
+        const credential = await navigator.credentials.create({
+          publicKey: {
+            challenge,
+            rp: { name: "EnCho" },
+            user: {
+              id: userId,
+              name: id,
+              displayName: id
+            },
+            pubKeyCredParams: [
+              { type: "public-key", alg: -7 },
+              { type: "public-key", alg: -257 }
+            ],
+            authenticatorSelection: { userVerification: "required" },
+            timeout: 60000,
+            attestation: "none"
+          }
+        });
+        if (!credential) {
+          if (messageTarget) {
+            messageTarget.textContent = "生体情報登録に失敗しました。";
+          }
+          return false;
+        }
+        const credentialId = toBase64Url(credential.rawId);
+        setAdminCredentialId(id, credentialId);
+        return true;
+      } catch (error) {
+        if (messageTarget) {
+          messageTarget.textContent = "生体情報登録に失敗しました。もう一度お試しください。";
+        }
+        return false;
+      }
+    }
+
+    async function startUserBiometricEnrollment(id, messageTarget) {
+      if (!isBiometricSupported()) {
+        if (messageTarget) {
+          messageTarget.textContent = "この端末では生体情報登録に対応していません。";
+        }
+        return false;
+      }
+      try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+        const userId = new Uint8Array(16);
+        window.crypto.getRandomValues(userId);
+        const credential = await navigator.credentials.create({
+          publicKey: {
+            challenge,
+            rp: { name: "EnCho" },
+            user: {
+              id: userId,
+              name: id,
+              displayName: id
+            },
+            pubKeyCredParams: [
+              { type: "public-key", alg: -7 },
+              { type: "public-key", alg: -257 }
+            ],
+            authenticatorSelection: { userVerification: "required" },
+            timeout: 60000,
+            attestation: "none"
+          }
+        });
+        if (!credential) {
+          if (messageTarget) {
+            messageTarget.textContent = "生体情報登録に失敗しました。";
+          }
+          return false;
+        }
+        const credentialId = toBase64Url(credential.rawId);
+        setUserCredentialId(id, credentialId);
+        return true;
+      } catch (error) {
+        if (messageTarget) {
+          messageTarget.textContent = "生体情報登録に失敗しました。もう一度お試しください。";
+        }
+        return false;
+      }
+    }
+
+    async function startUserBiometricLogin(messageTarget) {
+      const store = loadUserBiometricStore();
+      const credentialIds = Object.values(store).map((entry) => entry?.credentialId).filter(Boolean);
+      if (!credentialIds.length && messageTarget) {
+        messageTarget.textContent = "生体情報の登録が必要です。";
+      }
+      if (!isBiometricSupported()) {
+        if (messageTarget) {
+          messageTarget.textContent = "この端末では生体情報認証に対応していません。";
+        }
+        return "";
+      }
+      try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+        const publicKey = {
+          challenge,
+          timeout: 60000,
+          userVerification: "required"
+        };
+        if (credentialIds.length) {
+          publicKey.allowCredentials = credentialIds.map((id) => ({
+            type: "public-key",
+            id: fromBase64Url(id)
+          }));
+        }
+        const assertion = await navigator.credentials.get({
+          publicKey,
+          mediation: "optional"
+        });
+        if (!assertion) return "";
+        const matchedId = getUserIdByCredentialId(toBase64Url(assertion.rawId));
+        if (!matchedId && messageTarget) {
+          messageTarget.textContent = "登録済みの生体情報が見つかりませんでした。";
+        }
+        return matchedId;
+      } catch (error) {
+        if (messageTarget) {
+          messageTarget.textContent = "生体情報認証に失敗しました。もう一度お試しください。";
+        }
+        return "";
+      }
+    }
+
+    async function startAdminBiometricLogin(id, messageTarget) {
+      const credentialId = getAdminCredentialId(id);
+      if (!credentialId) {
+        if (messageTarget) {
+          messageTarget.textContent = "生体情報の登録が必要です。";
+        }
+        return false;
+      }
+      if (!isBiometricSupported()) {
+        if (messageTarget) {
+          messageTarget.textContent = "この端末では生体情報認証に対応していません。";
+        }
+        return false;
+      }
+      try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+        const assertion = await navigator.credentials.get({
+          publicKey: {
+            challenge,
+            timeout: 60000,
+            userVerification: "required",
+            allowCredentials: [
+              {
+                type: "public-key",
+                id: fromBase64Url(credentialId)
+              }
+            ]
+          },
+          mediation: "optional"
+        });
+        return !!assertion;
+      } catch (error) {
+        if (messageTarget) {
+          messageTarget.textContent = "生体情報認証に失敗しました。もう一度お試しください。";
+        }
+        return false;
+      }
+    }
+
+    function openOtpModal() {
+      otpCodeInput.value = "";
+      fixedCodeInput.value = "";
+      const otpLength = getOtpLength();
+      otpCodeInput.maxLength = otpLength;
+      buildOtpDisplay(otpLength);
+      refreshOtpDisplay(otpCodeInput, otpLength);
+      setupKeypad(otpCodeInput, otpLength);
+      if (isFixedCodeRequired()) {
+        fixedCodeGroup.classList.remove("hidden");
+        const fixedLength = getFixedCodeLength();
+        fixedCodeInput.maxLength = fixedLength;
+      } else {
+        fixedCodeGroup.classList.add("hidden");
+      }
+      otpStatus.textContent = "コード確認後に指紋（パスキー）登録を開始します。";
+      openModal(otpModal);
+    }
+
+    function openInitialAuth() {
+      const mode = getAuthMode();
+      if (mode === "instant_issue_fixed_biometric") {
+        humanStatus.textContent = "パスワードを入力してください。";
+        return;
+      }
+      if (mode === "fingerprint_only") {
+        startInitialFingerprint();
+        return;
+      }
+      openOtpModal();
+    }
+
+    async function startInitialFingerprint() {
+      humanStatus.textContent = "指紋認証を開始しました。";
+      const verified = await startFingerprintAuth(humanStatus);
+      if (!verified) {
+        return;
+      }
+      isHumanVerified = true;
+      sessionStorage.setItem("enchoHumanVerified", "true");
+      humanStatus.textContent = "指紋確認が完了しました。端末IDも登録されました。";
+      updateHumanCheckUI();
+      const preferredUser = getPreferredUser();
+      if (preferredUser) {
+        setStatus("ログインしました。前回の画面へ移動します。");
+        goToLastPage(preferredUser, "fingerprint");
+      }
+    }
+
+    if (initialLoginButton) {
+      initialLoginButton.addEventListener("click", openInitialAuth);
+    }
+
+    if (biometricLoginButton) {
+      biometricLoginButton.addEventListener("click", async () => {
+        humanStatus.textContent = "生体認証を開始しました。";
+        const matchedUser = await startUserBiometricLogin(humanStatus);
+        if (!matchedUser) return;
+        setStatus("ログインしました。前回の画面へ移動します。");
+        goToLastPage(matchedUser, "biometric");
+      });
+    }
+
+    if (passwordUnlockButton) {
+      passwordUnlockButton.addEventListener("click", async () => {
+        let value = (passwordInput.value || "").trim();
+        let fallbackUserId = "";
+        if (isTestModeActive() && !value) {
+          value = "123456";
+          if (passwordInput) {
+            passwordInput.value = value;
+          }
+          refreshPasswordDisplay(passwordInput, passwordInput?.maxLength || value.length);
+        }
+        const mode = getAuthMode();
+        const fallbackAllowedModes = ["password_only", "password_then_biometric", "multi_password", "instant_issue_fixed_biometric", "csv_fixed_pw"];
+        if (isSixDigitNumeric(value) && fallbackAllowedModes.includes(mode)) {
+          fallbackUserId = findUserByFallbackPassword(value);
+        }
+        const fixedConfig = getFixedPasswordConfig();
+        if (mode === "instant_issue_fixed_biometric" && isTestModeActive() && value && value !== fixedConfig.password) {
+          isHumanVerified = true;
+          sessionStorage.setItem("enchoHumanVerified", "true");
+          setStatus("テストユーザーでログインしました。前回の画面へ移動します。");
+          goToLastPage("テストユーザー", "test_id");
+          return;
+        }
+        const result = validatePasswordEntry(value);
+        if (!result.ok) {
+          passwordStatus.textContent = result.message || "パスワードが一致しません。";
+          return;
+        }
+        if (fallbackUserId) {
+          isHumanVerified = true;
+          sessionStorage.setItem("enchoHumanVerified", "true");
+          setStatus("ログインしました。前回の画面へ移動します。");
+          goToLastPage(fallbackUserId, "password_fallback");
+          return;
+        }
+        if (mode === "password_then_biometric") {
+          passwordStatus.textContent = "生体認証を開始します。";
+          const verified = await startFingerprintAuth(passwordStatus);
+          if (!verified) return;
+        } else if (mode === "instant_issue_fixed_biometric") {
+          const biometricAvailable = isBiometricSupported();
+          if (biometricAvailable && hasUserBiometricRegistrations()) {
+            passwordStatus.textContent = "生体認証はこちらをタップしてください。";
+            return;
+          }
+          passwordStatus.textContent = "初回登録を開始します。";
+          if (!biometricAvailable) {
+            const nextMode = hasUserFallbackRegistrations() ? "fallback_verify" : "fallback_enroll";
+            openUserEnrollModal(nextMode);
+            return;
+          }
+          openUserEnrollModal("biometric_enroll");
+          return;
+        }
+        isHumanVerified = true;
+        sessionStorage.setItem("enchoHumanVerified", "true");
+        const preferredUser = getPreferredUser();
+        if (preferredUser) {
+          setStatus("ログインしました。前回の画面へ移動します。");
+          goToLastPage(preferredUser, "password");
+        } else {
+          setStatus("初回ログインを選択してください。");
+        }
+      });
+    }
+
+    otpCancel.addEventListener("click", () => closeModal(otpModal));
+    otpModal.addEventListener("click", (event) => {
+      if (event.target === otpModal) closeModal(otpModal);
+    });
+
+    function matchOtpCode(code, mode) {
+      const master = getMasterOtpSettings();
+      if (master.enabled && master.code) {
+        if (master.mode === "master_only") {
+          return code === master.code ? { ok: true, source: "master" } : { ok: false };
+        }
+        if (master.mode === "master_plus_otp" && code === master.code) {
+          return { ok: true, source: "master" };
+        }
+      }
+      const issued = loadOtpCodes();
+      const match = issued.find(entry => entry.code === code && entry.type === mode && !entry.disabled);
+      if (!match) return { ok: false };
+      if (match.usedAt && !match.reusable) return { ok: false };
+      if (!match.reusable) {
+        match.usedAt = Date.now();
+        saveOtpCodes(issued);
+      }
+      return { ok: true, source: "issued" };
+    }
+
+    function matchSystemKey(code, mode) {
+      const list = loadSystemKeys();
+      return list.some(entry => entry.code === code && entry.mode === mode);
+    }
+
+    function isExpired(expiresAt) {
+      if (!expiresAt) return false;
+      const expiry = new Date(expiresAt);
+      if (Number.isNaN(expiry.getTime())) return false;
+      return Date.now() > expiry.getTime();
+    }
+
+    function validatePasswordEntry(value) {
+      if (!value) {
+        return { ok: true };
+      }
+      const mode = getAuthMode();
+      const fallbackAllowedModes = ["password_only", "password_then_biometric", "multi_password", "instant_issue_fixed_biometric", "csv_fixed_pw"];
+      if (isSixDigitNumeric(value) && fallbackAllowedModes.includes(mode) && findUserByFallbackPassword(value)) {
+        return { ok: true };
+      }
+      if (isTestModeActive()) {
+        return { ok: true };
+      }
+      const passwordConfig = getPasswordConfig();
+      const fixedConfig = getFixedPasswordConfig();
+      const multiConfig = getMultiPasswordConfig();
+      const otpSettings = getOtpSettings();
+      if (mode === "password_only" || mode === "password_then_biometric") {
+        if (isExpired(passwordConfig.expiresAt)) return { ok: false, message: "パスワードの有効期限が切れています。" };
+        return { ok: value === passwordConfig.password, message: "パスワードが一致しません。" };
+      }
+      if (mode === "instant_issue_fixed_biometric") {
+        if (isExpired(fixedConfig.expiresAt)) return { ok: false, message: "固定パスワードの有効期限が切れています。" };
+        return { ok: value === fixedConfig.password, message: "固定パスワードが一致しません。" };
+      }
+      if (mode === "csv_fixed_pw") {
+        if (isExpired(fixedConfig.expiresAt)) return { ok: false, message: "固定パスワードの有効期限が切れています。" };
+        return { ok: value === fixedConfig.password, message: "固定パスワードが一致しません。" };
+      }
+      if (mode === "sms_auth") {
+        if (isExpired(otpSettings.expiresAt)) return { ok: false, message: "ワンタイムパスワードの有効期限が切れています。" };
+        const otpMatch = matchOtpCode(value, "one_time").ok;
+        return otpMatch ? { ok: true } : { ok: false, message: "ワンタイムパスワードが一致しません。" };
+      }
+      if (mode === "multi_password") {
+        const list = Array.isArray(multiConfig.passwords) ? multiConfig.passwords : [];
+        return { ok: list.includes(value), message: "パスワードが一致しません。" };
+      }
+      if (mode === "fixed_and_otp") {
+        if (!isExpired(fixedConfig.expiresAt) && value === fixedConfig.password) {
+          return { ok: true };
+        }
+        const otpMatch = matchOtpCode(value, "one_time").ok;
+        if (!otpMatch) return { ok: false, message: "固定/ワンタイムパスワードが一致しません。" };
+        return { ok: true };
+      }
+      if (mode === "otp_only") {
+        if (isExpired(otpSettings.expiresAt)) return { ok: false, message: "ワンタイムパスワードの有効期限が切れています。" };
+        const otpMatch = matchOtpCode(value, "one_time").ok;
+        return otpMatch ? { ok: true } : { ok: false, message: "ワンタイムパスワードが一致しません。" };
+      }
+      if (fixedConfig.password && value === fixedConfig.password) {
+        return { ok: true };
+      }
+      return { ok: false, message: "入力が無効です。" };
+    }
+
+    otpSubmit.addEventListener("click", async () => {
+      const code = (otpCodeInput.value || "").trim();
+      const otpLength = getOtpLength();
+      if (!new RegExp(`^[0-9]{${otpLength}}$`).test(code)) {
+        otpStatus.textContent = `${otpLength}桁のワンタイムコードを入力してください。`;
+        return;
+      }
+      const mode = getAuthMode();
+      if (mode === "otp_ticket") {
+        const fixedCode = (fixedCodeInput.value || "").trim();
+        const fixedLength = getFixedCodeLength();
+        if (!new RegExp(`^[0-9]{${fixedLength}}$`).test(fixedCode)) {
+          otpStatus.textContent = `${fixedLength}桁の固定番号を入力してください。`;
+          return;
+        }
+        const fixedList = loadFixedKeys();
+        if (fixedList.length && !fixedList.includes(fixedCode)) {
+          otpStatus.textContent = "固定番号が一致しません。";
+          return;
+        }
+      }
+
+      let isValid = false;
+      let handledByMode = false;
+      if (mode === "master_otp") {
+        const master = getMasterOtpSettings();
+        isValid = master.enabled && master.code === code;
+        handledByMode = true;
+      } else if (mode === "otp_once") {
+        isValid = matchOtpCode(code, "one_time").ok;
+        handledByMode = true;
+      } else if (mode === "otp_system") {
+        isValid = matchOtpCode(code, "system").ok || matchSystemKey(code, "system");
+        handledByMode = true;
+      } else if (mode === "otp_system_reverse") {
+        isValid = matchOtpCode(code, "system_reverse").ok || matchSystemKey(code, "system_reverse");
+        handledByMode = true;
+      } else if (mode === "otp_ticket") {
+        isValid = matchOtpCode(code, "ticket").ok;
+        handledByMode = true;
+      } else if (mode === "otp_fingerprint") {
+        isValid = matchOtpCode(code, "one_time").ok || matchOtpCode(code, "system").ok;
+        handledByMode = true;
+      }
+
+      // Fallback: if the current auth mode is not one of the OTP-specific modes
+      // (e.g. "otp_only") or did not validate successfully, try generic OTP validation
+      if (!isValid && !handledByMode) {
+        const master = getMasterOtpSettings();
+        if (master.enabled && master.code === code) {
+          isValid = true;
+        } else if (
+          matchOtpCode(code, "one_time").ok ||
+          matchOtpCode(code, "system").ok ||
+          matchOtpCode(code, "system_reverse").ok ||
+          matchOtpCode(code, "ticket").ok
+        ) {
+          isValid = true;
+        }
+      }
+      if (!isValid) {
+        otpStatus.textContent = "ワンタイムコードが一致しません。";
+        return;
+      }
+
+      closeModal(otpModal);
+      if (mode === "otp_fingerprint") {
+        await startInitialFingerprint();
+        return;
+      }
+
+      humanStatus.textContent = "初回登録を開始します。";
+      updateHumanCheckUI();
+      openUserEnrollModal("biometric_enroll");
+    });
+
+    function loadAdminUsers() {
+      try {
+        const raw = localStorage.getItem(ADMIN_USERS_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (error) {
+        // ignore
+      }
+      const defaults = [
+        {
+          id: "admin",
+          password: "admin01",
+          role: "master",
+          permissions: [...MASTER_PERMISSIONS]
+        }
+      ];
+      localStorage.setItem(ADMIN_USERS_KEY, JSON.stringify(defaults));
+      return defaults;
+    }
+
+    function loadAdminDevices() {
+      try {
+        const raw = localStorage.getItem(ADMIN_DEVICES_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveAdminDevices(devices) {
+      localStorage.setItem(ADMIN_DEVICES_KEY, JSON.stringify(devices));
+    }
+
+    function registerAdminDevice(label = "端末") {
+      const devices = loadAdminDevices();
+      const id = `dev-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      devices.push({ id, label, addedAt: Date.now() });
+      saveAdminDevices(devices);
+    }
+
+    adminCancel.addEventListener("click", () => closeModal(adminModal));
+    adminModal.addEventListener("click", (event) => {
+      if (event.target === adminModal) closeModal(adminModal);
+    });
+
+    adminBiometricCancel?.addEventListener("click", () => {
+      pendingAdminBiometric = null;
+      closeModal(adminBiometricModal);
+    });
+    adminBiometricModal?.addEventListener("click", (event) => {
+      if (event.target === adminBiometricModal) {
+        pendingAdminBiometric = null;
+        closeModal(adminBiometricModal);
+      }
+    });
+
+    enrollChoiceTrigger?.addEventListener("click", () => openModal(enrollChoiceModal));
+    enrollChoiceCancel?.addEventListener("click", () => closeModal(enrollChoiceModal));
+    enrollChoiceModal?.addEventListener("click", (event) => {
+      if (event.target === enrollChoiceModal) closeModal(enrollChoiceModal);
+    });
+    enrollChoicePasskey?.addEventListener("click", () => {
+      closeModal(enrollChoiceModal);
+      openUserEnrollModal("biometric_enroll");
+    });
+    enrollChoicePassword?.addEventListener("click", () => {
+      closeModal(enrollChoiceModal);
+      openUserEnrollModal("fallback_enroll");
+    });
+
+    userEnrollCancel?.addEventListener("click", () => closeModal(userEnrollModal));
+    userEnrollModal?.addEventListener("click", (event) => {
+      if (event.target === userEnrollModal) closeModal(userEnrollModal);
+    });
+    userEnrollSubmit?.addEventListener("click", async () => {
+      const id = (userEnrollId?.value || "").trim();
+      if (!id) {
+        if (userEnrollStatus) {
+          userEnrollStatus.textContent = "ログインIDを入力してください。";
+        }
+        return;
+      }
+      if (userEnrollMode === "biometric_enroll") {
+        if (userEnrollStatus) {
+          userEnrollStatus.textContent = "生体情報登録を開始します。";
+        }
+        const enrolled = await startUserBiometricEnrollment(id, userEnrollStatus);
+        if (!enrolled) return;
+        isHumanVerified = true;
+        sessionStorage.setItem("enchoHumanVerified", "true");
+        closeModal(userEnrollModal);
+        setStatus("登録が完了しました。ログインします。");
+        goToLastPage(id, "biometric_enroll");
+        updateInstantIssueTestModeGuidance();
+        return;
+      }
+      const fallbackPassword = (userEnrollPassword?.value || "").trim();
+      if (!fallbackPassword) {
+        if (userEnrollStatus) {
+          userEnrollStatus.textContent = "認証パスワードを入力してください。";
+        }
+        return;
+      }
+      if (!isValidFallbackPassword(fallbackPassword)) {
+        if (userEnrollStatus) {
+          userEnrollStatus.textContent = "認証パスワードは4〜6桁の数字で入力してください。";
+        }
+        return;
+      }
+      const existing = getUserFallbackPassword(id);
+      if (userEnrollMode === "fallback_enroll") {
+        if (existing) {
+          if (userEnrollStatus) {
+            userEnrollStatus.textContent = "このログインIDは登録済みです。";
+          }
+          return;
+        }
+        setUserFallbackPassword(id, fallbackPassword);
+        isHumanVerified = true;
+        sessionStorage.setItem("enchoHumanVerified", "true");
+        closeModal(userEnrollModal);
+        setStatus("登録が完了しました。ログインします。");
+        goToLastPage(id, "fallback_enroll");
+        updateInstantIssueTestModeGuidance();
+        return;
+      }
+      if (!existing || existing !== fallbackPassword) {
+        if (userEnrollStatus) {
+          userEnrollStatus.textContent = "認証パスワードが一致しません。";
+        }
+        return;
+      }
+      isHumanVerified = true;
+      sessionStorage.setItem("enchoHumanVerified", "true");
+      closeModal(userEnrollModal);
+      setStatus("認証が完了しました。ログインします。");
+      goToLastPage(id, "fallback_verify");
+      updateInstantIssueTestModeGuidance();
+    });
+
+    function openUserEnrollModal(mode) {
+      userEnrollMode = mode;
+      if (userEnrollId) userEnrollId.value = "";
+      if (userEnrollPassword) userEnrollPassword.value = "";
+      if (userEnrollPasswordGroup) {
+        userEnrollPasswordGroup.classList.toggle("hidden", mode === "biometric_enroll");
+      }
+      if (userEnrollSpinner) {
+        userEnrollSpinner.classList.toggle("hidden", mode !== "biometric_enroll");
+      }
+      if (userEnrollNotice) {
+        if (mode === "biometric_enroll") {
+          userEnrollNotice.textContent = "ID登録をタップすると生体認証ウィンドウが表示されます。";
+        } else if (mode === "fallback_enroll") {
+          userEnrollNotice.textContent = "ID登録をタップすると認証パスワードを登録します。";
+        } else {
+          userEnrollNotice.textContent = "認証ボタンでログインします。";
+        }
+      }
+      if (userEnrollSubmit) {
+        userEnrollSubmit.textContent = mode === "fallback_verify" ? "認証" : "ID登録";
+      }
+      if (userEnrollStatus) {
+        userEnrollStatus.textContent = mode === "biometric_enroll" ? "ログインIDを入力してください。" : "ログインIDと認証パスワードを入力してください。";
+      }
+      const title = document.getElementById("userEnrollTitle");
+      if (title) {
+        title.textContent = mode === "fallback_verify" ? "認証" : "初回登録";
+      }
+      openModal(userEnrollModal);
+    }
+
+    masterChangeCancel.addEventListener("click", () => closeModal(masterChangeModal));
+    masterChangeModal.addEventListener("click", (event) => {
+      if (event.target === masterChangeModal) closeModal(masterChangeModal);
+    });
+    masterChangeSubmit.addEventListener("click", async () => {
+      const nextId = (masterIdInput?.value || "").trim();
+      const nextPw = (masterNextPw.value || "").trim();
+      if (!nextId) {
+        masterChangeStatus.textContent = "管理者IDを入力してください。";
+        return;
+      }
+      if (!nextPw) {
+        masterChangeStatus.textContent = "新しいPWを入力してください。";
+        return;
+      }
+      masterChangeStatus.textContent = "生体認証を開始します。";
+      const verified = await startFingerprintAuth(masterChangeStatus);
+      if (!verified) return;
+      const users = loadAdminUsers();
+      const adminUser = users.find(user => user.id === "admin");
+      const hasConflict = users.some(user => user.id === nextId && user.id !== "admin");
+      if (hasConflict) {
+        masterChangeStatus.textContent = "この管理者IDは既に使用されています。別のIDを入力してください。";
+        return;
+      }
+      if (adminUser) {
+        adminUser.id = nextId;
+        adminUser.password = nextPw;
+        adminUser.role = "master";
+        adminUser.permissions = [...MASTER_PERMISSIONS];
+      }
+      const filtered = users.filter(user => user.id !== "admin");
+      if (adminUser) {
+        filtered.push(adminUser);
+      } else {
+        filtered.push({ id: nextId, password: nextPw, role: "master", permissions: [...MASTER_PERMISSIONS] });
+      }
+      saveAdminUsers(filtered);
+      localStorage.setItem(MASTER_PASSWORD_CHANGED_KEY, "true");
+      closeModal(masterChangeModal);
+      finalizeAdminLogin(nextId, adminUser || { role: "master" });
+    });
+
+    function finalizeAdminLogin(id, match) {
+      const devices = loadAdminDevices();
+      if (!devices.length) {
+        registerAdminDevice("初回登録端末");
+      }
+      session?.setActiveAdmin?.(id);
+      localStorage.setItem(ACTIVE_ADMIN_ROLE_KEY, match.role || "admin");
+      closeModal(adminModal);
+      window.location.href = "admin-dashboard.html";
+    }
+
+    function openMasterChangeModal() {
+      masterIdInput.value = "";
+      masterNextPw.value = "";
+      masterChangeStatus.textContent = "初回ログインのためID入力・全管理権限付与・有効期限なし・生体情報登録が必要です。";
+      openModal(masterChangeModal);
+    }
+
+    function openAdminBiometricModal(id, match, autoStart = false) {
+      pendingAdminBiometric = { id, match };
+      if (adminBiometricId) {
+        adminBiometricId.textContent = `対象ID: ${id}`;
+      }
+      if (adminBiometricStatus) {
+        adminBiometricStatus.textContent = "生体情報を登録します。";
+      }
+      openModal(adminBiometricModal);
+      if (autoStart) {
+        requestAnimationFrame(() => {
+          runAdminEnrollmentFlow();
+        });
+      }
+    }
+
+    function isMasterFirstLogin(id) {
+      return id === "admin";
+    }
+
+    async function runAdminBiometricFlow(id, match) {
+      adminStatus.textContent = "生体認証を開始します。";
+      const verified = await startAdminBiometricLogin(id, adminStatus);
+      if (!verified) return;
+      finalizeAdminLogin(id, match);
+    }
+
+    async function runAdminEnrollmentFlow() {
+      if (!pendingAdminBiometric) return;
+      const { id, match } = pendingAdminBiometric;
+      if (adminBiometricStatus) {
+        adminBiometricStatus.textContent = "生体情報登録を開始します。";
+      }
+      const enrolled = await startAdminBiometricEnrollment(id, adminBiometricStatus);
+      if (!enrolled) return;
+      pendingAdminBiometric = null;
+      closeModal(adminBiometricModal);
+      finalizeAdminLogin(id, match);
+    }
+
+    adminBiometricSubmit?.addEventListener("click", async () => {
+      await runAdminEnrollmentFlow();
+    });
+
+    adminSubmit.addEventListener("click", async () => {
+      const id = (adminIdInput.value || "").trim();
+      if (!id) {
+        adminStatus.textContent = "管理者IDを入力してください。";
+        return;
+      }
+      const admins = loadAdminUsers();
+      let match = admins.find(user => user.id === id);
+      if (!match && id === "admin") {
+        const adminUser = { id: "admin", password: "admin01", role: "master", permissions: [...MASTER_PERMISSIONS] };
+        admins.push(adminUser);
+        saveAdminUsers(admins);
+        match = adminUser;
+      }
+      if (!match) {
+        adminStatus.textContent = "IDが違います。";
+        return;
+      }
+      if (!isBiometricSupported()) {
+        adminStatus.textContent = "この端末は生体認証未対応のため、IDのみでログインします。";
+        finalizeAdminLogin(id, match);
+        return;
+      }
+      const credentialId = getAdminCredentialId(id);
+      if (!credentialId) {
+        openAdminBiometricModal(id, match, true);
+        return;
+      }
+      await runAdminBiometricFlow(id, match);
+    });
+
+    function shouldForceMasterSetup() {
+      const admins = loadAdminUsers();
+      return !admins.length || !admins.some(user => user.role === "master");
+    }
+
+    function isForceMasterSetupEnabled() {
+      return localStorage.getItem(FORCE_MASTER_SETUP_ENABLED_KEY) === "true";
+    }
+
+    function markForceMasterSetupSeen() {
+      sessionStorage.setItem(FORCE_MASTER_SETUP_SEEN_KEY, "true");
+    }
+
+    function shouldShowForcedMasterSetup() {
+      if (!isForceMasterSetupEnabled()) return false;
+      return sessionStorage.getItem(FORCE_MASTER_SETUP_SEEN_KEY) !== "true";
+    }
+
+    function refreshForceInitTrigger() {
+      if (!forceInitTrigger) return;
+      if (isForceMasterSetupEnabled()) {
+        forceInitTrigger.classList.remove("hidden");
+        adminStatus.textContent = "";
+      } else {
+        forceInitTrigger.classList.add("hidden");
+      }
+    }
+
+    if (forceInitTrigger) {
+      forceInitTrigger.addEventListener("click", () => {
+        if (!confirm("管理者データを初期化し、マスター登録をやり直しますか？")) {
+          return;
+        }
+        localStorage.removeItem(ADMIN_USERS_KEY);
+        localStorage.removeItem(ADMIN_DEVICES_KEY);
+        localStorage.removeItem(ACTIVE_ADMIN_ROLE_KEY);
+        localStorage.removeItem(MASTER_PASSWORD_CHANGED_KEY);
+        localStorage.removeItem(FORCE_MASTER_SETUP_SEEN_KEY);
+        session?.clearActiveAdmin?.();
+        adminStatus.textContent = "管理者データを初期化しました。マスター登録を行ってください。";
+        markForceMasterSetupSeen();
+        openMasterChangeModal();
+      });
+    }
+
+    refreshForceInitTrigger();
+
+    if (shouldForceMasterSetup() || shouldShowForcedMasterSetup()) {
+      markForceMasterSetupSeen();
+      openMasterChangeModal();
+    }
+
+  </script>
+</body>
+</html>

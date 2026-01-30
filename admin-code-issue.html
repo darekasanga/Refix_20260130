@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EnCho-エンチョ- | 管理コード発行</title>
+  <script src="theme.js"></script>
+  <script>
+    window.EnchoTheme?.applyCurrentTheme(document);
+  </script>
+  <style>
+    :root{
+      --panel:#0f172a;
+      --panel-2:#111827;
+      --border:#1f2937;
+      --text:#e2e8f0;
+      --sub:#cbd5e1;
+      --accent:#8b5cf6;
+      --accent-2:#22d3ee;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      padding:24px;
+      font-family:"Noto Sans JP","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+      background:radial-gradient(circle at 18% 18%, rgba(139,92,246,.15), transparent 42%), radial-gradient(circle at 78% 12%, rgba(34,211,238,.12), transparent 40%), linear-gradient(180deg,#0b1021,#0f172a);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .card{
+      width:min(1080px, 96vw);
+      background:linear-gradient(160deg, rgba(255,255,255,.06), rgba(255,255,255,.03)), var(--panel-2);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:26px 24px;
+      box-shadow:0 18px 44px rgba(0,0,0,.35), 0 12px 28px rgba(139,92,246,.18);
+    }
+    .headline{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .logo{
+      width:62px;height:62px;border-radius:16px;
+      background:conic-gradient(from 180deg, #e0e7ff, #e0f2fe, #fcd34d, #fecdd3, #e0e7ff);
+      display:flex;align-items:center;justify-content:center;
+      color:#1f1b2d;font-weight:900;font-size:26px;
+      box-shadow:0 10px 26px rgba(0,0,0,.3);
+    }
+    h1{margin:0;font-size:24px;letter-spacing:.02em;}
+    p{margin:6px 0 0;color:var(--sub);}
+    .muted{color:var(--sub);font-size:13px;}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:16px;}
+    .section{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      background:rgba(255,255,255,.03);
+      box-shadow:0 10px 26px rgba(0,0,0,.24);
+    }
+    .section h2{margin:0 0 6px;font-size:18px;}
+    label{font-weight:800;font-size:13px;color:var(--sub);}
+    input{
+      width:100%;
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      font:inherit;
+      transition:border-color .2s, box-shadow .2s, background .2s;
+      margin-top:6px;
+    }
+    input:focus{
+      outline:none;
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(139,92,246,.28);
+      background:rgba(255,255,255,.08);
+    }
+    button{
+      padding:12px 16px;
+      border-radius:12px;
+      border:none;
+      background:linear-gradient(120deg,var(--accent),var(--accent-2));
+      color:#fff;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 12px 30px rgba(139,92,246,.32);
+      transition:transform .2s, box-shadow .2s, filter .2s;
+      margin-top:10px;
+    }
+    button.secondary{
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      box-shadow:none;
+      border:1px solid var(--border);
+    }
+    button:hover{transform:translateY(-1px);filter:brightness(1.02);}
+    button:active{transform:translateY(0);}
+    .status{
+      margin-top:8px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
+      color:var(--sub);
+      font-weight:800;
+      min-height:44px;
+    }
+    .status.error{color:#fecdd3;border-color:rgba(248,113,113,.35);}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:12px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      font-weight:800;color:var(--text);
+    }
+    .code-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(34,211,238,.12);
+      border:1px solid rgba(34,211,238,.32);
+      color:#bae6fd;
+      font-weight:900;
+      margin-top:8px;
+      word-break:break-all;
+    }
+    .flex-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .links{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;}
+    .link-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      color:var(--text);
+      text-decoration:none;
+      font-weight:800;
+      background:rgba(255,255,255,.04);
+    }
+    .warn-box{
+      margin-top:8px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(248,113,113,.25);
+      background:rgba(248,113,113,.1);
+      color:#fecdd3;
+      font-weight:800;
+      font-size:13px;
+    }
+    .helper{font-size:12px;color:var(--sub);margin-top:4px;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="headline">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="logo">管</div>
+        <div>
+          <h1>管理コード発行ツール</h1>
+          <p>FastAPI の管理コードエンドポイントにブラウザからリクエストします。</p>
+        </div>
+      </div>
+      <div class="pill" id="apiBaseLabel">API: http://127.0.0.1:8000</div>
+    </div>
+
+    <div class="links">
+      <a class="link-btn" href="admin-login.html">← 管理ログイン</a>
+      <a class="link-btn" href="admin-dashboard.html">管理ダッシュボード</a>
+      <a class="link-btn" href="index.html">トップ</a>
+    </div>
+
+    <div class="section" style="margin-top:14px;">
+      <h2>接続先 API</h2>
+      <p class="muted">FastAPI を <code>uvicorn app:app --reload</code> で起動し、このブラウザから POST します。</p>
+      <label for="apiBaseInput">ベースURL</label>
+      <div class="flex-row">
+        <input id="apiBaseInput" type="url" placeholder="http://127.0.0.1:8000" aria-label="APIのベースURL">
+        <button type="button" class="secondary" id="saveApiBase">URLを保存</button>
+      </div>
+      <div class="helper">URL はローカルストレージに保存されます。</div>
+    </div>
+
+    <div class="grid">
+      <section class="section">
+        <h2>① マスター管理コードの初期化</h2>
+        <p class="muted">master_admin が存在しない初回のみ実行してください。</p>
+        <label for="masterInitCode">マスター管理コード</label>
+        <input id="masterInitCode" type="password" autocomplete="one-time-code" placeholder="安全なコードを入力">
+        <div class="helper">未入力の場合は <code>administration012345</code> で初期化します。</div>
+        <button type="button" id="initMasterBtn">マスターを作成</button>
+        <div class="warn-box">既に master_admin がいる場合は 400 が返ります。</div>
+        <div id="initStatus" class="status"></div>
+      </section>
+
+      <section class="section">
+        <h2>② 新しい管理コードを発行</h2>
+        <p class="muted">master_admin のコードを issuer として送信します。</p>
+        <label for="issuerCode">発行者コード（マスター）</label>
+        <input id="issuerCode" type="password" autocomplete="one-time-code" placeholder="例: master-code-xxx">
+        <div class="helper">マスターが未入力なら <code>administration012345</code> を使います。</div>
+        <button type="button" id="issueBtn">新しいコードを発行</button>
+        <div id="issueStatus" class="status">発行結果がここに表示されます。</div>
+        <div id="issuedCode" class="code-badge" style="display:none;"></div>
+      </section>
+
+      <section class="section">
+        <h2>③ コードを検証</h2>
+        <p class="muted">入力したコードの有効性・ロールを確認します。</p>
+        <label for="validateCode">検証するコード</label>
+        <input id="validateCode" type="text" autocomplete="one-time-code" placeholder="encho-admin-01 など">
+        <button type="button" id="validateBtn">検証する</button>
+        <div id="validateStatus" class="status">未検証です。</div>
+      </section>
+
+      <section class="section">
+        <h2>④ コードを無効化</h2>
+        <p class="muted">master_admin のみ実行可能です。</p>
+        <label for="deactivateActor">実行者コード（マスター）</label>
+        <input id="deactivateActor" type="password" autocomplete="one-time-code" placeholder="master_admin のコード">
+        <label for="deactivateTarget">無効化するコード</label>
+        <input id="deactivateTarget" type="text" autocomplete="one-time-code" placeholder="無効化対象のコード">
+        <button type="button" id="deactivateBtn">コードを無効化</button>
+        <div id="deactivateStatus" class="status">実行ログがここに表示されます。</div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const apiBaseInput = document.getElementById("apiBaseInput");
+    const apiBaseLabel = document.getElementById("apiBaseLabel");
+    const saveApiBaseBtn = document.getElementById("saveApiBase");
+    const masterInitCodeInput = document.getElementById("masterInitCode");
+    const initStatus = document.getElementById("initStatus");
+    const initMasterBtn = document.getElementById("initMasterBtn");
+    const issuerCodeInput = document.getElementById("issuerCode");
+    const issueStatus = document.getElementById("issueStatus");
+    const issuedCode = document.getElementById("issuedCode");
+    const issueBtn = document.getElementById("issueBtn");
+    const validateCodeInput = document.getElementById("validateCode");
+    const validateStatus = document.getElementById("validateStatus");
+    const validateBtn = document.getElementById("validateBtn");
+    const deactivateActorInput = document.getElementById("deactivateActor");
+    const deactivateTargetInput = document.getElementById("deactivateTarget");
+    const deactivateStatus = document.getElementById("deactivateStatus");
+    const deactivateBtn = document.getElementById("deactivateBtn");
+
+    const STORAGE_KEY = "encho_manage_api_base_v1";
+    const MASTER_HINT_KEY = "encho_master_hint_v1";
+    const DEFAULT_MASTER_CODE = "administration012345";
+
+    function loadApiBase(){
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored || "http://127.0.0.1:8000";
+    }
+
+    function saveApiBase(url){
+      const trimmed = (url || "").trim();
+      if(!trimmed) return;
+      localStorage.setItem(STORAGE_KEY, trimmed);
+      renderApiBase(trimmed);
+    }
+
+    function renderApiBase(url){
+      if(apiBaseInput) apiBaseInput.value = url;
+      if(apiBaseLabel) apiBaseLabel.textContent = `API: ${url}`;
+    }
+
+    function setStatus(el, message, isError = false){
+      if(!el) return;
+      el.textContent = message;
+      el.classList.toggle("error", !!isError);
+    }
+
+    function buildUrl(path){
+      const base = (apiBaseInput?.value || loadApiBase()).trim().replace(/\/+$/, "");
+      const suffix = path.startsWith("/") ? path : `/${path}`;
+      return `${base}${suffix}`;
+    }
+
+    async function postJson(path, body){
+      const res = await fetch(buildUrl(path), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body || {})
+      });
+      const data = await res.json().catch(()=>null);
+      if(!res.ok){
+        const detail = data?.detail || res.statusText || "API error";
+        throw new Error(detail);
+      }
+      return data;
+    }
+
+    function copyText(text){
+      if(!navigator?.clipboard) return;
+      navigator.clipboard.writeText(text).catch(()=>{});
+    }
+
+    function ensureDefaultCodes(){
+      if(masterInitCodeInput && !masterInitCodeInput.value){
+        masterInitCodeInput.value = DEFAULT_MASTER_CODE;
+      }
+      if(issuerCodeInput){
+        const saved = localStorage.getItem(MASTER_HINT_KEY);
+        if(!issuerCodeInput.value){
+          issuerCodeInput.value = saved || DEFAULT_MASTER_CODE;
+        }
+      }
+    }
+
+    initMasterBtn?.addEventListener("click", async ()=>{
+      let code = (masterInitCodeInput?.value || "").trim();
+      if(!code){
+        code = DEFAULT_MASTER_CODE;
+        if(masterInitCodeInput) masterInitCodeInput.value = code;
+      }
+      if(!code){
+        setStatus(initStatus, "マスター管理コードを入力してください。", true);
+        return;
+      }
+      setStatus(initStatus, "送信中...", false);
+      try{
+        const data = await postJson("/init-master", { code });
+        setStatus(initStatus, `マスターを作成しました (ID: ${data?.id ?? "-"})。`, false);
+        localStorage.setItem(MASTER_HINT_KEY, code);
+        if(issuerCodeInput) issuerCodeInput.value = code;
+        ensureDefaultCodes();
+      }catch(err){
+        setStatus(initStatus, `初期化に失敗しました: ${err.message || err}`, true);
+      }
+    });
+
+    issueBtn?.addEventListener("click", async ()=>{
+      const issuer = (issuerCodeInput?.value || localStorage.getItem(MASTER_HINT_KEY) || DEFAULT_MASTER_CODE).trim();
+      if(!issuer){
+        setStatus(issueStatus, "マスター管理コードを入力してください。", true);
+        return;
+      }
+      setStatus(issueStatus, "発行中...", false);
+      issuedCode.style.display = "none";
+      try{
+        const data = await postJson("/codes/issue", { issuer_code: issuer });
+        const code = data?.admin_code || "(不明)";
+        setStatus(issueStatus, `新しいコードを発行しました (ID: ${data?.id ?? "-"})。`, false);
+        issuedCode.textContent = code;
+        issuedCode.style.display = "inline-flex";
+        copyText(code);
+        localStorage.setItem(MASTER_HINT_KEY, issuer);
+        ensureDefaultCodes();
+      }catch(err){
+        setStatus(issueStatus, `発行に失敗しました: ${err.message || err}`, true);
+      }
+    });
+
+    validateBtn?.addEventListener("click", async ()=>{
+      const code = (validateCodeInput?.value || "").trim();
+      if(!code){
+        setStatus(validateStatus, "検証するコードを入力してください。", true);
+        return;
+      }
+      setStatus(validateStatus, "検証中...", false);
+      try{
+        const data = await postJson("/codes/validate", { code });
+        if(data?.is_valid){
+          const activeText = data.is_active ? "有効" : "無効";
+          setStatus(validateStatus, `有効なコードです。ロール: ${data.role || "-"}, 状態: ${activeText}。`, false);
+        }else{
+          setStatus(validateStatus, "コードが無効です。", true);
+        }
+      }catch(err){
+        setStatus(validateStatus, `検証に失敗しました: ${err.message || err}`, true);
+      }
+    });
+
+    deactivateBtn?.addEventListener("click", async ()=>{
+      const actor = (deactivateActorInput?.value || "").trim();
+      const target = (deactivateTargetInput?.value || "").trim();
+      if(!actor || !target){
+        setStatus(deactivateStatus, "実行者コードと対象コードを入力してください。", true);
+        return;
+      }
+      setStatus(deactivateStatus, "送信中...", false);
+      try{
+        const data = await postJson("/codes/deactivate", { actor_code: actor, target_code: target });
+        const activeText = data?.is_active ? "有効" : "無効化済み";
+        setStatus(deactivateStatus, `更新しました。状態: ${activeText} (ID: ${data?.id ?? "-"})。`, false);
+      }catch(err){
+        setStatus(deactivateStatus, `無効化に失敗しました: ${err.message || err}`, true);
+      }
+    });
+
+    saveApiBaseBtn?.addEventListener("click", ()=>{
+      const nextBase = apiBaseInput?.value || "";
+      if(!nextBase.trim()){
+        alert("ベースURLを入力してください。");
+        return;
+      }
+      saveApiBase(nextBase);
+    });
+
+    const initialBase = loadApiBase();
+    renderApiBase(initialBase);
+    const masterHint = localStorage.getItem(MASTER_HINT_KEY) || "";
+    if(masterHint && issuerCodeInput){
+      issuerCodeInput.value = masterHint;
+    }
+    ensureDefaultCodes();
+  </script>
+</body>
+</html>

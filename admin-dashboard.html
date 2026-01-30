@@ -1,0 +1,4134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EnCho-エンチョ- | 管理ダッシュボード</title>
+  <script src="theme.js"></script>
+  <script>
+    window.EnchoTheme?.applyCurrentTheme(document);
+  </script>
+  <script src="session.js"></script>
+  <style>
+    :root{
+      --accent:#8b5cf6;
+      --accent-2:#22d3ee;
+      --panel:#0f172a;
+      --panel-2:#111827;
+      --border:#1f2937;
+      --text:#f8fafc;
+      --sub:#e2e8f0;
+      --ui-scale:1;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family:"Noto Sans JP","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+      background:var(--dash-bg);
+      color:var(--dash-text);
+      min-height:100vh;
+      zoom: var(--ui-scale);
+    }
+    .container{
+      max-width:1080px;
+      margin:0 auto;
+      padding:26px 18px 42px;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .layout{
+      display:grid;
+      grid-template-columns:240px 1fr;
+      gap:16px;
+    }
+    @media (max-width: 900px){
+      .layout{grid-template-columns:1fr;}
+    }
+    .side-nav{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      position:sticky;
+      top:18px;
+      align-self:flex-start;
+    }
+    .nav-btn{
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid var(--dash-border);
+      background:rgba(255,255,255,.04);
+      color:var(--dash-text);
+      font-weight:800;
+      cursor:pointer;
+      text-align:left;
+    }
+    .line-button{
+      background:#06c755;
+      border-color:#06c755;
+      color:#fff;
+    }
+    .nav-btn.line-button.active{
+      background:#06c755;
+      border-color:#06c755;
+      color:#fff;
+    }
+    .nav-btn.active{
+      background:linear-gradient(120deg,var(--dash-accent),var(--dash-accent-2));
+      color:#0b1021;
+      border-color:transparent;
+    }
+    .page-section{display:none;}
+    .page-section.active{display:block;}
+    h1{margin:0;font-size:24px;letter-spacing:.02em;}
+    .muted{color:var(--dash-sub);font-size:13px;}
+    .small-muted{color:var(--dash-sub);font-size:12px;}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:12px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      font-weight:800;
+      color:var(--dash-text);
+    }
+    .pill span{color:var(--dash-sub);font-size:12px;}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 12px;border-radius:12px;
+      border:1px solid var(--dash-border);
+      background:linear-gradient(120deg,var(--dash-accent),var(--dash-accent-2));
+      color:#0b1021;
+      font-weight:900;
+      text-decoration:none;
+      box-shadow:var(--dash-glow);
+      cursor:pointer;
+    }
+    .btn.secondary{
+      background:rgba(255,255,255,.05);
+      color:var(--dash-text);
+      box-shadow:none;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+      gap:14px;
+      margin-top:18px;
+    }
+    .menu-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+    .menu-tile{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--dash-border);
+      background:rgba(255,255,255,.04);
+      color:var(--dash-text);
+      text-align:left;
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .2s ease, border-color .2s ease;
+    }
+    .menu-tile span{
+      font-size:12px;
+      color:var(--dash-sub);
+      font-weight:600;
+    }
+    .menu-tile:hover{
+      transform:translateY(-2px);
+      border-color:rgba(148,163,184,.6);
+    }
+    .menu-tile.line-button span{
+      color:rgba(255,255,255,.85);
+    }
+    button, a{
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wizard-layout{
+      display:grid;
+      gap:14px;
+    }
+    @media (min-width: 960px){
+      .wizard-layout{
+        grid-template-columns:minmax(0, 1fr) minmax(0, 1.2fr);
+        align-items:start;
+      }
+    }
+    .builder-right{
+      display:grid;
+      gap:12px;
+    }
+    @media (min-width: 960px){
+      .builder-right{
+        grid-template-columns:minmax(0, 1fr) 260px;
+        align-items:start;
+      }
+    }
+    .wizard-controls{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .login-preview{
+      border-radius:16px;
+      border:1px dashed rgba(148,163,184,.4);
+      padding:14px;
+      background:rgba(15,23,42,.35);
+      display:grid;
+      gap:12px;
+      --preview-font-size:16px;
+      --preview-font-family:"Noto Sans JP","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+      --preview-text-color:var(--dash-text);
+      --preview-accent-color:var(--dash-accent);
+      --preview-button-color:var(--dash-accent-2);
+      --preview-icon-size:48px;
+      --preview-item-size:44px;
+      --preview-button-radius:14px;
+      --preview-button-padding:10px 14px;
+      --preview-button-font:14px;
+      font-family:var(--preview-font-family);
+      color:var(--preview-text-color);
+      font-size:var(--preview-font-size);
+    }
+    .login-preview .preview-card{
+      display:grid;
+      gap:10px;
+      padding:14px;
+      border-radius:16px;
+      border:1px solid rgba(148,163,184,.28);
+      background:rgba(255,255,255,.06);
+      background-image:
+        linear-gradient(to right, rgba(148,163,184,.16) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148,163,184,.16) 1px, transparent 1px);
+      background-size:calc(100% / var(--preview-grid-columns, 2)) 100%, 100% 32px;
+    }
+    .login-preview .preview-header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .login-preview .preview-icon{
+      width:var(--preview-icon-size);
+      height:var(--preview-icon-size);
+      border-radius:50%;
+      background:var(--preview-accent-color);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#0b1021;
+      font-weight:800;
+      font-size:calc(var(--preview-icon-size) * 0.32);
+      flex-shrink:0;
+    }
+    .login-preview .preview-icon.is-spinner{
+      background:transparent;
+      border:3px solid var(--preview-accent-color);
+      border-top-color:transparent;
+      color:transparent;
+      animation:preview-spin 1s linear infinite;
+    }
+    @keyframes preview-spin{
+      from{transform:rotate(0deg);}
+      to{transform:rotate(360deg);}
+    }
+    .login-preview .preview-title{
+      font-weight:800;
+    }
+    .login-preview .preview-muted{
+      color:var(--dash-sub);
+      font-size:0.85em;
+    }
+    .login-preview .preview-actions{
+      display:grid;
+      gap:8px;
+    }
+    .login-preview .preview-button{
+      border:none;
+      background:var(--preview-button-color);
+      color:#0b1021;
+      font-weight:800;
+      border-radius:var(--preview-button-radius);
+      padding:var(--preview-button-padding);
+      font-size:var(--preview-button-font);
+      text-align:center;
+    }
+    .login-preview .preview-input{
+      width:100%;
+      height:var(--preview-item-size);
+      border-radius:12px;
+      border:1px solid rgba(148,163,184,.4);
+      background:rgba(15,23,42,.35);
+      color:var(--preview-text-color);
+      padding:0 10px;
+      font-size:0.9em;
+    }
+    .login-preview .preview-divider{
+      border-top:1px dashed rgba(148,163,184,.4);
+      margin-top:6px;
+      padding-top:6px;
+      font-size:0.85em;
+      color:var(--dash-sub);
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    .login-preview .preview-item{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+      cursor:grab;
+      position:relative;
+      width:100%;
+      padding:8px;
+      border-radius:12px;
+      border:1px dashed rgba(148,163,184,.25);
+      background:rgba(15,23,42,.2);
+    }
+    .login-preview .preview-item:active{
+      cursor:grabbing;
+    }
+    .login-preview .preview-order-controls{
+      position:static;
+      display:flex;
+      gap:4px;
+      z-index:2;
+      justify-content:flex-end;
+    }
+    .login-preview .preview-order-controls button{
+      border:1px solid var(--dash-border);
+      background:var(--dash-panel-2);
+      color:var(--dash-text);
+      border-radius:8px;
+      padding:2px 6px;
+      font-size:11px;
+      cursor:pointer;
+    }
+    .login-preview .preview-order-controls button:active{
+      transform:translateY(1px);
+    }
+    .range-control{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .range-control input[type="range"]{
+      flex:1;
+    }
+    .range-control button{
+      padding:6px 10px;
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,.4);
+      background:rgba(255,255,255,.06);
+      color:var(--dash-text);
+      cursor:pointer;
+    }
+    .range-value{
+      min-width:56px;
+      text-align:right;
+      font-size:12px;
+      color:var(--dash-sub);
+    }
+    .is-hidden{display:none;}
+    .card{
+      border:1px solid var(--dash-border);
+      border-radius:14px;
+      background:linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.04)), var(--dash-panel-2);
+      padding:16px;
+      box-shadow:0 14px 34px rgba(0,0,0,.32);
+      min-height:160px;
+    }
+    #login-settings .card,
+    #login-settings-wizard .card{
+      background:var(--dash-panel-2);
+    }
+    .card h2{margin:0 0 6px;font-size:18px;}
+    .list{display:grid;gap:10px;margin-top:10px;}
+    .list-grid{display:grid;gap:10px;margin-top:10px;}
+    .list-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--dash-border);
+      background:rgba(255,255,255,.03);
+    }
+    .list-item strong{display:block;}
+    .list-item span{color:var(--dash-sub);font-size:12px;}
+    .empty{color:var(--dash-sub);margin:4px 0 0;}
+    .admin-table{
+      display:grid;
+      gap:8px;
+      margin-top:12px;
+    }
+    .admin-table-header,
+    .admin-table-row{
+      display:grid;
+      grid-template-columns:1.2fr 1fr 1.6fr 1fr;
+      gap:12px;
+      align-items:center;
+    }
+    .admin-table-header{
+      font-size:12px;
+      color:var(--dash-sub);
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      padding:0 12px;
+    }
+    .admin-table-row{
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--dash-border);
+      background:rgba(255,255,255,.03);
+    }
+    .admin-table-row.is-editing{
+      border-color:rgba(148,163,184,.6);
+      box-shadow:0 0 0 1px rgba(148,163,184,.18) inset;
+    }
+    .admin-cell{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .admin-label{
+      font-size:11px;
+      color:var(--dash-sub);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .admin-input{
+      width:100%;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,.3);
+      background:rgba(2,6,23,.45);
+      color:var(--dash-text);
+      font-size:13px;
+    }
+    .admin-input:disabled{
+      opacity:.75;
+    }
+    .admin-actions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .admin-table-row .btn{
+      white-space:nowrap;
+    }
+    .chip.primary{
+      background:rgba(139,92,246,.2);
+      border-color:rgba(139,92,246,.45);
+      color:#ddd6fe;
+    }
+    @media (max-width: 720px){
+      .admin-table-header{
+        display:none;
+      }
+      .admin-table-row{
+        grid-template-columns:1fr;
+      }
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:10px;
+      background:rgba(34,211,238,.12);
+      border:1px solid rgba(34,211,238,.28);
+      color:#bae6fd;
+      font-weight:800;
+      font-size:12px;
+      text-decoration:none;
+    }
+    .badge.tertiary{
+      background:rgba(148,163,184,.14);
+      border-color:rgba(148,163,184,.35);
+      color:#e2e8f0;
+    }
+    .badge.warning{
+      background:rgba(251,191,36,.12);
+      border-color:rgba(251,191,36,.35);
+      color:#fde68a;
+    }
+    .btn.small{
+      padding:6px 10px;
+      border-radius:10px;
+      font-size:12px;
+      font-weight:800;
+    }
+    .btn.danger{
+      background:rgba(248,113,113,.18);
+      border-color:rgba(248,113,113,.35);
+      color:#fecaca;
+      box-shadow:none;
+    }
+    .login-management-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .login-management-table{
+      display:grid;
+      gap:8px;
+      margin-top:12px;
+    }
+    .login-management-row{
+      display:grid;
+      gap:12px;
+      grid-template-columns:minmax(120px,1.1fr) minmax(160px,1.4fr) minmax(140px,1fr) minmax(160px,1fr) minmax(110px,.8fr) minmax(130px,.9fr);
+      align-items:center;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--dash-border);
+      background:rgba(255,255,255,.03);
+    }
+    .login-management-row.header{
+      background:rgba(15,23,42,.6);
+      font-size:12px;
+      font-weight:800;
+      color:var(--dash-sub);
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+    .login-management-cell strong{
+      display:block;
+      font-weight:800;
+    }
+    .login-management-cell span{
+      display:block;
+      font-size:12px;
+      color:var(--dash-sub);
+    }
+    .login-management-url-cell strong,
+    .login-management-url-cell span{
+      white-space:normal;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+    }
+    .login-management-actions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .login-management-meta{
+      display:grid;
+      gap:4px;
+      font-size:12px;
+      color:var(--dash-sub);
+    }
+    @media (max-width: 960px){
+      .login-management-row{
+        grid-template-columns:1fr;
+        align-items:flex-start;
+      }
+      .login-management-row.header{
+        display:none;
+      }
+      .login-management-actions{
+        justify-content:flex-start;
+      }
+    }
+    .form-grid{display:grid;gap:10px;}
+    .form-grid label{font-weight:800;font-size:13px;color:var(--dash-sub);}
+    .form-grid input, .form-grid textarea, .form-grid select{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--dash-border);
+      background:rgba(255,255,255,.04);
+      color:var(--dash-text);
+      font:inherit;
+    }
+    .form-grid textarea{min-height:70px;resize:vertical;}
+    .status-text{
+      margin-top:6px;
+      font-weight:800;
+      color:var(--dash-sub);
+    }
+    .status-text.error{color:#fecdd3;}
+    .notice{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(148,163,184,.35);
+      background:rgba(255,255,255,.04);
+      color:var(--dash-sub);
+      font-size:13px;
+      display:grid;
+      gap:4px;
+    }
+    .toggle-list{
+      display:grid;
+      gap:10px;
+    }
+    .toggle-item{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--dash-border);
+      background:rgba(255,255,255,.03);
+    }
+    .toggle-item input{
+      margin-top:4px;
+    }
+    .toggle-item strong{display:block;}
+    .toggle-item span{color:var(--dash-sub);font-size:12px;}
+    .list-meta{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .action-btn{
+      padding:6px 10px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.2);
+      background:rgba(255,255,255,.06);
+      color:var(--dash-text);
+      font-weight:700;
+      cursor:pointer;
+    }
+    .action-btn.danger{
+      border-color:rgba(248,113,113,.45);
+      color:#fecdd3;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.4);
+      font-size:11px;
+      color:var(--dash-sub);
+    }
+    .code-preview{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:10px;
+    }
+    .code-preview img{
+      width:110px;
+      height:110px;
+      border-radius:12px;
+      border:1px solid rgba(148,163,184,.4);
+      background:rgba(255,255,255,.06);
+      object-fit:contain;
+    }
+    .permission-grid{
+      display:grid;
+      gap:8px;
+    }
+    .history-list{
+      max-height:240px;
+      overflow:auto;
+      display:grid;
+      gap:8px;
+      margin-top:10px;
+    }
+    .history-item{
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,.3);
+      background:rgba(255,255,255,.04);
+      font-size:12px;
+    }
+    .scale-controls{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .scale-controls button{
+      padding:6px 10px;
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,.4);
+      background:rgba(255,255,255,.06);
+      color:var(--dash-text);
+      cursor:pointer;
+    }
+    .fullscreen-row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(15,23,42,.45);
+      backdrop-filter:blur(6px);
+      z-index:50;
+      padding:24px;
+    }
+    .modal-backdrop.is-open{display:flex;}
+    .modal-backdrop.no-overlay{
+      background:transparent;
+      backdrop-filter:none;
+    }
+    .modal{
+      width:min(820px, 96vw);
+      background:var(--dash-panel);
+      border:1px solid var(--dash-border);
+      border-radius:18px;
+      padding:18px;
+      color:var(--dash-text);
+      box-shadow:0 20px 50px rgba(0,0,0,.38);
+      display:grid;
+      gap:14px;
+      position:relative;
+      max-height:calc(100vh - 48px);
+      overflow:auto;
+    }
+    .modal.windowed{
+      position:fixed;
+      top:12vh;
+      left:50%;
+      transform:translateX(-50%);
+      max-height:82vh;
+      resize:both;
+      overflow:auto;
+    }
+    .modal-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+    }
+    .wizard-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px solid var(--dash-border);
+      padding-bottom:8px;
+      cursor:default;
+    }
+    .wizard-title{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .wizard-note{
+      color:var(--dash-sub);
+      font-size:12px;
+    }
+    .wizard-controls button{
+      padding:8px 12px;
+      border-radius:10px;
+      border:1px solid var(--dash-border);
+      background:rgba(255,255,255,.06);
+      color:var(--dash-text);
+      font-weight:700;
+      cursor:pointer;
+    }
+    .wizard-divider{
+      margin:10px 0 4px;
+      font-weight:900;
+      color:var(--dash-text);
+      font-size:14px;
+    }
+    .wizard-preview{
+      border-radius:14px;
+      border:1px dashed rgba(148,163,184,.45);
+      padding:12px;
+      display:grid;
+      gap:6px;
+      background:rgba(255,255,255,.04);
+    }
+    .admin-log-window{
+      position:fixed;
+      right:16px;
+      bottom:16px;
+      width:min(360px, 92vw);
+      max-height:42vh;
+      background:rgba(15,23,42,.92);
+      border:1px solid rgba(148,163,184,.4);
+      border-radius:14px;
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+      display:flex;
+      flex-direction:column;
+      z-index:40;
+    }
+    .admin-log-window.is-hidden{
+      display:none;
+    }
+    .admin-log-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(148,163,184,.25);
+      font-weight:800;
+      font-size:13px;
+    }
+    .admin-log-actions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+    .admin-log-btn{
+      padding:4px 8px;
+      border-radius:8px;
+      border:1px solid rgba(148,163,184,.4);
+      background:rgba(255,255,255,.06);
+      color:var(--dash-text);
+      font-size:11px;
+      cursor:pointer;
+    }
+    .admin-log-body{
+      padding:10px 12px;
+      display:grid;
+      gap:8px;
+      overflow:auto;
+      font-size:12px;
+    }
+    .admin-log-entry{
+      border:1px solid rgba(148,163,184,.2);
+      border-radius:10px;
+      padding:8px;
+      background:rgba(255,255,255,.04);
+      display:grid;
+      gap:4px;
+    }
+    .admin-log-entry time{
+      color:var(--dash-sub);
+      font-size:11px;
+    }
+    .admin-log-entry .detail{
+      color:var(--dash-sub);
+      font-size:11px;
+      word-break:break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>管理ダッシュボード</h1>
+        <div class="muted">管理者IDでログインした時のみアクセスできます。</div>
+        <div class="pill" id="adminNameChip" aria-label="管理者名">
+          <strong id="adminName">-</strong>
+          <span id="adminSignedAt"></span>
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn" href="Calcu.html">Calcuを開く</a>
+        <a class="btn secondary" href="index.html">トップ</a>
+        <button type="button" class="btn secondary" id="adminLogout">ログアウト</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav class="side-nav">
+        <button class="nav-btn active" data-target="menu-home">メニュー</button>
+        <button class="nav-btn" data-target="login-screen-builder">ログイン画面作成</button>
+        <button class="nav-btn" data-target="login-admin-management">ログイン管理登録・一覧</button>
+        <button class="nav-btn" data-target="permission-settings">権限設定</button>
+        <button class="nav-btn" data-target="admin-management">管理者登録・一覧</button>
+        <button class="nav-btn" data-target="user-management">ユーザー登録・一覧</button>
+        <button class="nav-btn" data-target="wifi-local-management">WiFiローカルネット管理</button>
+        <button class="nav-btn" data-target="fastapi-management">FAST API管理</button>
+        <button class="nav-btn line-button" data-target="line-oa-management">LINE Official Account管理</button>
+        <button class="nav-btn" data-target="login-settings" data-permission="mode_change">ログイン設定</button>
+        <button class="nav-btn" data-target="admin-register" data-permission="admin_edit">管理者登録</button>
+        <button class="nav-btn" data-target="network-settings">通信設定</button>
+        <button class="nav-btn" data-target="user-list" data-permission="user_edit">ユーザー一覧</button>
+        <button class="nav-btn" data-target="admin-list" data-permission="admin_edit">管理者一覧</button>
+        <button class="nav-btn" data-target="admin-device-list" data-permission="device_register">端末登録一覧（管理者）</button>
+        <button class="nav-btn" data-target="auth-device-list" data-permission="biometric_register">端末登録一覧（認証）</button>
+        <button class="nav-btn" data-target="misc-settings">その他設定</button>
+      </nav>
+      <div>
+        <section class="page-section active" id="menu-home">
+          <section class="card">
+            <h2>メニュー選択</h2>
+            <p class="muted">ログイン後はここから設定メニューを選択してください。</p>
+            <div class="menu-grid">
+              <button class="menu-tile" type="button" data-menu-target="login-screen-builder">
+                ログイン画面作成
+                <span>ログイン画面のデザインと構成を登録</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="login-admin-management">
+                ログイン管理登録・一覧
+                <span>ログイン用の管理情報を追加・確認</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="permission-settings">
+                権限設定
+                <span>管理メニューの閲覧権限を調整</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="admin-management">
+                管理者登録・一覧
+                <span>管理者の追加・一覧・権限</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="user-management">
+                ユーザー登録・一覧
+                <span>ユーザーの登録とステータス確認</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="wifi-local-management">
+                WiFiローカルネット管理
+                <span>ローカルネットワークの接続状況</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="fastapi-management">
+                FAST API管理
+                <span>API稼働状況とエンドポイント管理</span>
+              </button>
+              <button class="menu-tile line-button" type="button" data-menu-target="line-oa-management">
+                LINE Official Account管理
+                <span>LINE配信・連携設定の確認</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="login-settings" data-permission="mode_change">
+                ログイン設定
+                <span>認証モードやログイン画面の設定</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="admin-register" data-permission="admin_edit">
+                管理者登録
+                <span>管理者アカウントの追加と更新</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="network-settings">
+                通信設定
+                <span>ネットワークと通信設定</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="user-list" data-permission="user_edit">
+                ユーザー一覧
+                <span>ユーザーの一覧と状態確認</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="admin-list" data-permission="admin_edit">
+                管理者一覧
+                <span>管理者一覧と権限設定</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="admin-device-list" data-permission="device_register">
+                端末登録一覧（管理者）
+                <span>管理者用に登録された端末一覧</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="auth-device-list" data-permission="biometric_register">
+                端末登録一覧（認証）
+                <span>認証用に登録された端末一覧</span>
+              </button>
+              <button class="menu-tile" type="button" data-menu-target="misc-settings">
+                その他設定
+                <span>表示や端末関連の設定</span>
+              </button>
+            </div>
+          </section>
+        </section>
+
+        <section class="page-section" id="login-screen-builder">
+          <section class="card">
+            <h2>ログイン画面作成</h2>
+            <p class="muted">ログイン画面の見た目と配置を登録・管理します。</p>
+            <div class="list-grid">
+              <div class="list-item">
+                <div>
+                  <strong>画面テンプレート</strong>
+                  <div class="small-muted">ロゴ・ボタン・説明文の配置を選択</div>
+                </div>
+                <button class="btn secondary" type="button">テンプレート管理</button>
+              </div>
+              <div class="list-item">
+                <div>
+                  <strong>プレビュー</strong>
+                  <div class="small-muted">デザイン反映とデバイス別表示確認</div>
+                </div>
+                <button class="btn secondary" type="button">プレビューを開く</button>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="page-section" id="login-admin-management">
+          <section class="card">
+            <h2>ログイン管理登録・一覧</h2>
+            <p class="muted">ログインが必要なページを一覧で管理し、登録済みのログイン情報を編集・削除できます。</p>
+            <div class="notice">
+              <strong>編集できる項目</strong>
+              <span>URL / ログイン先URL / 固定パスワード / 認証方法 / パスワード桁数 / 英数字大文字記号判定 / 有効期限 / ログイン画面</span>
+            </div>
+            <div class="login-management-header">
+              <div>
+                <strong>ログインページ一覧</strong>
+                <div class="small-muted">新規作成・編集・削除の操作はこの一覧から行います。</div>
+              </div>
+              <button class="btn" type="button" id="loginManagementCreate">新規作成</button>
+            </div>
+            <div class="login-management-table" role="table" aria-label="ログイン管理一覧">
+              <div class="login-management-row header" role="row">
+                <div role="columnheader">URL</div>
+                <div role="columnheader">ログイン先URL</div>
+                <div role="columnheader">認証方法</div>
+                <div role="columnheader">ワンタイムパスワード設定</div>
+                <div role="columnheader">有効期限</div>
+                <div role="columnheader">操作</div>
+              </div>
+              <div id="loginManagementRows" role="rowgroup"></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="page-section" id="permission-settings">
+          <section class="card">
+            <h2>権限設定</h2>
+            <p class="muted">権限選択によりロールを作成できます。</p>
+            <form id="roleCreateForm" class="form-grid">
+              <div>
+                <label for="roleName">ロール名</label>
+                <input id="roleName" type="text" placeholder="例: 受付管理">
+              </div>
+              <div>
+                <label>権限選択（複数選択可）</label>
+                <div class="permission-grid">
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="admin_edit">
+                    <div>
+                      <strong>管理者編集</strong>
+                      <span>管理者の登録・権限変更</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="admin_delete">
+                    <div>
+                      <strong>管理者削除</strong>
+                      <span>管理者アカウントの削除</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="view_all">
+                    <div>
+                      <strong>閲覧（全て）</strong>
+                      <span>全管理メニューの閲覧</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="view_summary">
+                    <div>
+                      <strong>閲覧（抜粋）</strong>
+                      <span>必要情報のみの閲覧</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="view_guardian">
+                    <div>
+                      <strong>閲覧（ユーザー（保護者））</strong>
+                      <span>保護者ユーザーの閲覧</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="view_teacher">
+                    <div>
+                      <strong>閲覧（ユーザー（先生））</strong>
+                      <span>先生ユーザーの閲覧</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="fixed_password">
+                    <div>
+                      <strong>固定パスワード設定</strong>
+                      <span>固定パスワードの設定</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="otp_issue">
+                    <div>
+                      <strong>ワンタイムパスワード発行</strong>
+                      <span>ワンタイムPWの発行</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="login_page_create">
+                    <div>
+                      <strong>ログインページ作成</strong>
+                      <span>ログインページの作成</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="guardian_delete">
+                    <div>
+                      <strong>ユーザー（保護者）削除</strong>
+                      <span>保護者ユーザーの削除</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="guardian_qr_reissue">
+                    <div>
+                      <strong>ユーザー（保護者）QR再発行</strong>
+                      <span>保護者QRの再発行</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="teacher_edit_delete">
+                    <div>
+                      <strong>ユーザー（先生）編集削除</strong>
+                      <span>先生ユーザーの編集・削除</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="line_detail_delivery">
+                    <div>
+                      <strong>LINE明細配信（延長料金）</strong>
+                      <span>延長料金のLINE明細配信</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="line_reply_delivery">
+                    <div>
+                      <strong>LINE配信（リプライボタン）</strong>
+                      <span>リプライボタン配信</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="detail_print">
+                    <div>
+                      <strong>明細印刷（延長料金）</strong>
+                      <span>延長料金の明細印刷</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="child_register_delete">
+                    <div>
+                      <strong>園児登録・削除</strong>
+                      <span>園児情報の登録・削除</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="class_register_delete">
+                    <div>
+                      <strong>クラス登録・削除</strong>
+                      <span>クラスの登録・削除</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="school_register_delete">
+                    <div>
+                      <strong>園登録・削除</strong>
+                      <span>園の登録・削除</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="rolePermission" value="master">
+                    <div>
+                      <strong>マスター</strong>
+                      <span>全権限を付与</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label for="roleExpiry">有効期限（任意指定）</label>
+                <input id="roleExpiry" type="date">
+              </div>
+              <label class="toggle-item">
+                <input id="roleActive" type="checkbox" checked>
+                <div>
+                  <strong>有効</strong>
+                  <span>ロールを有効化します。</span>
+                </div>
+              </label>
+              <button type="submit" class="btn">ロールを作成</button>
+              <div class="status-text" id="roleCreateStatus">権限選択後にロールを作成できます。</div>
+            </form>
+          </section>
+        </section>
+
+        <section class="page-section" id="admin-management">
+          <section class="card">
+            <h2>管理者登録・一覧</h2>
+            <p class="muted">管理者アカウントの登録と一覧をまとめて管理します。</p>
+            <div class="list-grid">
+              <div class="list-item">
+                <div>
+                  <strong>新規管理者登録</strong>
+                  <div class="small-muted">権限と連絡先を設定</div>
+                </div>
+                <button class="btn secondary" type="button">登録へ</button>
+              </div>
+              <div class="list-item">
+                <div>
+                  <strong>管理者一覧</strong>
+                  <div class="small-muted">登録済みアカウントを確認</div>
+                </div>
+                <button class="btn secondary" type="button">一覧を見る</button>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="page-section" id="user-management">
+          <section class="card">
+            <h2>ユーザー登録・一覧</h2>
+            <p class="muted">ユーザーの登録状況とアクティブ状態を確認します。</p>
+            <div class="list-grid">
+              <div class="list-item">
+                <div>
+                  <strong>ユーザー登録</strong>
+                  <div class="small-muted">学籍番号や所属情報を追加</div>
+                </div>
+                <button class="btn secondary" type="button">登録フォーム</button>
+              </div>
+              <div class="list-item">
+                <div>
+                  <strong>ユーザー一覧</strong>
+                  <div class="small-muted">検索・絞り込みで確認</div>
+                </div>
+                <button class="btn secondary" type="button">一覧を開く</button>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="page-section" id="wifi-local-management">
+          <section class="card">
+            <h2>WiFiローカルネット管理</h2>
+            <p class="muted">ローカルネットワークの接続と稼働状況を把握します。</p>
+            <div class="list-grid">
+              <div class="list-item">
+                <div>
+                  <strong>アクセスポイント一覧</strong>
+                  <div class="small-muted">SSIDごとの接続状況</div>
+                </div>
+                <button class="btn secondary" type="button">一覧を表示</button>
+              </div>
+              <div class="list-item">
+                <div>
+                  <strong>メンテナンス記録</strong>
+                  <div class="small-muted">通信障害の履歴を確認</div>
+                </div>
+                <button class="btn secondary" type="button">履歴を見る</button>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="page-section" id="fastapi-management">
+          <section class="card">
+            <h2>FAST API管理</h2>
+            <p class="muted">APIの稼働状況とバージョン情報を確認します。</p>
+            <div class="list-grid">
+              <div class="list-item">
+                <div>
+                  <strong>稼働ステータス</strong>
+                  <div class="small-muted">現在のレスポンス確認</div>
+                </div>
+                <button class="btn secondary" type="button">ステータス取得</button>
+              </div>
+              <div class="list-item">
+                <div>
+                  <strong>エンドポイント管理</strong>
+                  <div class="small-muted">ルート一覧の整理</div>
+                </div>
+                <button class="btn secondary" type="button">管理画面へ</button>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="page-section" id="line-oa-management">
+          <section class="card">
+            <h2>LINE Official Account管理</h2>
+            <p class="muted">LINE公式アカウントの連携設定と配信状況を確認します。</p>
+            <div class="list-grid">
+              <div class="list-item">
+                <div>
+                  <strong>連携設定</strong>
+                  <div class="small-muted">アクセストークンやWebhookを管理</div>
+                </div>
+                <button class="btn secondary" type="button">設定を見る</button>
+              </div>
+              <div class="list-item">
+                <div>
+                  <strong>配信状況</strong>
+                  <div class="small-muted">配信履歴と到達数</div>
+                </div>
+                <button class="btn secondary" type="button">配信履歴</button>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="page-section" id="login-settings">
+          <section class="card" data-permission="mode_change">
+            <h2>ログイン設定</h2>
+            <p class="muted">ユーザーのログイン認証方法を設定できます。</p>
+            <form id="authModeForm" class="form-grid">
+              <div>
+                <label for="authModeSelect">モード選択</label>
+                <select id="authModeSelect">
+                  <option value="instant_issue_fixed_biometric">即時ID発行（初回事前固定PW/２回目以降生体情報認証）</option>
+                  <option value="biometric_only">生体情報認証運用</option>
+                  <option value="password_only">パスワード運用（固定PW、ワンタイムPW）</option>
+                  <option value="pre_registered_biometric">事前ID発行（生体認証、固定PW、ワンタイムPW）</option>
+                  <option value="sms_auth">SMS認証</option>
+                  <option value="csv_fixed_pw">CSVから固定PWを設定</option>
+                </select>
+              </div>
+              <button type="submit" class="btn">設定する</button>
+              <div id="authModeStatus" class="status-text"></div>
+            </form>
+          </section>
+          <section class="card" data-permission="mode_change">
+            <h2>画面構築管理</h2>
+            <p class="muted">現在のログイン画面を名前付きで登録し、URLごとに割り当てできます。</p>
+            <div class="form-grid">
+              <div>
+                <label for="layoutNameInput">画面構築名</label>
+                <input id="layoutNameInput" type="text" placeholder="例: 園長室ログイン">
+              </div>
+              <button type="button" class="btn" id="layoutSaveBtn">画面構築を登録</button>
+              <div id="layoutSaveStatus" class="status-text"></div>
+            </div>
+            <div class="wizard-divider">登録済み画面構築</div>
+            <div id="layoutLibraryList" class="list-grid"></div>
+          </section>
+          <section class="card" data-permission="mode_change">
+            <h2>画面割当て</h2>
+            <p class="muted">URLごとに適用する画面構築を選択します。</p>
+            <div class="form-grid">
+              <div>
+                <label for="layoutAssignUrl">対象URL</label>
+                <input id="layoutAssignUrl" type="text" placeholder="例: https://example.com/login">
+              </div>
+              <div>
+                <label for="layoutAssignSelect">画面構築</label>
+                <select id="layoutAssignSelect"></select>
+              </div>
+              <button type="button" class="btn" id="layoutAssignAdd">割当てを追加</button>
+              <div id="layoutAssignStatus" class="status-text"></div>
+            </div>
+            <div class="wizard-divider">割当て一覧</div>
+            <div id="layoutAssignList" class="list-grid"></div>
+          </section>
+        </section>
+
+        <section class="page-section" id="admin-register">
+          <section class="card" data-permission="admin_edit">
+            <h2>管理者登録</h2>
+            <p class="muted">新規登録の管理者IDと権限情報を入力します。</p>
+            <form id="adminRegisterForm" class="form-grid">
+              <div>
+                <label for="adminRegisterId">管理者ID</label>
+                <input id="adminRegisterId" type="text" placeholder="admin01">
+              </div>
+              <div>
+                <label for="adminRegisterPassword">管理者PW</label>
+                <input id="adminRegisterPassword" type="password" placeholder="password">
+              </div>
+              <div>
+                <label for="adminRegisterPeriod">管理権限期間</label>
+                <input id="adminRegisterPeriod" type="text" placeholder="例: 2024/04/01 - 2025/03/31">
+              </div>
+              <div>
+                <label>ロール（複数選択可）</label>
+                <div class="permission-grid">
+                  <label class="toggle-item">
+                    <input type="checkbox" name="adminRegisterRole" value="master">
+                    <div>
+                      <strong>マスター</strong>
+                      <span>全権限を付与します。</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="adminRegisterRole" value="biometric_register">
+                    <div>
+                      <strong>生体認証登録</strong>
+                      <span>生体認証の登録・管理を許可します。</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="adminRegisterRole" value="otp_issue">
+                    <div>
+                      <strong>ワンタイムパスワード発行</strong>
+                      <span>ワンタイムコードの発行を許可します。</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="adminRegisterRole" value="device_register">
+                    <div>
+                      <strong>端末登録</strong>
+                      <span>管理者端末の登録・管理を許可します。</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="adminRegisterRole" value="user_edit">
+                    <div>
+                      <strong>ユーザー編集</strong>
+                      <span>ユーザー一覧の編集を許可します。</span>
+                    </div>
+                  </label>
+                  <label class="toggle-item">
+                    <input type="checkbox" name="adminRegisterRole" value="admin_edit">
+                    <div>
+                      <strong>管理者編集</strong>
+                      <span>管理者の登録・権限変更を許可します。</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              <button type="submit" class="btn">登録する</button>
+              <div id="adminRegisterStatus" class="status-text"></div>
+            </form>
+          </section>
+        </section>
+
+        <section class="page-section" id="network-settings">
+          <section class="card">
+            <h2>通信設定</h2>
+            <p class="muted">通信関連の設定を準備中です。</p>
+          </section>
+        </section>
+
+        <section class="page-section" id="user-list">
+          <section class="card" data-permission="user_edit">
+            <h2>ユーザー一覧</h2>
+            <div id="userProfiles" class="list"></div>
+          </section>
+        </section>
+
+        <section class="page-section" id="admin-list">
+          <section class="card" data-permission="admin_edit">
+            <h2>管理者一覧</h2>
+            <p class="muted">管理者のID・PW・権限期間を編集できます。</p>
+            <div id="adminList" class="admin-table"></div>
+            <div id="adminListStatus" class="status-text"></div>
+          </section>
+        </section>
+
+        <section class="page-section" id="admin-device-list">
+          <section class="card" data-permission="device_register">
+            <h2>端末登録一覧（管理者）</h2>
+            <p class="muted">管理者用として登録された端末の一覧です。</p>
+            <div id="adminDeviceList" class="list"></div>
+          </section>
+        </section>
+
+        <section class="page-section" id="auth-device-list">
+          <section class="card" data-permission="biometric_register">
+            <h2>端末登録一覧（認証）</h2>
+            <p class="muted">認証用として登録された端末の一覧です。</p>
+            <div id="authDeviceList" class="list"></div>
+          </section>
+        </section>
+
+        <section class="page-section" id="misc-settings">
+          <section class="card">
+            <h2>その他設定</h2>
+            <p class="muted">表示設定や各種設定をまとめています。</p>
+            <form id="displaySettingsForm" class="form-grid">
+              <div>
+                <label for="themeSelect">テーマ</label>
+                <select id="themeSelect"></select>
+              </div>
+              <div>
+                <label>表示倍率</label>
+                <div class="scale-controls">
+                  <button type="button" id="scaleDown">ー</button>
+                  <span id="scaleValue" class="chip">100%</span>
+                  <button type="button" id="scaleUp">＋</button>
+                </div>
+              </div>
+              <div class="fullscreen-row">
+                <label class="toggle-item" style="flex:1;">
+                  <input type="checkbox" id="fullscreenToggle">
+                  <div>
+                    <strong>全画面モード</strong>
+                    <span>ログイン画面に「全画面」ボタンを表示します。</span>
+                  </div>
+                </label>
+                <button type="button" class="btn secondary" id="fullscreenNow">全画面にする</button>
+              </div>
+              <label class="toggle-item">
+                <input type="checkbox" id="secretModeToggle">
+                <div>
+                  <strong>シークレットモード</strong>
+                  <span>ログイン履歴を保存しません。</span>
+                </div>
+              </label>
+              <button type="submit" class="btn">保存する</button>
+              <div id="displaySettingsStatus" class="status-text"></div>
+            </form>
+          </section>
+        </section>
+
+        <section class="page-section" id="login-settings-wizard">
+          <section class="card">
+            <div class="wizard-header">
+              <div class="wizard-title">
+                <strong id="loginSettingsTitle">ログイン設定ページ</strong>
+                <span id="loginSettingsStep" class="wizard-note">ステップ 1 / 4</span>
+              </div>
+              <div class="wizard-controls">
+                <button type="button" id="loginSettingsBack">戻る</button>
+                <button type="button" id="loginSettingsNext">進む</button>
+                <button type="button" id="loginSettingsCancel">設定ページへ戻る</button>
+              </div>
+            </div>
+            <div id="loginSettingsContent" class="form-grid"></div>
+            <div class="modal-actions">
+              <button type="button" class="btn secondary" id="loginSettingsSave">決定</button>
+            </div>
+            <div id="loginSettingsStatus" class="status-text"></div>
+          </section>
+        </section>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="loginManagementModal" role="dialog" aria-modal="true" aria-labelledby="loginManagementTitle">
+      <div class="modal">
+        <div class="wizard-header">
+          <div class="wizard-title">
+            <strong id="loginManagementTitle">ログイン管理を新規作成</strong>
+            <span class="wizard-note">URLごとのログイン管理情報を登録します。</span>
+          </div>
+          <div class="wizard-controls">
+            <button type="button" id="loginManagementClose">閉じる</button>
+          </div>
+        </div>
+        <form id="loginManagementForm" class="form-grid">
+          <div>
+            <label for="loginManagementName">表示名</label>
+            <input id="loginManagementName" type="text" placeholder="例: 先生ポータル">
+          </div>
+          <div>
+            <label for="loginManagementUrl">URL</label>
+            <input id="loginManagementUrl" type="text" placeholder="/teacher/portal">
+          </div>
+          <div>
+            <label for="loginManagementLoginUrl">ログイン先URL</label>
+            <input id="loginManagementLoginUrl" type="text" placeholder="https://portal.encho.app/login">
+          </div>
+          <div>
+            <label for="loginManagementLoginNote">ログイン先の説明</label>
+            <textarea id="loginManagementLoginNote" placeholder="ログイン後の遷移や補足説明"></textarea>
+          </div>
+          <div>
+            <label for="loginManagementAuthMethod">認証方法</label>
+            <select id="loginManagementAuthMethod">
+              <option value="fixed_password">固定パスワード</option>
+              <option value="assigned_credentials">指定ID/パスワード</option>
+              <option value="otp">ワンタイムパスワード</option>
+              <option value="passkey">Passkey</option>
+              <option value="oath">Oath</option>
+            </select>
+          </div>
+          <div>
+            <label for="loginManagementFixedPassword">固定パスワード</label>
+            <input id="loginManagementFixedPassword" type="text" placeholder="例: portal-2024">
+          </div>
+          <div>
+            <label for="loginManagementPasswordLength">パスワード桁数</label>
+            <input id="loginManagementPasswordLength" type="number" min="1" max="32" placeholder="例: 6">
+          </div>
+          <div>
+            <label for="loginManagementOtpLength">ワンタイムパスワード桁数</label>
+            <input id="loginManagementOtpLength" type="number" min="4" max="12" placeholder="例: 6">
+          </div>
+          <label class="toggle-item">
+            <input type="checkbox" id="loginManagementRequireAlphanumeric">
+            <div>
+              <strong>英数字判定</strong>
+              <span>英数字の混在を必須とします。</span>
+            </div>
+          </label>
+          <label class="toggle-item">
+            <input type="checkbox" id="loginManagementRequireUppercase">
+            <div>
+              <strong>大文字判定</strong>
+              <span>大文字の使用を必須とします。</span>
+            </div>
+          </label>
+          <label class="toggle-item">
+            <input type="checkbox" id="loginManagementRequireSymbols">
+            <div>
+              <strong>記号判定</strong>
+              <span>記号の使用を必須とします。</span>
+            </div>
+          </label>
+          <div>
+            <label for="loginManagementExpiresAt">有効期限</label>
+            <input id="loginManagementExpiresAt" type="date">
+          </div>
+          <div>
+            <label for="loginManagementLayoutSelect">ログイン画面</label>
+            <select id="loginManagementLayoutSelect"></select>
+          </div>
+          <label class="toggle-item">
+            <input type="checkbox" id="loginManagementTestMode">
+            <div>
+              <strong>テストモード</strong>
+              <span>認証をスキップし、入力が必要な場合は固定123456で進みます。</span>
+            </div>
+          </label>
+        </form>
+        <div class="modal-actions">
+          <button type="button" class="btn secondary" id="loginManagementCancel">キャンセル</button>
+          <button type="button" class="btn" id="loginManagementSave">保存する</button>
+        </div>
+        <div id="loginManagementStatus" class="status-text"></div>
+      </div>
+    </div>
+
+    <div class="admin-log-window" id="adminLogWindow" aria-live="polite">
+      <div class="admin-log-header">
+        <span>ログウィンドウ</span>
+        <div class="admin-log-actions">
+          <button type="button" class="admin-log-btn" id="adminLogCopy">コピー</button>
+          <button type="button" class="admin-log-btn" id="adminLogClear">クリア</button>
+          <button type="button" class="admin-log-btn" id="adminLogClose">閉じる</button>
+        </div>
+      </div>
+      <div class="admin-log-body" id="adminLogBody"></div>
+    </div>
+
+  <script>
+    const session = window.EnchoSession;
+    const adminNameEl = document.getElementById("adminName");
+    const adminSignedAtEl = document.getElementById("adminSignedAt");
+    const userProfilesEl = document.getElementById("userProfiles");
+    const logoutBtn = document.getElementById("adminLogout");
+    const lockModeForm = document.getElementById("lockModeForm");
+    const lockModeToggle = document.getElementById("lockModeToggle");
+    const lockModeStatus = document.getElementById("lockModeStatus");
+    const forceInitForm = document.getElementById("forceInitForm");
+    const forceInitToggle = document.getElementById("forceInitToggle");
+    const forceInitStatus = document.getElementById("forceInitStatus");
+    const authModeForm = document.getElementById("authModeForm");
+    const authModeSelect = document.getElementById("authModeSelect");
+    const masterOtpMode = document.getElementById("masterOtpMode");
+    const masterOtpCode = document.getElementById("masterOtpCode");
+    const otpLengthInput = document.getElementById("otpLength");
+    const fixedCodeLengthInput = document.getElementById("fixedCodeLength");
+    const authModeStatus = document.getElementById("authModeStatus");
+    const passwordSettingsForm = document.getElementById("passwordSettingsForm");
+    const singlePassword = document.getElementById("singlePassword");
+    const singlePasswordLength = document.getElementById("singlePasswordLength");
+    const singlePasswordExpiry = document.getElementById("singlePasswordExpiry");
+    const fixedPassword = document.getElementById("fixedPassword");
+    const fixedPasswordLength = document.getElementById("fixedPasswordLength");
+    const fixedPasswordExpiry = document.getElementById("fixedPasswordExpiry");
+    const multiPasswordList = document.getElementById("multiPasswordList");
+    const passwordSettingsStatus = document.getElementById("passwordSettingsStatus");
+    const otpSettingsForm = document.getElementById("otpSettingsForm");
+    const otpLengthSetting = document.getElementById("otpLengthSetting");
+    const otpCountSetting = document.getElementById("otpCountSetting");
+    const otpExpirySetting = document.getElementById("otpExpirySetting");
+    const otpExportCsv = document.getElementById("otpExportCsv");
+    const otpCsvOutput = document.getElementById("otpCsvOutput");
+    const otpSettingsStatus = document.getElementById("otpSettingsStatus");
+    const adminRegisterForm = document.getElementById("adminRegisterForm");
+    const adminRegisterId = document.getElementById("adminRegisterId");
+    const adminRegisterPassword = document.getElementById("adminRegisterPassword");
+    const adminRegisterPeriod = document.getElementById("adminRegisterPeriod");
+    const adminRegisterRoles = document.querySelectorAll("input[name='adminRegisterRole']");
+    const adminRegisterStatus = document.getElementById("adminRegisterStatus");
+    const adminList = document.getElementById("adminList");
+    const adminListStatus = document.getElementById("adminListStatus");
+    const permissionForm = document.getElementById("permissionForm");
+    const permissionTarget = document.getElementById("permissionTarget");
+    const permissionStatus = document.getElementById("permissionStatus");
+    const adminPasswordForm = document.getElementById("adminPasswordForm");
+    const adminPasswordCurrent = document.getElementById("adminPasswordCurrent");
+    const adminPasswordNext = document.getElementById("adminPasswordNext");
+    const adminPasswordStatus = document.getElementById("adminPasswordStatus");
+    const deviceRegisterForm = document.getElementById("deviceRegisterForm");
+    const deviceLabel = document.getElementById("deviceLabel");
+    const deviceRegisterStatus = document.getElementById("deviceRegisterStatus");
+    const deviceList = document.getElementById("deviceList");
+    const adminDeviceList = document.getElementById("adminDeviceList");
+    const authDeviceList = document.getElementById("authDeviceList");
+    const otpIssueForm = document.getElementById("otpIssueForm");
+    const otpIssueType = document.getElementById("otpIssueType");
+    const otpIssueCode = document.getElementById("otpIssueCode");
+    const otpIssueQr = document.getElementById("otpIssueQr");
+    const otpIssueBarcode = document.getElementById("otpIssueBarcode");
+    const otpIssueNote = document.getElementById("otpIssueNote");
+    const otpIssueStatus = document.getElementById("otpIssueStatus");
+    const otpIssuePreview = document.getElementById("otpIssuePreview");
+    const otpIssueList = document.getElementById("otpIssueList");
+    const systemKeyForm = document.getElementById("systemKeyForm");
+    const systemKeyMode = document.getElementById("systemKeyMode");
+    const systemKeyCode = document.getElementById("systemKeyCode");
+    const systemKeyLabel = document.getElementById("systemKeyLabel");
+    const systemKeyStatus = document.getElementById("systemKeyStatus");
+    const systemKeyCsvForm = document.getElementById("systemKeyCsvForm");
+    const systemKeyCsv = document.getElementById("systemKeyCsv");
+    const systemKeyList = document.getElementById("systemKeyList");
+    const fixedCodeForm = document.getElementById("fixedCodeForm");
+    const fixedCodeInput = document.getElementById("fixedCodeInput");
+    const fixedCodeStatus = document.getElementById("fixedCodeStatus");
+    const fixedCodeList = document.getElementById("fixedCodeList");
+    const displaySettingsForm = document.getElementById("displaySettingsForm");
+    const themeSelect = document.getElementById("themeSelect");
+    const scaleDown = document.getElementById("scaleDown");
+    const scaleUp = document.getElementById("scaleUp");
+    const scaleValue = document.getElementById("scaleValue");
+    const fullscreenToggle = document.getElementById("fullscreenToggle");
+    const fullscreenNow = document.getElementById("fullscreenNow");
+    const secretModeToggle = document.getElementById("secretModeToggle");
+    const displaySettingsStatus = document.getElementById("displaySettingsStatus");
+    const historyFilterForm = document.getElementById("historyFilterForm");
+    const historyDate = document.getElementById("historyDate");
+    const historyList = document.getElementById("historyList");
+    const loginSettingsStep = document.getElementById("loginSettingsStep");
+    const loginSettingsContent = document.getElementById("loginSettingsContent");
+    const loginSettingsBack = document.getElementById("loginSettingsBack");
+    const loginSettingsNext = document.getElementById("loginSettingsNext");
+    const loginSettingsSave = document.getElementById("loginSettingsSave");
+    const loginSettingsCancel = document.getElementById("loginSettingsCancel");
+    const loginSettingsStatus = document.getElementById("loginSettingsStatus");
+    const adminLogWindow = document.getElementById("adminLogWindow");
+    const adminLogBody = document.getElementById("adminLogBody");
+    const adminLogCopy = document.getElementById("adminLogCopy");
+    const adminLogClear = document.getElementById("adminLogClear");
+    const adminLogClose = document.getElementById("adminLogClose");
+    const layoutNameInput = document.getElementById("layoutNameInput");
+    const layoutSaveBtn = document.getElementById("layoutSaveBtn");
+    const layoutSaveStatus = document.getElementById("layoutSaveStatus");
+    const layoutLibraryList = document.getElementById("layoutLibraryList");
+    const layoutAssignUrl = document.getElementById("layoutAssignUrl");
+    const layoutAssignSelect = document.getElementById("layoutAssignSelect");
+    const layoutAssignAdd = document.getElementById("layoutAssignAdd");
+    const layoutAssignStatus = document.getElementById("layoutAssignStatus");
+    const layoutAssignList = document.getElementById("layoutAssignList");
+    const loginManagementRows = document.getElementById("loginManagementRows");
+    const loginManagementCreate = document.getElementById("loginManagementCreate");
+    const loginManagementModal = document.getElementById("loginManagementModal");
+    const loginManagementTitle = document.getElementById("loginManagementTitle");
+    const loginManagementForm = document.getElementById("loginManagementForm");
+    const loginManagementName = document.getElementById("loginManagementName");
+    const loginManagementUrl = document.getElementById("loginManagementUrl");
+    const loginManagementLoginUrl = document.getElementById("loginManagementLoginUrl");
+    const loginManagementLoginNote = document.getElementById("loginManagementLoginNote");
+    const loginManagementAuthMethod = document.getElementById("loginManagementAuthMethod");
+    const loginManagementFixedPassword = document.getElementById("loginManagementFixedPassword");
+    const loginManagementPasswordLength = document.getElementById("loginManagementPasswordLength");
+    const loginManagementOtpLength = document.getElementById("loginManagementOtpLength");
+    const loginManagementRequireAlphanumeric = document.getElementById("loginManagementRequireAlphanumeric");
+    const loginManagementRequireUppercase = document.getElementById("loginManagementRequireUppercase");
+    const loginManagementRequireSymbols = document.getElementById("loginManagementRequireSymbols");
+    const loginManagementExpiresAt = document.getElementById("loginManagementExpiresAt");
+    const loginManagementLayoutSelect = document.getElementById("loginManagementLayoutSelect");
+    const loginManagementTestMode = document.getElementById("loginManagementTestMode");
+    const loginManagementClose = document.getElementById("loginManagementClose");
+    const loginManagementCancel = document.getElementById("loginManagementCancel");
+    const loginManagementSave = document.getElementById("loginManagementSave");
+    const loginManagementStatus = document.getElementById("loginManagementStatus");
+    let loginSettingsWizardMode = authModeSelect?.value || "instant_issue_fixed_biometric";
+    let loginSettingsStepIndex = 1;
+    let loginSettingsDraft = {
+      ...loadInstantIssueSettings(),
+      layout: loadLoginLayoutSettings()
+    };
+    let activeLoginManagementId = null;
+
+    const MASTER_OTP_ENABLED_KEY = "encho_master_otp_enabled";
+    const MASTER_OTP_CODE_KEY = "encho_master_otp_code";
+    const MASTER_OTP_MODE_KEY = "encho_master_otp_mode";
+    const AUTH_MODE_KEY = "encho_auth_mode_v2";
+    const OTP_LENGTH_KEY = "encho_otp_length";
+    const FIXED_CODE_LENGTH_KEY = "encho_fixed_code_length";
+    const OTP_CODES_KEY = "encho_otp_codes_v1";
+    const SYSTEM_KEYS_KEY = "encho_system_keys_v1";
+    const FIXED_KEYS_KEY = "encho_fixed_codes_v1";
+    const LOGIN_HISTORY_KEY = "encho_login_history_v1";
+    const UI_SCALE_KEY = "encho_ui_scale";
+    const FULLSCREEN_MODE_KEY = "encho_fullscreen_mode";
+    const SECRET_MODE_KEY = "encho_secret_mode";
+    const FORCE_MASTER_SETUP_ENABLED_KEY = "encho_force_master_setup_enabled";
+    const ADMIN_USERS_KEY = "encho_admin_users_v1";
+    const ADMIN_DEVICES_KEY = "encho_admin_devices_v1";
+    const AUTH_DEVICES_KEY = "encho_auth_devices_v1";
+    const PASSWORD_SETTINGS_KEY = "encho_password_settings_v1";
+    const OTP_SETTINGS_KEY = "encho_otp_settings_v1";
+    const FIXED_PASSWORD_SETTINGS_KEY = "encho_fixed_password_settings_v1";
+    const MULTI_PASSWORD_SETTINGS_KEY = "encho_multi_password_settings_v1";
+    const INSTANT_ISSUE_SETTINGS_KEY = "encho_instant_issue_settings_v1";
+    const LOGIN_LAYOUT_SETTINGS_KEY = "encho_login_layout_settings_v1";
+    const LOGIN_LAYOUT_LIBRARY_KEY = "encho_login_layout_library_v1";
+    const LOGIN_LAYOUT_ASSIGNMENTS_KEY = "encho_login_layout_assignments_v1";
+    const LOGIN_LAYOUT_DEFAULT_SNAPSHOT_KEY = "encho_login_layout_default_snapshot_v1";
+    const ADMIN_LOG_KEY = "encho_admin_activity_log_v1";
+
+    const PERMISSIONS = [
+      "otp_issue",
+      "password_manage",
+      "mode_change",
+      "biometric_register",
+      "lock_mode",
+      "device_register",
+      "user_edit",
+      "admin_edit"
+    ];
+    const ROLE_PERMISSION_MAP = {
+      master: ["master", ...PERMISSIONS],
+      biometric_register: ["biometric_register"],
+      otp_issue: ["otp_issue"],
+      device_register: ["device_register"],
+      user_edit: ["user_edit"],
+      admin_edit: ["admin_edit"]
+    };
+
+    function applyUiScale() {
+      const scale = Number(localStorage.getItem(UI_SCALE_KEY) || "1");
+      if (Number.isFinite(scale) && scale > 0) {
+        document.documentElement.style.setProperty("--ui-scale", String(scale));
+      }
+    }
+
+    function loadAdminUsers() {
+      try {
+        const raw = localStorage.getItem(ADMIN_USERS_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (error) {
+        // ignore
+      }
+      const defaults = [
+        {
+          id: "admin",
+          password: "admin",
+          role: "master",
+          permissions: ["master", ...PERMISSIONS],
+          permissionPeriod: "無期限"
+        }
+      ];
+      localStorage.setItem(ADMIN_USERS_KEY, JSON.stringify(defaults));
+      return defaults;
+    }
+
+    function saveAdminUsers(users) {
+      localStorage.setItem(ADMIN_USERS_KEY, JSON.stringify(users));
+    }
+
+    function loadAdminDevices() {
+      try {
+        const raw = localStorage.getItem(ADMIN_DEVICES_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveAdminDevices(devices) {
+      localStorage.setItem(ADMIN_DEVICES_KEY, JSON.stringify(devices));
+    }
+
+    function loadAuthDevices() {
+      try {
+        const raw = localStorage.getItem(AUTH_DEVICES_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveAuthDevices(devices) {
+      localStorage.setItem(AUTH_DEVICES_KEY, JSON.stringify(devices));
+    }
+
+    function getActiveAdminRecord() {
+      const activeId = session?.getActiveAdmin?.();
+      const users = loadAdminUsers();
+      return users.find(user => user.id === activeId) || null;
+    }
+
+    function hasPermission(permission) {
+      const admin = getActiveAdminRecord();
+      if (!admin) return false;
+      if (admin.role === "master") return true;
+      return Array.isArray(admin.permissions) && admin.permissions.includes(permission);
+    }
+
+    function applyPermissions() {
+      document.querySelectorAll("[data-permission]").forEach((section) => {
+        const perm = section.dataset.permission;
+        const allowed = hasPermission(perm);
+        section.hidden = !allowed;
+        section.setAttribute("aria-hidden", (!allowed).toString());
+      });
+    }
+
+    function loadAdminLogs() {
+      try {
+        const raw = localStorage.getItem(ADMIN_LOG_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveAdminLogs(logs) {
+      try {
+        localStorage.setItem(ADMIN_LOG_KEY, JSON.stringify(logs));
+      } catch (error) {
+        console.warn("管理者ログの保存に失敗しました", error);
+      }
+    }
+
+    function formatAdminLogEntry(entry) {
+      const time = entry?.timestamp ? new Date(entry.timestamp).toLocaleString() : "-";
+      const detailText = entry?.detail && Object.keys(entry.detail).length
+        ? JSON.stringify(entry.detail)
+        : "詳細なし";
+      return { time, detailText };
+    }
+
+    function appendAdminLogEntry(entry) {
+      if (!adminLogBody) return;
+      const { time, detailText } = formatAdminLogEntry(entry);
+      const row = document.createElement("div");
+      row.className = "admin-log-entry";
+      const actionContainer = document.createElement("div");
+      const actionStrong = document.createElement("strong");
+      actionStrong.textContent = entry && entry.action ? entry.action : "";
+      actionContainer.appendChild(actionStrong);
+      const timeEl = document.createElement("time");
+      timeEl.textContent = time;
+      const detailDiv = document.createElement("div");
+      detailDiv.className = "detail";
+      detailDiv.textContent = detailText;
+      row.appendChild(actionContainer);
+      row.appendChild(timeEl);
+      row.appendChild(detailDiv);
+      adminLogBody.prepend(row);
+      if (adminLogBody.children.length > 200) {
+        adminLogBody.removeChild(adminLogBody.lastChild);
+      }
+    }
+
+    function renderAdminLogWindow() {
+      if (!adminLogBody) return;
+      const logs = loadAdminLogs();
+      adminLogBody.innerHTML = "";
+      if (!logs.length) {
+        adminLogBody.innerHTML = `<div class="admin-log-entry"><div><strong>ログがありません。</strong></div></div>`;
+        return;
+      }
+      logs.slice(-200).forEach((entry) => appendAdminLogEntry(entry));
+    }
+
+    function logAdminAction(action, detail = {}) {
+      const logs = loadAdminLogs();
+      const entry = {
+        action,
+        detail,
+        timestamp: Date.now()
+      };
+      logs.push(entry);
+      if (logs.length > 300) logs.splice(0, logs.length - 300);
+      saveAdminLogs(logs);
+      appendAdminLogEntry(entry);
+    }
+
+    let activePageId = "menu-home";
+    function setActivePage(targetId) {
+      const navTarget = targetId === "login-settings-wizard" ? "login-settings" : targetId;
+      document.querySelectorAll(".page-section").forEach((section) => {
+        section.classList.toggle("active", section.id === targetId);
+      });
+      document.querySelectorAll(".nav-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.target === navTarget);
+      });
+      activePageId = targetId;
+      logAdminAction("navigate", { target: targetId });
+    }
+
+    function loadInstantIssueSettings() {
+      try {
+        const raw = localStorage.getItem(INSTANT_ISSUE_SETTINGS_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function saveInstantIssueSettings(settings) {
+      localStorage.setItem(INSTANT_ISSUE_SETTINGS_KEY, JSON.stringify(settings));
+    }
+
+    const DEFAULT_LOGIN_LAYOUT_SETTINGS = {
+      titleText: "SenSei ログイン",
+      subtitleText: "先生用端末の表示テーマに合わせたログイン画面",
+      helperText: "タップして生体認証を開始してください。",
+      biometricButtonText: "生体認証を開始",
+      initialLoginButtonText: "初回ログインの方はこちら",
+      initialLoginDescription: "説明書き: 端末認証＋コードで初回登録を行います。",
+      passwordUnlockText: "解錠",
+      fontFamily: "\"Noto Sans JP\", \"Inter\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      fontSize: 16,
+      textColor: "#f8fafc",
+      accentColor: "#8b5cf6",
+      buttonColor: "#22d3ee",
+      iconSize: 48,
+      itemSize: 44,
+      iconStyle: "circle",
+      showHelperText: true,
+      showInitialDescription: true,
+      buttonShape: "rounded",
+      buttonSize: "standard",
+      cardWidth: 560,
+      cardHeight: 520,
+      cardSpacing: "standard",
+      gridColumns: 2,
+      gridGap: 12,
+      gridOrder: {
+        icon: 1,
+        title: 2,
+        subtitle: 3,
+        helper: 4,
+        initial: 5,
+        input: 6,
+        biometric: 7,
+        initialButton: 8,
+        unlock: 9
+      },
+      gridSpan: {
+        icon: 1,
+        title: 1,
+        subtitle: 1,
+        helper: 2,
+        initial: 2,
+        input: 2,
+        biometric: 2,
+        initialButton: 2,
+        unlock: 2
+      }
+    };
+
+    if (typeof window !== "undefined" && !window.DEFAULT_LOGIN_LAYOUT_SETTINGS) {
+      window.DEFAULT_LOGIN_LAYOUT_SETTINGS = DEFAULT_LOGIN_LAYOUT_SETTINGS;
+    }
+
+    function getDefaultLoginLayoutSettings() {
+      if (typeof window !== "undefined" && window.DEFAULT_LOGIN_LAYOUT_SETTINGS) {
+        return window.DEFAULT_LOGIN_LAYOUT_SETTINGS;
+      }
+      return DEFAULT_LOGIN_LAYOUT_SETTINGS;
+    }
+
+    function getThemeColorValue(name, fallback) {
+      const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return value || fallback;
+    }
+
+    function getLayoutParts() {
+      return [
+        { key: "icon", label: "アイコン" },
+        { key: "title", label: "タイトル" },
+        { key: "subtitle", label: "サブタイトル" },
+        { key: "helper", label: "説明（生体）" },
+        { key: "initial", label: "説明（初回）" },
+        { key: "input", label: "入力パッド" },
+        { key: "biometric", label: "生体ボタン" },
+        { key: "initialButton", label: "初回ボタン" },
+        { key: "unlock", label: "解錠ボタン" }
+      ];
+    }
+
+    function isPartHidden(layout, key) {
+      if (!layout) return false;
+      const hiddenParts = layout.hiddenParts || {};
+      if (hiddenParts[key]) return true;
+      if (key === "helper") return layout.showHelperText === false;
+      if (key === "initial") return layout.showInitialDescription === false;
+      return false;
+    }
+
+    function loadLoginLayoutSettings() {
+      return loadSettings(LOGIN_LAYOUT_SETTINGS_KEY, getDefaultLoginLayoutSettings());
+    }
+
+    function saveLoginLayoutSettings(settings) {
+      saveSettings(LOGIN_LAYOUT_SETTINGS_KEY, settings);
+    }
+
+    function loadLoginLayoutLibrary() {
+      return loadSettings(LOGIN_LAYOUT_LIBRARY_KEY, []);
+    }
+
+    function saveLoginLayoutLibrary(library) {
+      saveSettings(LOGIN_LAYOUT_LIBRARY_KEY, library);
+    }
+
+    function loadLoginLayoutAssignments() {
+      return loadSettings(LOGIN_LAYOUT_ASSIGNMENTS_KEY, []);
+    }
+
+    function saveLoginLayoutAssignments(assignments) {
+      saveSettings(LOGIN_LAYOUT_ASSIGNMENTS_KEY, assignments);
+    }
+
+    function getAuthModeLabel(mode) {
+      const labels = {
+        instant_issue_fixed_biometric: "即時ID発行（初回事前固定PW/２回目以降生体情報認証）",
+        biometric_only: "生体情報認証運用",
+        password_only: "パスワード運用（固定PW、ワンタイムPW）",
+        pre_registered_biometric: "事前ID発行（生体認証、固定PW、ワンタイムPW）",
+        sms_auth: "SMS認証",
+        csv_fixed_pw: "CSVから固定PWを設定"
+      };
+      return labels[mode] || mode || "-";
+    }
+
+    function renderLoginPreview(layout, editable = false) {
+      const textColor = layout.textColor || "#f8fafc";
+      const accentColor = layout.accentColor || "#8b5cf6";
+      const buttonColor = layout.buttonColor || "#22d3ee";
+      const iconSize = layout.iconSize || 48;
+      const itemSize = layout.itemSize || 44;
+      const cardWidth = layout.cardWidth || 560;
+      const cardHeight = layout.cardHeight || 520;
+      const gridColumns = layout.gridColumns || 2;
+      const gridGap = layout.gridGap || 12;
+      const order = layout.gridOrder || {};
+      const span = layout.gridSpan || {};
+      const editableAttr = editable ? "contenteditable=\"true\"" : "";
+      const helperHidden = layout.showHelperText === false ? "is-hidden" : "";
+      const initialHidden = layout.showInitialDescription === false ? "is-hidden" : "";
+      const inputPlaceholder = loginSettingsWizardMode === "instant_issue_fixed_biometric"
+        ? "固定PWを入力"
+        : "園児コードを入力";
+      const iconClass = layout.iconStyle === "spinner" ? "preview-icon is-spinner" : "preview-icon";
+      const iconLabel = layout.iconStyle === "spinner" ? "" : "ID";
+      const itemStyle = (key) => {
+        const colSpan = Math.min(Math.max(Number(span[key] || gridColumns), 1), gridColumns);
+        const orderValue = Number(order[key] || 1);
+        return `order:${orderValue}; grid-column: span ${colSpan};`;
+      };
+      const orderControls = (key) => editable
+        ? `
+          <div class="preview-order-controls">
+            <button type="button" data-order-action="up" data-order-key="${key}" aria-label="上へ">↑</button>
+            <button type="button" data-order-action="down" data-order-key="${key}" aria-label="下へ">↓</button>
+          </div>
+        `
+        : "";
+      return `
+        <div id="layoutPreview" class="login-preview" style="
+          --preview-font-family:${layout.fontFamily || ""};
+          --preview-font-size:${layout.fontSize || 16}px;
+          --preview-text-color:${textColor};
+          --preview-accent-color:${accentColor};
+          --preview-button-color:${buttonColor};
+          --preview-icon-size:${iconSize}px;
+          --preview-item-size:${itemSize}px;
+        ">
+          <div class="preview-card" style="
+            width:100%;
+            max-width:100%;
+            height:${cardHeight}px;
+            display:grid;
+            grid-template-columns:repeat(${gridColumns}, minmax(0, 1fr));
+            grid-auto-rows:minmax(24px, auto);
+            gap:${gridGap}px;
+            --preview-grid-columns:${gridColumns};
+          ">
+            <div class="preview-item" data-item="icon" style="${itemStyle("icon")}">
+              ${orderControls("icon")}
+              <div class="${iconClass}" aria-hidden="true">${iconLabel}</div>
+            </div>
+            <div class="preview-item" data-item="title" style="${itemStyle("title")}">
+              ${orderControls("title")}
+              <div class="preview-title" ${editableAttr} data-field="titleText">${layout.titleText || "SenSei ログイン"}</div>
+            </div>
+            <div class="preview-item" data-item="subtitle" style="${itemStyle("subtitle")}">
+              ${orderControls("subtitle")}
+              <div class="preview-muted" ${editableAttr} data-field="subtitleText">${layout.subtitleText || "先生用端末の表示テーマに合わせたログイン画面"}</div>
+            </div>
+            <div class="preview-item ${helperHidden}" data-item="helper" data-preview="helper" style="${itemStyle("helper")}">
+              ${orderControls("helper")}
+              <div class="preview-muted" ${editableAttr} data-field="helperText">${layout.helperText || "タップして生体認証を開始してください。"}</div>
+            </div>
+            <div class="preview-item ${initialHidden}" data-item="initial" data-preview="initialDescription" style="${itemStyle("initial")}">
+              ${orderControls("initial")}
+              <div class="preview-muted" ${editableAttr} data-field="initialLoginDescription">${layout.initialLoginDescription || "説明書き: 端末認証＋コードで初回登録を行います。"}</div>
+            </div>
+            <div class="preview-item" data-item="input" style="${itemStyle("input")}">
+              ${orderControls("input")}
+              <input class="preview-input" type="text" value="${inputPlaceholder}" readonly aria-label="コード入力プレビュー">
+            </div>
+            <div class="preview-item" data-item="biometric" style="${itemStyle("biometric")}">
+              ${orderControls("biometric")}
+              <div class="preview-button" ${editableAttr} data-field="biometricButtonText">${layout.biometricButtonText || "生体認証を開始"}</div>
+            </div>
+            <div class="preview-item" data-item="initialButton" style="${itemStyle("initialButton")}">
+              ${orderControls("initialButton")}
+              <div class="preview-button" ${editableAttr} data-field="initialLoginButtonText">${layout.initialLoginButtonText || "初回ログインの方はこちら"}</div>
+            </div>
+            <div class="preview-item" data-item="unlock" style="${itemStyle("unlock")}">
+              ${orderControls("unlock")}
+              <div class="preview-button" ${editableAttr} data-field="passwordUnlockText">${layout.passwordUnlockText || "解錠"}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLoginSettingsStep(step, mode, settings) {
+      if (!loginSettingsContent) return;
+      if (loginSettingsStep) loginSettingsStep.textContent = `ステップ ${step} / 4`;
+      if (loginSettingsStatus) loginSettingsStatus.textContent = "";
+      const safe = settings || {};
+      updateEditQuickAvailability();
+      if (loginSettingsBack) loginSettingsBack.style.display = step === 1 ? "none" : "inline-flex";
+      if (loginSettingsNext) loginSettingsNext.style.display = step >= 4 ? "none" : "inline-flex";
+      if (loginSettingsSave) loginSettingsSave.style.display = step === 4 ? "inline-flex" : "none";
+      if (step === 1) {
+        loginSettingsContent.innerHTML = `
+          <div>
+            <label for="wizardModeSelect">モード選択</label>
+            <select id="wizardModeSelect">
+              <option value="instant_issue_fixed_biometric">即時ID発行（初回事前固定PW/２回目以降生体情報認証）</option>
+              <option value="biometric_only">生体情報認証運用</option>
+              <option value="password_only">パスワード運用（固定PW、ワンタイムPW）</option>
+              <option value="pre_registered_biometric">事前ID発行（生体認証、固定PW、ワンタイムPW）</option>
+              <option value="sms_auth">SMS認証</option>
+              <option value="csv_fixed_pw">CSVから固定PWを設定</option>
+            </select>
+          </div>
+        `;
+        const select = document.getElementById("wizardModeSelect");
+        if (select) select.value = mode || "instant_issue_fixed_biometric";
+        return;
+      }
+      if (step === 2) {
+        if (mode === "instant_issue_fixed_biometric") {
+          loginSettingsContent.innerHTML = `
+            <div>
+              <label for="instantFixedPassword">固定パスワード</label>
+              <input id="instantFixedPassword" type="password" inputmode="numeric" placeholder="例: 123456">
+            </div>
+            <div>
+              <label for="instantFixedLength">数字桁数</label>
+              <input id="instantFixedLength" type="number" min="4" max="12" value="${safe.fixedLength || 6}">
+            </div>
+            <div>
+              <label for="instantExpiry">有効期限</label>
+              <input id="instantExpiry" type="date" value="${safe.expiresAt || ""}">
+            </div>
+            <div>
+              <label for="instantFallback">生体情報未対応端末の対応</label>
+              <select id="instantFallback">
+                <option value="block">受付しない</option>
+                <option value="sms_otp">SMSワンタイムパスワード認証</option>
+              </select>
+            </div>
+          `;
+          const passInput = document.getElementById("instantFixedPassword");
+          if (passInput && safe.fixedPassword) passInput.value = safe.fixedPassword;
+          const fallback = document.getElementById("instantFallback");
+          if (fallback && safe.fallbackMode) fallback.value = safe.fallbackMode;
+          return;
+        }
+        loginSettingsContent.innerHTML = `
+          <p class="muted">このモードの認証内容は準備中です。次のステップでログイン画面構築に進みます。</p>
+        `;
+        return;
+      }
+      if (step === 3) {
+        const layout = safe.layout || loadLoginLayoutSettings();
+        const isInstant = mode === "instant_issue_fixed_biometric";
+        if (isInstant) {
+          layout.hiddenParts = {
+            ...(layout.hiddenParts || {}),
+            icon: true,
+            title: true,
+            subtitle: true,
+            helper: true,
+            initial: true,
+            unlock: true
+          };
+          layout.showHelperText = false;
+          layout.showInitialDescription = false;
+          if (!layout.initialLoginButtonText || layout.initialLoginButtonText === "初回ログインの方はこちら") {
+            layout.initialLoginButtonText = "ID登録はこちら";
+          }
+        }
+        loginSettingsContent.innerHTML = `
+          <div class="wizard-layout">
+            <div class="form-grid">
+              <div>
+                <label>文字サイズ</label>
+                <div class="range-control">
+                  <button type="button" class="range-btn" data-range-step="-1" data-range-target="layoutFontSizeRange">ー</button>
+                  <input id="layoutFontSizeRange" type="range" min="12" max="28" value="${layout.fontSize || 16}">
+                  <button type="button" class="range-btn" data-range-step="1" data-range-target="layoutFontSizeRange">＋</button>
+                  <span class="range-value" data-range-output="layoutFontSizeRange" data-range-suffix="px"></span>
+                </div>
+              </div>
+              <div>
+                <label for="layoutFontFamily">文字フォント</label>
+                <input id="layoutFontFamily" type="text" value="${layout.fontFamily || ""}" placeholder="例: Noto Sans JP">
+              </div>
+              <div>
+                <label for="layoutTextColor">文字色</label>
+                <input id="layoutTextColor" type="color" value="${layout.textColor || "#f8fafc"}">
+              </div>
+              <div>
+                <label for="layoutAccentColor">アクセント色</label>
+                <input id="layoutAccentColor" type="color" value="${layout.accentColor || "#8b5cf6"}">
+              </div>
+              <div>
+                <label for="layoutButtonColor">ボタン色</label>
+                <input id="layoutButtonColor" type="color" value="${layout.buttonColor || "#22d3ee"}">
+              </div>
+              <div>
+                <label>アイコン大きさ（px）</label>
+                <div class="range-control">
+                  <button type="button" class="range-btn" data-range-step="-2" data-range-target="layoutIconSizeRange">ー</button>
+                  <input id="layoutIconSizeRange" type="range" min="32" max="96" value="${layout.iconSize || 48}">
+                  <button type="button" class="range-btn" data-range-step="2" data-range-target="layoutIconSizeRange">＋</button>
+                  <span class="range-value" data-range-output="layoutIconSizeRange" data-range-suffix="px"></span>
+                </div>
+              </div>
+              <div>
+                <label>項目大きさ（px）</label>
+                <div class="range-control">
+                  <button type="button" class="range-btn" data-range-step="-2" data-range-target="layoutItemSizeRange">ー</button>
+                  <input id="layoutItemSizeRange" type="range" min="32" max="72" value="${layout.itemSize || 44}">
+                  <button type="button" class="range-btn" data-range-step="2" data-range-target="layoutItemSizeRange">＋</button>
+                  <span class="range-value" data-range-output="layoutItemSizeRange" data-range-suffix="px"></span>
+                </div>
+              </div>
+              <div>
+                <label for="layoutIconStyle">アイコン</label>
+                <select id="layoutIconStyle">
+                  <option value="circle">丸アイコン</option>
+                  <option value="spinner">くるくる</option>
+                </select>
+              </div>
+              <div>
+                <label for="layoutButtonShape">ボタン形状</label>
+                <select id="layoutButtonShape">
+                  <option value="rounded">角丸</option>
+                  <option value="pill">ピル型</option>
+                  <option value="square">角小さめ</option>
+                </select>
+              </div>
+              <div>
+                <label for="layoutButtonSize">ボタンサイズ</label>
+                <select id="layoutButtonSize">
+                  <option value="compact">コンパクト</option>
+                  <option value="standard">標準</option>
+                  <option value="large">大きめ</option>
+                </select>
+              </div>
+              <div>
+                <label>ログイン画面の幅</label>
+                <div class="range-control">
+                  <button type="button" class="range-btn" data-range-step="-20" data-range-target="layoutCardWidthRange">ー</button>
+                  <input id="layoutCardWidthRange" type="range" min="360" max="760" value="${layout.cardWidth || 560}">
+                  <button type="button" class="range-btn" data-range-step="20" data-range-target="layoutCardWidthRange">＋</button>
+                  <span class="range-value" data-range-output="layoutCardWidthRange" data-range-suffix="px"></span>
+                </div>
+              </div>
+              <div>
+                <label>ログイン画面の高さ</label>
+                <div class="range-control">
+                  <button type="button" class="range-btn" data-range-step="-20" data-range-target="layoutCardHeightRange">ー</button>
+                  <input id="layoutCardHeightRange" type="range" min="320" max="900" value="${layout.cardHeight || 520}">
+                  <button type="button" class="range-btn" data-range-step="20" data-range-target="layoutCardHeightRange">＋</button>
+                  <span class="range-value" data-range-output="layoutCardHeightRange" data-range-suffix="px"></span>
+                </div>
+              </div>
+              <div>
+                <label>グリッド列数</label>
+                <div class="range-control">
+                  <button type="button" class="range-btn" data-range-step="-1" data-range-target="layoutGridColumns">ー</button>
+                  <input id="layoutGridColumns" type="range" min="1" max="4" value="${layout.gridColumns || 2}">
+                  <button type="button" class="range-btn" data-range-step="1" data-range-target="layoutGridColumns">＋</button>
+                  <span class="range-value" data-range-output="layoutGridColumns" data-range-suffix="列"></span>
+                </div>
+              </div>
+              <div>
+                <label>グリッド間隔</label>
+                <div class="range-control">
+                  <button type="button" class="range-btn" data-range-step="-2" data-range-target="layoutGridGap">ー</button>
+                  <input id="layoutGridGap" type="range" min="4" max="24" value="${layout.gridGap || 12}">
+                  <button type="button" class="range-btn" data-range-step="2" data-range-target="layoutGridGap">＋</button>
+                  <span class="range-value" data-range-output="layoutGridGap" data-range-suffix="px"></span>
+                </div>
+              </div>
+              <label class="toggle-item">
+                <input type="checkbox" id="layoutShowHelper" ${layout.showHelperText === false ? "" : "checked"}>
+                <div>
+                  <strong>説明文（生体認証）を表示</strong>
+                  <span>表示しない場合はチェックを外してください。</span>
+                </div>
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" id="layoutShowInitial" ${layout.showInitialDescription === false ? "" : "checked"}>
+                <div>
+                  <strong>説明文（初回ログイン）を表示</strong>
+                  <span>不要な場合はチェックを外してください。</span>
+                </div>
+              </label>
+            </div>
+            <div class="builder-right">
+              ${renderLoginPreview(layout, true)}
+            </div>
+          </div>
+                `;
+        const buttonShape = document.getElementById("layoutButtonShape");
+        if (buttonShape) buttonShape.value = layout.buttonShape || "rounded";
+        const buttonSize = document.getElementById("layoutButtonSize");
+        if (buttonSize) buttonSize.value = layout.buttonSize || "standard";
+        const iconStyle = document.getElementById("layoutIconStyle");
+        if (iconStyle) iconStyle.value = layout.iconStyle || "circle";
+        attachPreviewEditors();
+        return;
+      }
+      const layout = safe.layout || loadLoginLayoutSettings();
+      loginSettingsContent.innerHTML = `
+        <div class="notice">
+          <div>選択モード: ${getAuthModeLabel(mode)}</div>
+          <div>固定パスワード: ${safe.fixedPassword ? "設定済み" : "未設定"}</div>
+          <div>数字桁数: ${safe.fixedLength || "-"}</div>
+          <div>有効期限: ${safe.expiresAt || "なし"}</div>
+          <div>未対応端末対応: ${safe.fallbackMode === "sms_otp" ? "SMSワンタイム" : "受付しない"}</div>
+          <div>文字サイズ: ${layout.fontSize || 16}px / フォント: ${layout.fontFamily || "-"}</div>
+        </div>
+        <div class="wizard-divider">ログイン画面プレビュー</div>
+        ${renderLoginPreview(layout, false)}
+      `;
+      attachPreviewEditors();
+    }
+
+    function requireAdmin(){
+      const adminName = session?.getActiveAdmin?.();
+      if(!adminName){
+        window.location.href = "login.html";
+        throw new Error("管理者でのログインが必要です");
+      }
+      if(adminNameEl) adminNameEl.textContent = adminName;
+      if(adminSignedAtEl){
+        const signedAt = session?.getAdminSignedInAt?.();
+        if (signedAt) {
+          const date = new Date(signedAt);
+          adminSignedAtEl.textContent = `最終認証: ${date.toLocaleString()}`;
+        } else {
+          adminSignedAtEl.textContent = "管理権限: 有効";
+        }
+      }
+    }
+
+    function setStatus(target, message, isError = false){
+      if(!target) return;
+      target.textContent = message;
+      target.classList.toggle("error", !!isError);
+    }
+
+    function getLoginManagementDefaults() {
+      return [
+        {
+          id: "login-portal",
+          name: "先生ポータル",
+          url: "/teacher/portal",
+          loginUrl: "https://portal.encho.app/login",
+          loginNote: "ログイン後は/teacherへ遷移",
+          authMethod: "fixed_password",
+          fixedPassword: "portal-2024",
+          passwordLength: 6,
+          otpLength: null,
+          requireAlphanumeric: false,
+          requireUppercase: false,
+          requireSymbols: false,
+          expiresAt: "2025-03-31",
+          loginLayoutId: ""
+        },
+        {
+          id: "login-guardian",
+          name: "保護者ログイン",
+          url: "/guardian",
+          loginUrl: "https://guardian.encho.app/auth",
+          loginNote: "子ども情報を取得",
+          authMethod: "assigned_credentials",
+          fixedPassword: "",
+          passwordLength: 8,
+          otpLength: null,
+          requireAlphanumeric: true,
+          requireUppercase: false,
+          requireSymbols: false,
+          expiresAt: "2024-12-20",
+          loginLayoutId: ""
+        },
+        {
+          id: "login-support-otp",
+          name: "サポート窓口",
+          url: "/support/otp",
+          loginUrl: "https://support.encho.app/otp",
+          loginNote: "緊急連絡用",
+          authMethod: "otp",
+          fixedPassword: "",
+          passwordLength: null,
+          otpLength: 6,
+          requireAlphanumeric: true,
+          requireUppercase: true,
+          requireSymbols: false,
+          testMode: false,
+          expiresAt: "2024-10-01",
+          loginLayoutId: ""
+        },
+        {
+          id: "login-admin-passkey",
+          name: "管理者端末",
+          url: "/admin/passkey",
+          loginUrl: "https://admin.encho.app/passkey",
+          loginNote: "端末登録必須",
+          authMethod: "passkey",
+          fixedPassword: "",
+          passwordLength: null,
+          otpLength: null,
+          requireAlphanumeric: false,
+          requireUppercase: false,
+          requireSymbols: false,
+          testMode: false,
+          expiresAt: "",
+          loginLayoutId: ""
+        }
+      ];
+    }
+
+    let loginManagementEntries = getLoginManagementDefaults();
+    let loginManagementLoaded = false;
+
+    async function fetchLoginManagementEntries() {
+      try {
+        const res = await fetch("/admin/settings/login-management", {
+          headers: { accept: "application/json" },
+          credentials: "include"
+        });
+        if (!res.ok) throw new Error("ログイン管理の取得に失敗しました。");
+        const data = await res.json();
+        const entries = Array.isArray(data.entries) ? data.entries : [];
+        loginManagementEntries = entries.length ? entries : getLoginManagementDefaults();
+        loginManagementLoaded = true;
+        setStatus(loginManagementStatus, "");
+        return loginManagementEntries;
+      } catch (error) {
+        console.warn("ログイン管理の取得に失敗しました", error);
+        loginManagementEntries = getLoginManagementDefaults();
+        loginManagementLoaded = true;
+        setStatus(loginManagementStatus, "ログイン管理の取得に失敗しました。再ログインしてください。", true);
+        return loginManagementEntries;
+      }
+    }
+
+    function loadLoginManagementEntries() {
+      return loginManagementEntries;
+    }
+
+    async function saveLoginManagementEntries(entries) {
+      loginManagementEntries = entries;
+      try {
+        const res = await fetch("/admin/settings/login-management", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ entries })
+        });
+        if (!res.ok) throw new Error("ログイン管理の保存に失敗しました。");
+        const data = await res.json();
+        loginManagementEntries = Array.isArray(data.entries) ? data.entries : entries;
+        setStatus(loginManagementStatus, "ログイン管理を保存しました。");
+        return loginManagementEntries;
+      } catch (error) {
+        console.warn("ログイン管理の保存に失敗しました", error);
+        setStatus(loginManagementStatus, "ログイン管理の保存に失敗しました。再ログインしてください。", true);
+        return loginManagementEntries;
+      }
+    }
+
+    function getLoginManagementAuthLabel(method) {
+      switch (method) {
+        case "fixed_password":
+          return "固定パスワード";
+        case "assigned_credentials":
+          return "指定ID/パスワード";
+        case "otp":
+          return "ワンタイムパスワード";
+        case "passkey":
+          return "Passkey";
+        case "oath":
+          return "Oath";
+        default:
+          return "未設定";
+      }
+    }
+
+    function getLoginManagementAuthClass(method) {
+      if (method === "otp") return "badge warning";
+      if (method === "assigned_credentials") return "badge tertiary";
+      return "badge";
+    }
+
+    function getLoginLayoutName(layoutId) {
+      if (!layoutId) return "未指定";
+      const library = loadLoginLayoutLibrary();
+      const match = library.find((entry) => entry.id === layoutId);
+      return match ? match.name : "未指定";
+    }
+
+    function renderLoginManagementLayoutOptions(selectedId = "") {
+      if (!loginManagementLayoutSelect) return;
+      const library = loadLoginLayoutLibrary();
+      if (!library.length) {
+        loginManagementLayoutSelect.innerHTML = `<option value="">登録なし</option>`;
+        return;
+      }
+      loginManagementLayoutSelect.innerHTML = [
+        `<option value="">未指定</option>`,
+        ...library.map((entry) => `<option value="${entry.id}">${entry.name}</option>`)
+      ].join("");
+      loginManagementLayoutSelect.value = selectedId || "";
+    }
+
+    function renderLoginManagementTable() {
+      if (!loginManagementRows) return;
+      const entries = loadLoginManagementEntries();
+      if (!entries.length) {
+        loginManagementRows.innerHTML = `
+          <div class="login-management-row" role="row">
+            <div class="login-management-cell" role="cell" style="grid-column:1/-1;">
+              <span class="small-muted">ログイン管理の登録はありません。</span>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      loginManagementRows.innerHTML = entries.map((entry) => {
+        const layoutName = getLoginLayoutName(entry.loginLayoutId);
+        const authLabel = getLoginManagementAuthLabel(entry.authMethod);
+        const authClass = getLoginManagementAuthClass(entry.authMethod);
+        const fixedPasswordLabel = entry.authMethod === "fixed_password"
+          ? `固定PW: ${entry.fixedPassword || "-"}`
+          : "固定PW: 対象外";
+        const testModeLabel = entry.testMode ? "テストモード: 有効" : "テストモード: 無効";
+        const otpMeta = entry.authMethod === "otp"
+          ? `
+            <span>桁数: ${entry.otpLength || "-"}</span>
+            <span>英数字: ${entry.requireAlphanumeric ? "有効" : "無効"} / 大文字: ${entry.requireUppercase ? "有効" : "無効"} / 記号: ${entry.requireSymbols ? "有効" : "無効"}</span>
+          `
+          : `<span>対象外</span>`;
+        const expiresLabel = entry.expiresAt ? entry.expiresAt.replace(/-/g, "/") : "無期限";
+        return `
+          <div class="login-management-row" role="row">
+            <div class="login-management-cell login-management-url-cell" role="cell">
+              <strong>${entry.url}</strong>
+              <span>${entry.name || "名称未設定"}</span>
+            </div>
+            <div class="login-management-cell login-management-url-cell" role="cell">
+              <strong>${entry.loginUrl}</strong>
+              <span>${entry.loginNote || "補足なし"} / ログイン画面: ${layoutName}</span>
+            </div>
+            <div class="login-management-cell" role="cell">
+              <span class="${authClass}">${authLabel}</span>
+              <span>PW桁数: ${entry.passwordLength || "-"}</span>
+              <span>${fixedPasswordLabel}</span>
+              <span>${testModeLabel}</span>
+            </div>
+            <div class="login-management-cell login-management-meta" role="cell">
+              ${otpMeta}
+            </div>
+            <div class="login-management-cell" role="cell">
+              <strong>${expiresLabel}</strong>
+              <span>${entry.expiresAt ? "期限あり" : "期限なし"}</span>
+            </div>
+            <div class="login-management-actions" role="cell">
+              <button class="btn secondary small" type="button" data-edit-login="${entry.id}">編集</button>
+              <button class="btn danger small" type="button" data-remove-login="${entry.id}">削除</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      loginManagementRows.querySelectorAll("[data-edit-login]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.editLogin;
+          const entry = loadLoginManagementEntries().find((item) => item.id === id);
+          if (!entry) return;
+          openLoginManagementModal(entry);
+        });
+      });
+
+      loginManagementRows.querySelectorAll("[data-remove-login]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.removeLogin;
+          if (!id) return;
+          const next = loadLoginManagementEntries().filter((item) => item.id !== id);
+          await saveLoginManagementEntries(next);
+          renderLoginManagementTable();
+        });
+      });
+    }
+
+    function openLoginManagementModal(entry = null) {
+      if (!loginManagementModal) return;
+      activeLoginManagementId = entry?.id || null;
+      if (loginManagementTitle) {
+        loginManagementTitle.textContent = entry ? "ログイン管理を編集" : "ログイン管理を新規作成";
+      }
+      if (loginManagementName) loginManagementName.value = entry?.name || "";
+      if (loginManagementUrl) loginManagementUrl.value = entry?.url || "";
+      if (loginManagementLoginUrl) loginManagementLoginUrl.value = entry?.loginUrl || "";
+      if (loginManagementLoginNote) loginManagementLoginNote.value = entry?.loginNote || "";
+      if (loginManagementAuthMethod) loginManagementAuthMethod.value = entry?.authMethod || "fixed_password";
+      if (loginManagementFixedPassword) loginManagementFixedPassword.value = entry?.fixedPassword || "";
+      if (loginManagementPasswordLength) loginManagementPasswordLength.value = entry?.passwordLength || "";
+      if (loginManagementOtpLength) loginManagementOtpLength.value = entry?.otpLength || "";
+      if (loginManagementRequireAlphanumeric) loginManagementRequireAlphanumeric.checked = !!entry?.requireAlphanumeric;
+      if (loginManagementRequireUppercase) loginManagementRequireUppercase.checked = !!entry?.requireUppercase;
+      if (loginManagementRequireSymbols) loginManagementRequireSymbols.checked = !!entry?.requireSymbols;
+      if (loginManagementTestMode) loginManagementTestMode.checked = !!entry?.testMode;
+      if (loginManagementExpiresAt) loginManagementExpiresAt.value = entry?.expiresAt || "";
+      renderLoginManagementLayoutOptions(entry?.loginLayoutId || "");
+      setStatus(loginManagementStatus, "");
+      loginManagementModal.classList.add("is-open");
+    }
+
+    function closeLoginManagementModal() {
+      if (!loginManagementModal) return;
+      loginManagementModal.classList.remove("is-open");
+      activeLoginManagementId = null;
+      if (loginManagementForm) loginManagementForm.reset();
+      setStatus(loginManagementStatus, "");
+    }
+
+    async function saveLoginManagementFromModal() {
+      if (!loginManagementUrl || !loginManagementLoginUrl || !loginManagementAuthMethod) return;
+      const urlValue = (loginManagementUrl.value || "").trim();
+      const loginUrlValue = (loginManagementLoginUrl.value || "").trim();
+      if (!urlValue) {
+        setStatus(loginManagementStatus, "URLを入力してください。", true);
+        return;
+      }
+      if (!loginUrlValue) {
+        setStatus(loginManagementStatus, "ログイン先URLを入力してください。", true);
+        return;
+      }
+      const authMethodValue = loginManagementAuthMethod.value || "fixed_password";
+      const fixedPasswordValue = (loginManagementFixedPassword?.value || "").trim();
+      if (authMethodValue === "fixed_password" && !fixedPasswordValue) {
+        setStatus(loginManagementStatus, "固定パスワードを入力してください。", true);
+        return;
+      }
+      const otpLengthValue = Number(loginManagementOtpLength?.value || "");
+      if (authMethodValue === "otp" && (!Number.isFinite(otpLengthValue) || otpLengthValue <= 0)) {
+        setStatus(loginManagementStatus, "ワンタイムパスワード桁数を入力してください。", true);
+        return;
+      }
+      const passwordLengthValue = Number(loginManagementPasswordLength?.value || "");
+      const entry = {
+        id: activeLoginManagementId || `login-${Date.now()}`,
+        name: (loginManagementName?.value || "").trim(),
+        url: urlValue,
+        loginUrl: loginUrlValue,
+        loginNote: (loginManagementLoginNote?.value || "").trim(),
+        authMethod: authMethodValue,
+        fixedPassword: authMethodValue === "fixed_password" ? fixedPasswordValue : "",
+        passwordLength: Number.isFinite(passwordLengthValue) && passwordLengthValue > 0 ? passwordLengthValue : null,
+        otpLength: Number.isFinite(otpLengthValue) && otpLengthValue > 0 ? otpLengthValue : null,
+        requireAlphanumeric: !!loginManagementRequireAlphanumeric?.checked,
+        requireUppercase: !!loginManagementRequireUppercase?.checked,
+        requireSymbols: !!loginManagementRequireSymbols?.checked,
+        testMode: !!loginManagementTestMode?.checked,
+        expiresAt: loginManagementExpiresAt?.value || "",
+        loginLayoutId: loginManagementLayoutSelect?.value || ""
+      };
+      const entries = loadLoginManagementEntries();
+      const existingIndex = entries.findIndex((item) => item.id === activeLoginManagementId);
+      if (existingIndex >= 0) {
+        entries[existingIndex] = entry;
+      } else {
+        entries.push(entry);
+      }
+      await saveLoginManagementEntries(entries);
+      renderLoginManagementTable();
+      closeLoginManagementModal();
+    }
+
+    function renderLayoutLibrary() {
+      if (!layoutLibraryList || !layoutAssignSelect) return;
+      const library = loadLoginLayoutLibrary();
+      if (!library.length) {
+        layoutLibraryList.innerHTML = `<p class="empty">登録された画面構築がありません。</p>`;
+        layoutAssignSelect.innerHTML = `<option value="">登録なし</option>`;
+      } else {
+        layoutLibraryList.innerHTML = library.map((entry) => `
+          <div class="list-item">
+            <div class="list-meta">
+              <strong>${entry.name}</strong>
+              <span>${entry.updatedAt ? new Date(entry.updatedAt).toLocaleString() : "-"}</span>
+            </div>
+            <button type="button" class="action-btn danger" data-remove-layout="${entry.id}">削除</button>
+          </div>
+        `).join("");
+        layoutAssignSelect.innerHTML = library.map((entry) => `
+          <option value="${entry.id}">${entry.name}</option>
+        `).join("");
+      }
+      layoutLibraryList.querySelectorAll("[data-remove-layout]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.removeLayout;
+          if (!id) return;
+          const next = loadLoginLayoutLibrary().filter((entry) => entry.id !== id);
+          saveLoginLayoutLibrary(next);
+          const assignments = loadLoginLayoutAssignments().filter((entry) => entry.layoutId !== id);
+          saveLoginLayoutAssignments(assignments);
+          renderLayoutLibrary();
+          renderLayoutAssignments();
+        });
+      });
+      renderLoginManagementTable();
+    }
+
+    function renderLayoutAssignments() {
+      if (!layoutAssignList) return;
+      const assignments = loadLoginLayoutAssignments();
+      const library = loadLoginLayoutLibrary();
+      if (!assignments.length) {
+        layoutAssignList.innerHTML = `<p class="empty">割当てがありません。</p>`;
+        return;
+      }
+      const nameById = new Map(library.map((entry) => [entry.id, entry.name]));
+      layoutAssignList.innerHTML = assignments.map((entry) => `
+        <div class="list-item">
+          <div class="list-meta">
+            <strong>${entry.url}</strong>
+            <span>適用: ${nameById.get(entry.layoutId) || "未設定"}</span>
+          </div>
+          <button type="button" class="action-btn danger" data-remove-assignment="${entry.id}">削除</button>
+        </div>
+      `).join("");
+      layoutAssignList.querySelectorAll("[data-remove-assignment]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.removeAssignment;
+          if (!id) return;
+          const next = loadLoginLayoutAssignments().filter((entry) => entry.id !== id);
+          saveLoginLayoutAssignments(next);
+          renderLayoutAssignments();
+        });
+      });
+    }
+
+    function ensureDefaultLayoutSnapshot() {
+      if (!layoutNameInput) return;
+      if (localStorage.getItem(LOGIN_LAYOUT_DEFAULT_SNAPSHOT_KEY)) return;
+      const layout = loadLoginLayoutSettings();
+      const library = loadLoginLayoutLibrary();
+      const entry = {
+        id: `layout-${Date.now()}`,
+        name: "登録画面１",
+        layout,
+        updatedAt: Date.now()
+      };
+      library.push(entry);
+      saveLoginLayoutLibrary(library);
+      localStorage.setItem(LOGIN_LAYOUT_DEFAULT_SNAPSHOT_KEY, "true");
+    }
+
+    function renderProfiles(){
+      if(!userProfilesEl) return;
+      const state = session?.loadUserState?.() || { profiles:{} };
+      const entries = Object.entries(state.profiles || {});
+      if(!entries.length){
+        userProfilesEl.innerHTML = `<p class="empty">保存されたユーザーはありません。</p>`;
+        return;
+      }
+      userProfilesEl.innerHTML = entries.map(([name, profile])=>{
+        const last = profile?.lastPage || "未利用";
+        return `
+          <div class="list-item">
+            <div class="list-meta">
+              <strong>${name}</strong>
+              <span>前回のページ: ${last}</span>
+            </div>
+            <button type="button" class="action-btn danger" data-remove-user="${name}">削除</button>
+          </div>
+        `;
+      }).join("");
+
+      userProfilesEl.querySelectorAll("button[data-remove-user]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = btn.dataset.removeUser;
+          if (!target) return;
+          const next = session?.loadUserState?.() || { activeUser: null, profiles: {} };
+          delete next.profiles[target];
+          if (next.activeUser === target) next.activeUser = null;
+          session?.saveUserState?.(next);
+          renderProfiles();
+        });
+      });
+    }
+
+    function loadLockMode(){
+      if(!lockModeToggle) return;
+      lockModeToggle.checked = session?.getLockMode?.() ?? false;
+      setStatus(lockModeStatus, "現在の状態を読み込みました。");
+    }
+
+    function loadForceInitSetting() {
+      if (!forceInitToggle) return;
+      forceInitToggle.checked = localStorage.getItem(FORCE_MASTER_SETUP_ENABLED_KEY) === "true";
+      setStatus(forceInitStatus, "現在の設定を読み込みました。");
+    }
+
+    function loadAuthMode(){
+      if(!authModeSelect) return;
+      authModeSelect.value = localStorage.getItem(AUTH_MODE_KEY) || "biometric_only";
+      setStatus(authModeStatus, "現在の設定を読み込みました。");
+    }
+
+    function renderAdminList(){
+      if(!adminList) return;
+      const users = loadAdminUsers();
+      if (!users.length) {
+        adminList.innerHTML = `<p class="empty">管理者が登録されていません。</p>`;
+        return;
+      }
+      adminList.innerHTML = `
+        <div class="admin-table-header">
+          <div>管理者ID</div>
+          <div>管理者PW</div>
+          <div>操作</div>
+          <div>管理権限期間</div>
+        </div>
+        ${users.map((user) => {
+          const isMaster = user.role === "master" || (user.permissions || []).includes("master");
+          const period = user.permissionPeriod || "無期限";
+          return `
+            <div class="admin-table-row" data-admin-row="${user.id}">
+              <div class="admin-cell">
+                <span class="admin-label">管理者ID</span>
+                <input class="admin-input" type="text" data-field="id" value="${user.id}" disabled>
+                ${isMaster ? `<span class="chip primary">初回登録管理者</span>` : ""}
+              </div>
+              <div class="admin-cell">
+                <span class="admin-label">管理者PW</span>
+                <input class="admin-input" type="password" data-field="password" value="${user.password || ""}" disabled>
+              </div>
+              <div class="admin-cell">
+                <span class="admin-label">操作</span>
+                <div class="admin-actions">
+                  <button type="button" class="btn secondary small" data-action="edit">編集</button>
+                  <button type="button" class="btn small" data-action="save">保存</button>
+                  <button type="button" class="btn secondary small" data-action="reset">リセット</button>
+                  <button type="button" class="btn danger small" data-action="remove" data-remove-admin="${user.id}">削除</button>
+                </div>
+              </div>
+              <div class="admin-cell">
+                <span class="admin-label">管理権限期間</span>
+                <input class="admin-input" type="text" data-field="permissionPeriod" value="${period}" disabled>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      `;
+
+      adminList.querySelectorAll("button[data-action='remove']").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = btn.dataset.removeAdmin;
+          if (!target) return;
+          const users = loadAdminUsers().filter(user => user.id !== target);
+          saveAdminUsers(users);
+          renderAdminList();
+          renderPermissionTargets();
+          setStatus(adminListStatus, "管理者を削除しました。");
+        });
+      });
+
+      adminList.querySelectorAll(".admin-table-row").forEach((row) => {
+        const editBtn = row.querySelector("button[data-action='edit']");
+        const saveBtn = row.querySelector("button[data-action='save']");
+        const resetBtn = row.querySelector("button[data-action='reset']");
+        const inputs = row.querySelectorAll(".admin-input");
+        const originalId = row.dataset.adminRow;
+
+        const resetRow = () => {
+          const users = loadAdminUsers();
+          const target = users.find((user) => user.id === originalId);
+          if (!target) return;
+          inputs.forEach((input) => {
+            if (input.dataset.field === "id") input.value = target.id;
+            if (input.dataset.field === "password") input.value = target.password || "";
+            if (input.dataset.field === "permissionPeriod") input.value = target.permissionPeriod || "無期限";
+            input.disabled = true;
+          });
+          row.classList.remove("is-editing");
+          setStatus(adminListStatus, "編集内容をリセットしました。");
+        };
+
+        editBtn?.addEventListener("click", () => {
+          inputs.forEach((input) => {
+            input.disabled = false;
+          });
+          row.classList.add("is-editing");
+          setStatus(adminListStatus, "編集モードに切り替えました。");
+        });
+
+        saveBtn?.addEventListener("click", () => {
+          const users = loadAdminUsers();
+          const targetIndex = users.findIndex((user) => user.id === originalId);
+          if (targetIndex === -1) return;
+          const idInput = row.querySelector("input[data-field='id']");
+          const pwInput = row.querySelector("input[data-field='password']");
+          const periodInput = row.querySelector("input[data-field='permissionPeriod']");
+          const nextId = idInput?.value.trim() || "";
+          const nextPw = pwInput?.value.trim() || "";
+          const nextPeriod = periodInput?.value.trim() || "無期限";
+          if (!nextId || !nextPw) {
+            setStatus(adminListStatus, "管理者IDとPWを入力してください。", true);
+            return;
+          }
+          if (nextId !== originalId && users.some(user => user.id === nextId)) {
+            setStatus(adminListStatus, "同じ管理者IDが既に存在します。", true);
+            return;
+          }
+          users[targetIndex] = {
+            ...users[targetIndex],
+            id: nextId,
+            password: nextPw,
+            permissionPeriod: nextPeriod
+          };
+          saveAdminUsers(users);
+          setStatus(adminListStatus, "管理者情報を保存しました。");
+          renderAdminList();
+          renderPermissionTargets();
+        });
+
+        resetBtn?.addEventListener("click", resetRow);
+      });
+    }
+
+    function renderPermissionTargets(){
+      if(!permissionTarget) return;
+      const users = loadAdminUsers();
+      permissionTarget.innerHTML = users.map(user => `<option value="${user.id}">${user.id}</option>`).join("");
+    }
+
+    function loadPermissionSelection(){
+      const targetId = permissionTarget?.value;
+      const users = loadAdminUsers();
+      const target = users.find(user => user.id === targetId);
+      const permissions = target?.permissions || [];
+      permissionForm?.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
+        checkbox.checked = permissions.includes(checkbox.value);
+      });
+    }
+
+    function renderDevices(){
+      const devices = loadAdminDevices();
+      const targets = [deviceList, adminDeviceList].filter(Boolean);
+      targets.forEach((target) => {
+        if (!devices.length) {
+          target.innerHTML = `<p class="empty">登録された端末がありません。</p>`;
+          return;
+        }
+        target.innerHTML = devices.map((device) => `
+          <div class="list-item">
+            <div class="list-meta">
+              <strong>${device.label}</strong>
+              <span>${new Date(device.addedAt).toLocaleString()}</span>
+            </div>
+            <button type="button" class="action-btn danger" data-remove-device="${device.id}">削除</button>
+          </div>
+        `).join("");
+        target.querySelectorAll("button[data-remove-device]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = btn.dataset.removeDevice;
+            const devices = loadAdminDevices().filter(device => device.id !== id);
+            saveAdminDevices(devices);
+            renderDevices();
+          });
+        });
+      });
+    }
+
+    function renderAuthDevices(){
+      if (!authDeviceList) return;
+      const devices = loadAuthDevices();
+      if (!devices.length) {
+        authDeviceList.innerHTML = `<p class="empty">登録された端末がありません。</p>`;
+        return;
+      }
+      authDeviceList.innerHTML = devices.map((device) => `
+        <div class="list-item">
+          <div class="list-meta">
+            <strong>${device.label}</strong>
+            <span>${new Date(device.addedAt).toLocaleString()}</span>
+          </div>
+          <button type="button" class="action-btn danger" data-remove-auth-device="${device.id}">削除</button>
+        </div>
+      `).join("");
+      authDeviceList.querySelectorAll("button[data-remove-auth-device]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.removeAuthDevice;
+          const devices = loadAuthDevices().filter(device => device.id !== id);
+          saveAuthDevices(devices);
+          renderAuthDevices();
+        });
+      });
+    }
+
+    async function startFingerprintAuth(messageTarget) {
+      if (!("credentials" in navigator) || !window.PublicKeyCredential) {
+        setStatus(messageTarget, "この端末では指紋認証に対応していません。", true);
+        return false;
+      }
+      try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+        const credential = await navigator.credentials.get({
+          publicKey: {
+            challenge,
+            timeout: 60000,
+            userVerification: "required"
+          },
+          mediation: "optional"
+        });
+        return !!credential;
+      } catch (error) {
+        setStatus(messageTarget, "指紋認証に失敗しました。", true);
+        return false;
+      }
+    }
+
+    function loadOtpCodes(){
+      try {
+        const raw = localStorage.getItem(OTP_CODES_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveOtpCodes(codes){
+      localStorage.setItem(OTP_CODES_KEY, JSON.stringify(codes));
+    }
+
+    function renderOtpList(){
+      if(!otpIssueList) return;
+      const entries = loadOtpCodes();
+      if(!entries.length){
+        otpIssueList.innerHTML = `<p class="empty">発券済みコードはありません。</p>`;
+        return;
+      }
+      otpIssueList.innerHTML = entries.map(entry => `
+        <div class="list-item">
+          <div class="list-meta">
+            <strong>${entry.code}</strong>
+            <span>種別: ${entry.type} / 発行: ${new Date(entry.issuedAt).toLocaleString()}</span>
+            <span>${entry.usedAt ? "使用済み" : "未使用"}</span>
+          </div>
+          <button type="button" class="action-btn danger" data-remove-otp="${entry.code}">削除</button>
+        </div>
+      `).join("");
+      otpIssueList.querySelectorAll("button[data-remove-otp]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const code = btn.dataset.removeOtp;
+          const entries = loadOtpCodes().filter(entry => entry.code !== code);
+          saveOtpCodes(entries);
+          renderOtpList();
+        });
+      });
+    }
+
+    function loadSystemKeys(){
+      try {
+        const raw = localStorage.getItem(SYSTEM_KEYS_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveSystemKeys(entries){
+      localStorage.setItem(SYSTEM_KEYS_KEY, JSON.stringify(entries));
+    }
+
+    function renderSystemKeys(){
+      if(!systemKeyList) return;
+      const entries = loadSystemKeys();
+      if(!entries.length){
+        systemKeyList.innerHTML = `<p class="empty">登録されたシステムキーはありません。</p>`;
+        return;
+      }
+      systemKeyList.innerHTML = entries.map((entry, index) => `
+        <div class="list-item">
+          <div class="list-meta">
+            <strong>${entry.code}</strong>
+            <span>${entry.label || "-"} / ${entry.mode}</span>
+          </div>
+          <button type="button" class="action-btn danger" data-remove-system="${index}">削除</button>
+        </div>
+      `).join("");
+      systemKeyList.querySelectorAll("button[data-remove-system]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const index = Number(btn.dataset.removeSystem);
+          const entries = loadSystemKeys();
+          entries.splice(index, 1);
+          saveSystemKeys(entries);
+          renderSystemKeys();
+        });
+      });
+    }
+
+    function loadFixedCodes(){
+      try {
+        const raw = localStorage.getItem(FIXED_KEYS_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveFixedCodes(entries){
+      localStorage.setItem(FIXED_KEYS_KEY, JSON.stringify(entries));
+    }
+
+    function renderFixedCodes(){
+      if(!fixedCodeList) return;
+      const entries = loadFixedCodes();
+      if(!entries.length){
+        fixedCodeList.innerHTML = `<p class="empty">登録された固定番号はありません。</p>`;
+        return;
+      }
+      fixedCodeList.innerHTML = entries.map((entry, index) => `
+        <div class="list-item">
+          <div class="list-meta">
+            <strong>${entry}</strong>
+          </div>
+          <button type="button" class="action-btn danger" data-remove-fixed="${index}">削除</button>
+        </div>
+      `).join("");
+      fixedCodeList.querySelectorAll("button[data-remove-fixed]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const index = Number(btn.dataset.removeFixed);
+          const entries = loadFixedCodes();
+          entries.splice(index, 1);
+          saveFixedCodes(entries);
+          renderFixedCodes();
+        });
+      });
+    }
+
+    function loadSettings(key, fallback = {}) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function saveSettings(key, data) {
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    function loadPasswordSettings() {
+      const single = loadSettings(PASSWORD_SETTINGS_KEY, { password: "", length: 6, expiresAt: "" });
+      const fixed = loadSettings(FIXED_PASSWORD_SETTINGS_KEY, { password: "", length: 6, expiresAt: "" });
+      const multi = loadSettings(MULTI_PASSWORD_SETTINGS_KEY, { passwords: [] });
+      if (singlePassword) singlePassword.value = single.password || "";
+      if (singlePasswordLength) singlePasswordLength.value = single.length || 6;
+      if (singlePasswordExpiry) singlePasswordExpiry.value = single.expiresAt || "";
+      if (fixedPassword) fixedPassword.value = fixed.password || "";
+      if (fixedPasswordLength) fixedPasswordLength.value = fixed.length || 6;
+      if (fixedPasswordExpiry) fixedPasswordExpiry.value = fixed.expiresAt || "";
+      if (multiPasswordList) multiPasswordList.value = Array.isArray(multi.passwords) ? multi.passwords.join("\n") : "";
+      setStatus(passwordSettingsStatus, "現在の設定を読み込みました。");
+    }
+
+    function loadOtpSettings() {
+      const settings = loadSettings(OTP_SETTINGS_KEY, { length: 6, count: 10, expiresAt: "" });
+      if (otpLengthSetting) otpLengthSetting.value = settings.length || 6;
+      if (otpCountSetting) otpCountSetting.value = settings.count || 10;
+      if (otpExpirySetting) otpExpirySetting.value = settings.expiresAt || "";
+      setStatus(otpSettingsStatus, "現在の設定を読み込みました。");
+    }
+
+    function renderThemeOptions(){
+      if(!themeSelect || !window.EnchoTheme) return;
+      themeSelect.innerHTML = Object.entries(window.EnchoTheme.THEMES).map(([key, theme]) => {
+        return `<option value="${key}">${theme.label}</option>`;
+      }).join("");
+      themeSelect.value = window.EnchoTheme.getActiveThemeName();
+    }
+
+    function renderScale(){
+      const scale = Number(localStorage.getItem(UI_SCALE_KEY) || "1");
+      if (scaleValue) scaleValue.textContent = `${Math.round(scale * 100)}%`;
+    }
+
+    function renderHistory(){
+      if(!historyList) return;
+      const targetDate = historyDate?.value;
+      const entries = (() => {
+        try {
+          const raw = localStorage.getItem(LOGIN_HISTORY_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch (error) {
+          return [];
+        }
+      })();
+      const filtered = entries.filter(entry => {
+        if (!targetDate) return true;
+        const date = entry.timestamp?.slice(0, 10);
+        return date === targetDate;
+      });
+      if(!filtered.length){
+        historyList.innerHTML = `<p class="empty">該当するログイン履歴はありません。</p>`;
+        return;
+      }
+      historyList.innerHTML = filtered.map(entry => {
+        const time = entry.timestamp ? new Date(entry.timestamp).toLocaleString() : "-";
+        return `
+          <div class="history-item">
+            <div><strong>${entry.username}</strong> / ${entry.destination}</div>
+            <div>${time} / ${entry.mode || "-"} / ${entry.method || "-"}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    requireAdmin();
+    applyPermissions();
+    document.querySelectorAll(".nav-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        if (!target) return;
+        setActivePage(target);
+      });
+    });
+    let lastMenuPointerUpAt = 0;
+    const handleMenuNavigation = (event) => {
+      const target = event.currentTarget?.dataset?.menuTarget;
+      if (!target) return;
+      setActivePage(target);
+    };
+    document.querySelectorAll("[data-menu-target]").forEach((btn) => {
+      btn.addEventListener("pointerup", (event) => {
+        lastMenuPointerUpAt = Date.now();
+        handleMenuNavigation(event);
+      });
+      btn.addEventListener("click", (event) => {
+        if (Date.now() - lastMenuPointerUpAt < 500) return;
+        handleMenuNavigation(event);
+      });
+    });
+    renderProfiles();
+    loadLockMode();
+    loadForceInitSetting();
+    loadAuthMode();
+    renderAdminList();
+    renderPermissionTargets();
+    loadPermissionSelection();
+    renderDevices();
+    renderAuthDevices();
+    renderOtpList();
+    renderSystemKeys();
+    renderFixedCodes();
+    loadPasswordSettings();
+    loadOtpSettings();
+    renderThemeOptions();
+    renderScale();
+    applyUiScale();
+    ensureDefaultLayoutSnapshot();
+    renderLayoutLibrary();
+    renderLayoutAssignments();
+    fetchLoginManagementEntries().then(() => {
+      renderLoginManagementTable();
+    });
+    renderAdminLogWindow();
+    if (historyDate) {
+      historyDate.valueAsDate = new Date();
+      renderHistory();
+    }
+    fullscreenToggle.checked = localStorage.getItem(FULLSCREEN_MODE_KEY) === "true";
+    secretModeToggle.checked = localStorage.getItem(SECRET_MODE_KEY) === "true";
+
+    adminLogClose?.addEventListener("click", () => {
+      adminLogWindow?.classList.add("is-hidden");
+    });
+    adminLogClear?.addEventListener("click", () => {
+      saveAdminLogs([]);
+      renderAdminLogWindow();
+    });
+    adminLogCopy?.addEventListener("click", async () => {
+      const logs = loadAdminLogs();
+      const text = logs.map((entry) => {
+        const { time, detailText } = formatAdminLogEntry(entry);
+        return `${time} ${entry.action} ${detailText}`;
+      }).join("\n");
+      if (!text) return;
+      if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (error) {
+          console.warn("ログのコピーに失敗しました", error);
+        }
+        return;
+      }
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.setAttribute("readonly", "true");
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand("copy");
+      } catch (error) {
+        console.warn("ログのコピーに失敗しました", error);
+      } finally {
+        document.body.removeChild(textArea);
+      }
+    });
+
+    loginManagementCreate?.addEventListener("click", () => {
+      openLoginManagementModal();
+    });
+    loginManagementClose?.addEventListener("click", () => {
+      closeLoginManagementModal();
+    });
+    loginManagementCancel?.addEventListener("click", () => {
+      closeLoginManagementModal();
+    });
+    loginManagementSave?.addEventListener("click", async () => {
+      await saveLoginManagementFromModal();
+    });
+
+    logoutBtn?.addEventListener("click", ()=>{
+      session?.clearActiveAdmin?.();
+      window.location.href = "login.html";
+    });
+
+    lockModeForm?.addEventListener("submit",(e)=>{
+      e.preventDefault();
+      const ok = session?.setLockMode?.(!!lockModeToggle?.checked);
+      if(ok){
+        setStatus(lockModeStatus, "ロックモード設定を保存しました。");
+      }else{
+        setStatus(lockModeStatus, "保存に失敗しました。ブラウザの保存領域を確認してください。", true);
+      }
+    });
+
+    forceInitForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      localStorage.setItem(FORCE_MASTER_SETUP_ENABLED_KEY, forceInitToggle?.checked ? "true" : "false");
+      setStatus(forceInitStatus, "初期化設定を保存しました。");
+    });
+
+    authModeForm?.addEventListener("submit",(e)=>{
+      e.preventDefault();
+      const mode = authModeSelect?.value || "instant_issue_fixed_biometric";
+      loginSettingsWizardMode = mode;
+      loginSettingsStepIndex = 1;
+      loginSettingsDraft = {
+        ...loadInstantIssueSettings(),
+        layout: loadLoginLayoutSettings()
+      };
+      renderLoginSettingsStep(loginSettingsStepIndex, loginSettingsWizardMode, loginSettingsDraft);
+      setActivePage("login-settings-wizard");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    layoutSaveBtn?.addEventListener("click", () => {
+      const name = (layoutNameInput?.value || "").trim();
+      if (!name) {
+        setStatus(layoutSaveStatus, "画面構築名を入力してください。", true);
+        return;
+      }
+      const library = loadLoginLayoutLibrary();
+      const layout = loadLoginLayoutSettings();
+      const existing = library.find((entry) => entry.name === name);
+      if (existing) {
+        existing.layout = layout;
+        existing.updatedAt = Date.now();
+      } else {
+        library.push({
+          id: `layout-${Date.now()}`,
+          name,
+          layout,
+          updatedAt: Date.now()
+        });
+      }
+      saveLoginLayoutLibrary(library);
+      if (layoutNameInput) layoutNameInput.value = "";
+      setStatus(layoutSaveStatus, "画面構築を登録しました。");
+      renderLayoutLibrary();
+      renderLayoutAssignments();
+    });
+
+    layoutAssignAdd?.addEventListener("click", () => {
+      const url = (layoutAssignUrl?.value || "").trim();
+      const layoutId = layoutAssignSelect?.value;
+      if (!url) {
+        setStatus(layoutAssignStatus, "対象URLを入力してください。", true);
+        return;
+      }
+      if (!layoutId) {
+        setStatus(layoutAssignStatus, "画面構築を選択してください。", true);
+        return;
+      }
+      const assignments = loadLoginLayoutAssignments();
+      const existing = assignments.find((entry) => entry.url === url);
+      if (existing) {
+        existing.layoutId = layoutId;
+      } else {
+        assignments.push({
+          id: `assign-${Date.now()}`,
+          url,
+          layoutId
+        });
+      }
+      saveLoginLayoutAssignments(assignments);
+      if (layoutAssignUrl) layoutAssignUrl.value = "";
+      setStatus(layoutAssignStatus, "割当てを保存しました。");
+      renderLayoutAssignments();
+    });
+
+    loginSettingsStepIndex = 1;
+    loginSettingsWizardMode = authModeSelect?.value || "instant_issue_fixed_biometric";
+    loginSettingsDraft = {
+      ...loadInstantIssueSettings(),
+      layout: loadLoginLayoutSettings()
+    };
+
+    function readLayoutSettingsFromForm() {
+      const layout = { ...(loginSettingsDraft.layout || getDefaultLoginLayoutSettings()) };
+      const fontFamilyInput = document.getElementById("layoutFontFamily");
+      const fontSizeRange = document.getElementById("layoutFontSizeRange");
+      const textColorInput = document.getElementById("layoutTextColor");
+      const accentColorInput = document.getElementById("layoutAccentColor");
+      const buttonColorInput = document.getElementById("layoutButtonColor");
+      const iconSizeRange = document.getElementById("layoutIconSizeRange");
+      const itemSizeRange = document.getElementById("layoutItemSizeRange");
+      const iconStyleInput = document.getElementById("layoutIconStyle");
+      const cardWidthRange = document.getElementById("layoutCardWidthRange");
+      const cardHeightRange = document.getElementById("layoutCardHeightRange");
+      const gridColumnsRange = document.getElementById("layoutGridColumns");
+      const gridGapRange = document.getElementById("layoutGridGap");
+      const spanFields = {
+        icon: document.getElementById("layoutSpanIcon"),
+        title: document.getElementById("layoutSpanTitle"),
+        subtitle: document.getElementById("layoutSpanSubtitle"),
+        helper: document.getElementById("layoutSpanHelper"),
+        initial: document.getElementById("layoutSpanInitial"),
+        input: document.getElementById("layoutSpanInput"),
+        biometric: document.getElementById("layoutSpanBiometric"),
+        initialButton: document.getElementById("layoutSpanInitialButton"),
+        unlock: document.getElementById("layoutSpanUnlock")
+      };
+      const showHelperToggle = document.getElementById("layoutShowHelper");
+      const showInitialToggle = document.getElementById("layoutShowInitial");
+      const buttonShapeInput = document.getElementById("layoutButtonShape");
+      const buttonSizeInput = document.getElementById("layoutButtonSize");
+      if (fontFamilyInput) layout.fontFamily = fontFamilyInput.value.trim();
+      if (fontSizeRange) layout.fontSize = Number(fontSizeRange.value || layout.fontSize || 16);
+      if (textColorInput) layout.textColor = textColorInput.value || layout.textColor;
+      if (accentColorInput) layout.accentColor = accentColorInput.value || layout.accentColor;
+      if (buttonColorInput) layout.buttonColor = buttonColorInput.value || layout.buttonColor;
+      if (iconSizeRange) layout.iconSize = Number(iconSizeRange.value || layout.iconSize || 48);
+      if (itemSizeRange) layout.itemSize = Number(itemSizeRange.value || layout.itemSize || 44);
+      if (iconStyleInput) layout.iconStyle = iconStyleInput.value || layout.iconStyle;
+      if (cardWidthRange) layout.cardWidth = Number(cardWidthRange.value || layout.cardWidth || 560);
+      if (cardHeightRange) layout.cardHeight = Number(cardHeightRange.value || layout.cardHeight || 520);
+      if (gridColumnsRange) layout.gridColumns = Number(gridColumnsRange.value || layout.gridColumns || 2);
+      if (gridGapRange) layout.gridGap = Number(gridGapRange.value || layout.gridGap || 12);
+      if (showHelperToggle) layout.showHelperText = !!showHelperToggle.checked;
+      if (showInitialToggle) layout.showInitialDescription = !!showInitialToggle.checked;
+      if (buttonShapeInput) layout.buttonShape = buttonShapeInput.value;
+      if (buttonSizeInput) layout.buttonSize = buttonSizeInput.value;
+      layout.gridOrder = { ...(layout.gridOrder || {}) };
+      layout.gridSpan = { ...(layout.gridSpan || {}) };
+      Object.entries(spanFields).forEach(([key, field]) => {
+        if (field) layout.gridSpan[key] = Number(field.value || layout.gridSpan[key] || layout.gridColumns || 2);
+      });
+      loginSettingsDraft.layout = layout;
+    }
+
+    function readLayoutSettingsFromPreview() {
+      readLayoutSettingsFromForm();
+      const layout = { ...(loginSettingsDraft.layout || getDefaultLoginLayoutSettings()) };
+      const preview = document.getElementById("layoutPreview");
+      if (!preview) return;
+      const field = (name) => preview.querySelector(`[data-field='${name}']`);
+      const valueFromField = (name) => field(name)?.textContent?.trim() || "";
+      layout.titleText = valueFromField("titleText") || layout.titleText;
+      layout.subtitleText = valueFromField("subtitleText") || layout.subtitleText;
+      layout.helperText = valueFromField("helperText") || layout.helperText;
+      layout.initialLoginDescription = valueFromField("initialLoginDescription") || layout.initialLoginDescription;
+      layout.biometricButtonText = valueFromField("biometricButtonText") || layout.biometricButtonText;
+      layout.initialLoginButtonText = valueFromField("initialLoginButtonText") || layout.initialLoginButtonText;
+      layout.passwordUnlockText = valueFromField("passwordUnlockText") || layout.passwordUnlockText;
+      loginSettingsDraft.layout = layout;
+    }
+
+    function attachPreviewEditors() {
+      const preview = document.getElementById("layoutPreview");
+      if (!preview) return;
+      const orderPanel = document.querySelector("[data-order-panel]");
+      const toolPanel = document.querySelector("[data-tool-panel]");
+      const editorBackdrop = document.querySelector("[data-editor-backdrop]");
+      const fontEditor = document.querySelector("[data-font-editor]");
+      const buttonEditor = document.querySelector("[data-button-editor]");
+      const iconEditor = document.querySelector("[data-icon-editor]");
+      const updatePreviewStyle = () => {
+        const layout = loginSettingsDraft.layout || getDefaultLoginLayoutSettings();
+        const fontSize = layout.fontSize || 16;
+        preview.style.setProperty("--preview-font-family", layout.fontFamily || "");
+        preview.style.setProperty("--preview-font-size", `${fontSize}px`);
+        preview.style.setProperty("--preview-text-color", layout.textColor || "#f8fafc");
+        preview.style.setProperty("--preview-accent-color", layout.accentColor || "#8b5cf6");
+        preview.style.setProperty("--preview-button-color", layout.buttonColor || "#22d3ee");
+        preview.style.setProperty("--preview-icon-size", `${layout.iconSize || 48}px`);
+        preview.style.setProperty("--preview-item-size", `${layout.itemSize || 44}px`);
+        const icon = preview.querySelector(".preview-icon");
+        if (icon) {
+          const isSpinner = layout.iconStyle === "spinner";
+          icon.classList.toggle("is-spinner", isSpinner);
+          icon.textContent = isSpinner ? "" : "ID";
+        }
+        const buttonRadius = layout.buttonShape === "pill"
+          ? "999px"
+          : layout.buttonShape === "square"
+            ? "6px"
+            : "14px";
+        preview.style.setProperty("--preview-button-radius", buttonRadius);
+        const buttonPadding = layout.buttonSize === "large"
+          ? "14px 18px"
+          : layout.buttonSize === "compact"
+            ? "6px 10px"
+            : "10px 14px";
+        const buttonFont = layout.buttonSize === "large"
+          ? "15px"
+          : layout.buttonSize === "compact"
+            ? "12px"
+            : "14px";
+        preview.style.setProperty("--preview-button-padding", buttonPadding);
+        preview.style.setProperty("--preview-button-font", buttonFont);
+        const helper = preview.querySelector("[data-preview='helper']");
+        if (helper) helper.classList.toggle("is-hidden", layout.showHelperText === false);
+        const initial = preview.querySelector("[data-preview='initialDescription']");
+        if (initial) initial.classList.toggle("is-hidden", layout.showInitialDescription === false);
+        const card = preview.querySelector(".preview-card");
+        if (card) {
+          card.style.maxWidth = `${layout.cardWidth || 560}px`;
+          card.style.height = `${layout.cardHeight || 520}px`;
+          const columns = Number(layout.gridColumns || 2);
+          card.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+          card.style.gap = `${layout.gridGap || 12}px`;
+          card.style.setProperty("--preview-grid-columns", String(columns));
+        }
+        preview.querySelectorAll("[data-item]").forEach((item) => {
+          const key = item.dataset.item;
+          if (!key) return;
+          const columns = Number(layout.gridColumns || 2);
+          const span = Math.min(Math.max(Number(layout.gridSpan?.[key] || columns), 1), columns);
+          const order = Number(layout.gridOrder?.[key] || 1);
+          item.style.order = order;
+          item.style.gridColumn = `span ${span}`;
+        });
+      };
+      const closeEditor = () => {
+        if (!editorBackdrop) return;
+        editorBackdrop.classList.remove("is-open");
+        editorBackdrop.dataset.activeEditor = "";
+        editorBackdrop.dataset.partKey = "";
+        if (fontEditor) fontEditor.style.display = "none";
+        if (buttonEditor) buttonEditor.style.display = "none";
+        if (iconEditor) iconEditor.style.display = "none";
+      };
+      closeEditor();
+      preview.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-order-action]");
+        if (!button) return;
+        const action = button.dataset.orderAction;
+        const key = button.dataset.orderKey;
+        if (!action || !key) return;
+        const layout = { ...(loginSettingsDraft.layout || getDefaultLoginLayoutSettings()) };
+        layout.gridOrder = { ...(layout.gridOrder || {}) };
+        const defaultOrder = {
+          icon: 1,
+          title: 2,
+          subtitle: 3,
+          helper: 4,
+          initial: 5,
+          input: 6,
+          biometric: 7,
+          initialButton: 8,
+          unlock: 9
+        };
+        Object.keys(defaultOrder).forEach((itemKey) => {
+          if (!Number.isFinite(Number(layout.gridOrder[itemKey]))) {
+            layout.gridOrder[itemKey] = defaultOrder[itemKey];
+          }
+        });
+        const current = Number(layout.gridOrder[key] || defaultOrder[key] || 1);
+        const delta = action === "up" ? -1 : 1;
+        const next = current + delta;
+        if (next < 1 || next > 12) return;
+        const swapKey = Object.entries(layout.gridOrder).find(([, value]) => Number(value) === next)?.[0];
+        layout.gridOrder[key] = next;
+        if (swapKey) layout.gridOrder[swapKey] = current;
+        loginSettingsDraft.layout = layout;
+        updatePreviewStyle();
+        updateOrderPanel();
+      });
+      preview.querySelectorAll("[contenteditable='true']").forEach((el) => {
+        el.addEventListener("input", () => {
+          readLayoutSettingsFromPreview();
+          updatePreviewStyle();
+          updateOrderPanel();
+        });
+      });
+      document.querySelectorAll("#loginSettingsContent select, #loginSettingsContent input").forEach((el) => {
+        el.addEventListener("input", () => {
+          readLayoutSettingsFromForm();
+          updatePreviewStyle();
+          updateOrderPanel();
+        });
+      });
+      document.querySelectorAll("[data-range-step]").forEach((btn) => {
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = "true";
+        btn.addEventListener("click", () => {
+          const targetId = btn.dataset.rangeTarget;
+          const step = Number(btn.dataset.rangeStep || 1);
+          const range = document.getElementById(targetId);
+          if (!range) return;
+          const next = Number(range.value) + step;
+          range.value = String(Math.min(Number(range.max), Math.max(Number(range.min), next)));
+          range.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+      });
+      document.querySelectorAll("[data-range-output]").forEach((output) => {
+        const targetId = output.dataset.rangeOutput;
+        const suffix = output.dataset.rangeSuffix || "";
+        const range = document.getElementById(targetId);
+        if (!range) return;
+        const update = () => {
+          output.textContent = `${range.value}${suffix}`;
+        };
+        update();
+        if (!range.dataset.bound) {
+          range.dataset.bound = "true";
+          range.addEventListener("input", update);
+        }
+      });
+      updatePreviewStyle();
+      updateOrderPanel();
+    }
+
+    function saveLoginSettingsDraft(step) {
+      if (step === 1) {
+        const select = document.getElementById("wizardModeSelect");
+        loginSettingsWizardMode = select?.value || loginSettingsWizardMode;
+        return;
+      }
+      if (step === 2 && loginSettingsWizardMode === "instant_issue_fixed_biometric") {
+        const passInput = document.getElementById("instantFixedPassword");
+        const lengthInput = document.getElementById("instantFixedLength");
+        const expiryInput = document.getElementById("instantExpiry");
+        const fallbackInput = document.getElementById("instantFallback");
+        loginSettingsDraft.fixedPassword = (passInput?.value || "").trim();
+        loginSettingsDraft.fixedLength = Number(lengthInput?.value || 6);
+        loginSettingsDraft.expiresAt = expiryInput?.value || "";
+        loginSettingsDraft.fallbackMode = fallbackInput?.value || "block";
+      }
+      if (step === 3) {
+        readLayoutSettingsFromPreview();
+      }
+    }
+
+    function validateLoginSettingsStep(step) {
+      if (step === 2 && loginSettingsWizardMode === "instant_issue_fixed_biometric") {
+        if (!loginSettingsDraft.fixedPassword) {
+          setStatus(loginSettingsStatus, "固定パスワードを入力してください。", true);
+          return false;
+        }
+        if (!Number.isFinite(loginSettingsDraft.fixedLength) || loginSettingsDraft.fixedLength <= 0) {
+          setStatus(loginSettingsStatus, "数字桁数を入力してください。", true);
+          return false;
+        }
+      }
+      if (step === 3) {
+        const size = Number(loginSettingsDraft.layout?.fontSize || 16);
+        if (!Number.isFinite(size) || size < 12 || size > 28) {
+          setStatus(loginSettingsStatus, "文字サイズは12〜28の範囲で入力してください。", true);
+          return false;
+        }
+        const iconSize = Number(loginSettingsDraft.layout?.iconSize || 48);
+        if (!Number.isFinite(iconSize) || iconSize < 32 || iconSize > 96) {
+          setStatus(loginSettingsStatus, "アイコン大きさは32〜96の範囲で入力してください。", true);
+          return false;
+        }
+        const itemSize = Number(loginSettingsDraft.layout?.itemSize || 44);
+        if (!Number.isFinite(itemSize) || itemSize < 32 || itemSize > 72) {
+          setStatus(loginSettingsStatus, "項目大きさは32〜72の範囲で入力してください。", true);
+          return false;
+        }
+        const cardWidth = Number(loginSettingsDraft.layout?.cardWidth || 560);
+        if (!Number.isFinite(cardWidth) || cardWidth < 360 || cardWidth > 760) {
+          setStatus(loginSettingsStatus, "ログイン画面の幅は360〜760の範囲で入力してください。", true);
+          return false;
+        }
+        const cardHeight = Number(loginSettingsDraft.layout?.cardHeight || 520);
+        if (!Number.isFinite(cardHeight) || cardHeight < 320 || cardHeight > 900) {
+          setStatus(loginSettingsStatus, "ログイン画面の高さは320〜900の範囲で入力してください。", true);
+          return false;
+        }
+        const columns = Number(loginSettingsDraft.layout?.gridColumns || 2);
+        if (!Number.isFinite(columns) || columns < 1 || columns > 4) {
+          setStatus(loginSettingsStatus, "グリッド列数は1〜4の範囲で入力してください。", true);
+          return false;
+        }
+      }
+      return true;
+    }
+
+    loginSettingsNext?.addEventListener("click", () => {
+      saveLoginSettingsDraft(loginSettingsStepIndex);
+      if (!validateLoginSettingsStep(loginSettingsStepIndex)) return;
+      loginSettingsStepIndex = Math.min(4, loginSettingsStepIndex + 1);
+      renderLoginSettingsStep(loginSettingsStepIndex, loginSettingsWizardMode, loginSettingsDraft);
+    });
+
+    loginSettingsBack?.addEventListener("click", () => {
+      saveLoginSettingsDraft(loginSettingsStepIndex);
+      loginSettingsStepIndex = Math.max(1, loginSettingsStepIndex - 1);
+      renderLoginSettingsStep(loginSettingsStepIndex, loginSettingsWizardMode, loginSettingsDraft);
+    });
+
+    loginSettingsCancel?.addEventListener("click", () => {
+      setActivePage("login-settings");
+      loginSettingsStepIndex = 1;
+      loginSettingsDraft = {
+        ...loadInstantIssueSettings(),
+        layout: loadLoginLayoutSettings()
+      };
+    });
+
+    loginSettingsSave?.addEventListener("click", () => {
+      saveLoginSettingsDraft(loginSettingsStepIndex);
+      if (!validateLoginSettingsStep(loginSettingsStepIndex)) return;
+      if (loginSettingsWizardMode === "instant_issue_fixed_biometric") {
+        saveInstantIssueSettings(loginSettingsDraft);
+        saveSettings(FIXED_PASSWORD_SETTINGS_KEY, {
+          password: loginSettingsDraft.fixedPassword || "",
+          length: Number(loginSettingsDraft.fixedLength || 6),
+          expiresAt: loginSettingsDraft.expiresAt || ""
+        });
+      }
+      if (loginSettingsDraft.layout) {
+        saveLoginLayoutSettings(loginSettingsDraft.layout);
+      }
+      localStorage.setItem(AUTH_MODE_KEY, loginSettingsWizardMode);
+      if (authModeSelect) authModeSelect.value = loginSettingsWizardMode;
+      setStatus(authModeStatus, "認証モードを保存しました。");
+      setStatus(loginSettingsStatus, "設定を保存しました。");
+      setActivePage("login-settings");
+      loginSettingsStepIndex = 1;
+    });
+
+    passwordSettingsForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const single = {
+        password: (singlePassword?.value || "").trim(),
+        length: Number(singlePasswordLength?.value || 6),
+        expiresAt: singlePasswordExpiry?.value || ""
+      };
+      const fixed = {
+        password: (fixedPassword?.value || "").trim(),
+        length: Number(fixedPasswordLength?.value || 6),
+        expiresAt: fixedPasswordExpiry?.value || ""
+      };
+      const multi = {
+        passwords: (multiPasswordList?.value || "").split("\n").map(item => item.trim()).filter(Boolean)
+      };
+      saveSettings(PASSWORD_SETTINGS_KEY, single);
+      saveSettings(FIXED_PASSWORD_SETTINGS_KEY, fixed);
+      saveSettings(MULTI_PASSWORD_SETTINGS_KEY, multi);
+      setStatus(passwordSettingsStatus, "パスワード設定を保存しました。");
+    });
+
+    otpSettingsForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const settings = {
+        length: Number(otpLengthSetting?.value || 6),
+        count: Number(otpCountSetting?.value || 10),
+        expiresAt: otpExpirySetting?.value || ""
+      };
+      saveSettings(OTP_SETTINGS_KEY, settings);
+      setStatus(otpSettingsStatus, "ワンタイムパスワード設定を保存しました。");
+    });
+
+    otpExportCsv?.addEventListener("click", () => {
+      const settings = loadSettings(OTP_SETTINGS_KEY, { length: 6, count: 10 });
+      const length = settings.length || 6;
+      const count = settings.count || 10;
+      const codes = Array.from({ length: count }).map(() =>
+        Array.from({ length }).map(() => Math.floor(Math.random() * 10)).join("")
+      );
+      if (otpCsvOutput) {
+        otpCsvOutput.value = codes.map(code => `${code}`).join("\n");
+      }
+      setStatus(otpSettingsStatus, "CSV出力を生成しました。");
+    });
+
+    adminRegisterForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = adminRegisterId?.value.trim();
+      const pw = adminRegisterPassword?.value;
+      const period = adminRegisterPeriod?.value.trim() || "無期限";
+      const selectedRoles = Array.from(adminRegisterRoles || [])
+        .filter((checkbox) => checkbox.checked)
+        .map((checkbox) => checkbox.value);
+      const isMaster = selectedRoles.includes("master");
+      const role = isMaster ? "master" : "admin";
+      if (!id || !pw) {
+        setStatus(adminRegisterStatus, "IDとPWを入力してください。", true);
+        return;
+      }
+      if (!selectedRoles.length) {
+        setStatus(adminRegisterStatus, "ロールを1つ以上選択してください。", true);
+        return;
+      }
+      const users = loadAdminUsers();
+      if (users.some(user => user.id === id)) {
+        setStatus(adminRegisterStatus, "同じIDが既に存在します。", true);
+        return;
+      }
+      let permissions = [];
+      if (isMaster) {
+        permissions = ROLE_PERMISSION_MAP.master;
+        users.forEach((user) => {
+          if (user.role === "master") {
+            user.role = "admin";
+            user.permissions = ["lock_mode"];
+          }
+        });
+      } else {
+        permissions = Array.from(new Set(selectedRoles.flatMap((item) => ROLE_PERMISSION_MAP[item] || [])));
+      }
+      users.push({ id, password: pw, role, permissions, permissionPeriod: period });
+      saveAdminUsers(users);
+      adminRegisterId.value = "";
+      adminRegisterPassword.value = "";
+      if (adminRegisterPeriod) adminRegisterPeriod.value = "";
+      adminRegisterRoles.forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+      setStatus(adminRegisterStatus, "管理者を追加しました。");
+      renderAdminList();
+      renderPermissionTargets();
+    });
+
+    permissionTarget?.addEventListener("change", loadPermissionSelection);
+
+    permissionForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const targetId = permissionTarget?.value;
+      const users = loadAdminUsers();
+      const target = users.find(user => user.id === targetId);
+      if (!target) {
+        setStatus(permissionStatus, "対象の管理者が見つかりません。", true);
+        return;
+      }
+      const selected = Array.from(permissionForm.querySelectorAll("input[type='checkbox']"))
+        .filter((checkbox) => checkbox.checked)
+        .map((checkbox) => checkbox.value);
+      target.permissions = target.role === "master" ? ["master", ...PERMISSIONS] : selected;
+      saveAdminUsers(users);
+      setStatus(permissionStatus, "権限を保存しました。");
+      renderAdminList();
+    });
+
+    adminPasswordForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const admin = getActiveAdminRecord();
+      if (!admin) return;
+      if ((adminPasswordCurrent?.value || "") !== admin.password) {
+        setStatus(adminPasswordStatus, "現在のPWが違います。", true);
+        return;
+      }
+      if (!adminPasswordNext?.value) {
+        setStatus(adminPasswordStatus, "新しいPWを入力してください。", true);
+        return;
+      }
+      const verified = await startFingerprintAuth(adminPasswordStatus);
+      if (!verified) return;
+      const users = loadAdminUsers();
+      const target = users.find(user => user.id === admin.id);
+      if (target) target.password = adminPasswordNext.value;
+      saveAdminUsers(users);
+      adminPasswordCurrent.value = "";
+      adminPasswordNext.value = "";
+      setStatus(adminPasswordStatus, "PWを変更しました。");
+      renderAdminList();
+    });
+
+    deviceRegisterForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const label = deviceLabel?.value.trim() || "端末";
+      const verified = await startFingerprintAuth(deviceRegisterStatus);
+      if (!verified) return;
+      const devices = loadAdminDevices();
+      const id = `dev-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      devices.push({ id, label, addedAt: Date.now() });
+      saveAdminDevices(devices);
+      deviceLabel.value = "";
+      setStatus(deviceRegisterStatus, "端末を登録しました。");
+      renderDevices();
+    });
+
+    otpIssueForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const type = otpIssueType?.value || "one_time";
+      const length = Number(otpLengthInput?.value || 6);
+      const code = (otpIssueCode?.value || "").trim() || Array.from({ length }).map(() => Math.floor(Math.random() * 10)).join("");
+      if (!new RegExp(`^[0-9]{${length}}$`).test(code)) {
+        setStatus(otpIssueStatus, `${length}桁のコードを入力してください。`, true);
+        return;
+      }
+      const entries = loadOtpCodes();
+      entries.unshift({
+        code,
+        type,
+        issuedAt: Date.now(),
+        usedAt: null,
+        reusable: type !== "one_time",
+        note: otpIssueNote?.value || ""
+      });
+      saveOtpCodes(entries);
+      otpIssueCode.value = "";
+      otpIssueNote.value = "";
+      setStatus(otpIssueStatus, "コードを発券しました。");
+      otpIssuePreview.innerHTML = "";
+      if (otpIssueQr?.checked) {
+        const img = document.createElement("img");
+        img.alt = "QRコード";
+        img.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(code)}`;
+        otpIssuePreview.appendChild(img);
+      }
+      if (otpIssueBarcode?.checked) {
+        const img = document.createElement("img");
+        img.alt = "バーコード";
+        img.src = `https://barcodeapi.org/api/128/${encodeURIComponent(code)}`;
+        otpIssuePreview.appendChild(img);
+      }
+      renderOtpList();
+    });
+
+    systemKeyForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const code = (systemKeyCode?.value || "").trim();
+      const label = (systemKeyLabel?.value || "").trim();
+      const mode = systemKeyMode?.value || "system";
+      if (!code) {
+        setStatus(systemKeyStatus, "コードを入力してください。", true);
+        return;
+      }
+      const entries = loadSystemKeys();
+      entries.push({ code, label, mode });
+      saveSystemKeys(entries);
+      systemKeyCode.value = "";
+      systemKeyLabel.value = "";
+      setStatus(systemKeyStatus, "システムキーを追加しました。");
+      renderSystemKeys();
+    });
+
+    systemKeyCsvForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const raw = systemKeyCsv?.value || "";
+      if (!raw.trim()) return;
+      const mode = systemKeyMode?.value || "system";
+      const entries = loadSystemKeys();
+      raw.split("\n").forEach((line) => {
+        const [code, label] = line.split(",");
+        if (!code) return;
+        entries.push({ code: code.trim(), label: (label || "").trim(), mode });
+      });
+      saveSystemKeys(entries);
+      systemKeyCsv.value = "";
+      renderSystemKeys();
+    });
+
+    fixedCodeForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const code = (fixedCodeInput?.value || "").trim();
+      const length = Number(fixedCodeLengthInput?.value || 5);
+      if (!new RegExp(`^[0-9]{${length}}$`).test(code)) {
+        setStatus(fixedCodeStatus, `${length}桁の固定番号を入力してください。`, true);
+        return;
+      }
+      const entries = loadFixedCodes();
+      entries.push(code);
+      saveFixedCodes(entries);
+      fixedCodeInput.value = "";
+      setStatus(fixedCodeStatus, "固定番号を追加しました。");
+      renderFixedCodes();
+    });
+
+    displaySettingsForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (window.EnchoTheme) {
+        window.EnchoTheme.saveActiveThemeName(themeSelect?.value || "violet");
+        window.EnchoTheme.applyCurrentTheme(document);
+      }
+      localStorage.setItem(FULLSCREEN_MODE_KEY, fullscreenToggle?.checked ? "true" : "false");
+      localStorage.setItem(SECRET_MODE_KEY, secretModeToggle?.checked ? "true" : "false");
+      setStatus(displaySettingsStatus, "表示設定を保存しました。");
+    });
+
+    scaleDown?.addEventListener("click", () => {
+      let scale = Number(localStorage.getItem(UI_SCALE_KEY) || "1");
+      scale = Math.max(0.6, Math.round((scale - 0.1) * 10) / 10);
+      localStorage.setItem(UI_SCALE_KEY, String(scale));
+      renderScale();
+      applyUiScale();
+    });
+
+    scaleUp?.addEventListener("click", () => {
+      let scale = Number(localStorage.getItem(UI_SCALE_KEY) || "1");
+      scale = Math.min(1.4, Math.round((scale + 0.1) * 10) / 10);
+      localStorage.setItem(UI_SCALE_KEY, String(scale));
+      renderScale();
+      applyUiScale();
+    });
+
+    fullscreenNow?.addEventListener("click", () => {
+      document.documentElement.requestFullscreen?.();
+    });
+
+    historyFilterForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      renderHistory();
+    });
+  </script>
+</body>
+</html>

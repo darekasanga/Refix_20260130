@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COVE AI NEWS | EnCho-エンチョ-</title>
+  <script src="theme.js"></script>
+  <script>
+    window.EnchoTheme?.applyCurrentTheme(document);
+  </script>
+  <script src="swipe-handler.js"></script>
+  <link rel="stylesheet" href="swipe-rail.css">
+  <script src="swipe-rail.js" defer></script>
+  <style>
+    :root {
+      --accent: #8b5cf6;
+      --accent-2: #f59e0b;
+      --accent-3: #22d3ee;
+      --accent-4: #fb7185;
+      --muted: #14121d;
+      --panel: #1b1827;
+      --panel-sub: #221f30;
+      --border: #2f2a3d;
+      --text: #fefefe;
+      --subtext: #d8d9e4;
+      --bg: linear-gradient(135deg, #0d0b16 0%, #0c1228 55%, #0f162f 100%);
+      --panel-overlay: rgba(19, 18, 28, 0.9);
+      --glow: 0 12px 45px rgba(168, 85, 247, 0.28);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans JP", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 22px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+    }
+    .refresh-button {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .refresh-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(34, 211, 238, 0.25);
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+    .article-card {
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--glow);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      scroll-margin-top: 18px;
+    }
+    .article-card p {
+      margin: 0;
+      color: var(--subtext);
+      line-height: 1.7;
+    }
+    .keyword-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #fef9c3;
+      letter-spacing: 0.4px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #0f172a;
+      background: linear-gradient(120deg, #fef3c7, #f5d0fe);
+      box-shadow: 0 8px 18px rgba(244, 114, 182, 0.25);
+    }
+    .meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .notice {
+      margin: 0;
+      font-size: 13px;
+      color: var(--subtext);
+      line-height: 1.6;
+    }
+    .notice + .notice {
+      margin-top: 6px;
+      color: rgba(216, 217, 228, 0.8);
+    }
+    .archive {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .archive a {
+      color: var(--text);
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    @media (max-width: 720px) {
+      body { padding: 16px; }
+      h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-group">
+        <h1>COVE AI NEWS</h1>
+        <button class="refresh-button" type="button" id="forceRefresh">強制更新</button>
+      </div>
+      <a class="back-link" href="index.html">← ポータルに戻る</a>
+    </header>
+    <section class="article-card">
+      <p class="notice">本ページは保育・教育・子育て分野の報道や行政発表をもとに、社内向けに整理した要約コンテンツです。更新は毎日8:00・12:00・16:30に行われ、時間になっても最新情報が反映されていない場合は「強制更新」をタップしてください。こども家庭庁・厚生労働省の法令改正や予算概要、新着ニュースの要点に加え、京都府の子ども関係ニュース、文科省の教育関連ニュースもまとめて掲載します。</p>
+      <p class="notice" id="lastUpdated">最終更新: --</p>
+      <div class="archive">
+        <span class="tag">アーカイブ</span>
+        <a href="#archive-2025-02-20">2025/02/20</a>
+        <a href="#archive-2025-02-19">2025/02/19</a>
+        <a href="#archive-2025-02-18">2025/02/18</a>
+      </div>
+    </section>
+
+    <section id="news1" class="article-card">
+      <p class="keyword-label">［検索キーワード：保育料 補助 2025 制度動向］</p>
+      <p>自治体による保護者負担軽減策で、預かり保育料の補助上限を段階的に広げる動きが進んでいます。</p>
+      <p>所得制限を設けず幅広く利用できる設計を検討する地域があり、周知方法や申請負担の見直しが課題です。</p>
+      <p>園側は手続き説明のテンプレートを整備し、保護者の理解を得ながら移行する準備が求められています。</p>
+    </section>
+
+    <section id="news2" class="article-card">
+      <p class="keyword-label">［検索キーワード：延長保育 見守り体制 実務］</p>
+      <p>夕方帯の見守り体制を強化する園が増え、看護師や有資格者を追加配置する例が目立っています。</p>
+      <p>転倒や発熱の初動を短縮するため、役割分担の見える化や引き継ぎシートの刷新が進行中です。</p>
+      <p>延長利用の家庭には、当日の対応記録を短文で共有し安心感を高める工夫が広がっています。</p>
+    </section>
+
+    <section id="news3" class="article-card">
+      <p class="keyword-label">［検索キーワード：保護者 対応 帰宅ぐずり コミュニケーション］</p>
+      <p>お迎え後の切り替え支援として、帰宅前に親子でできる短い遊びを案内する園が増えています。</p>
+      <p>園内の掲示や連絡帳で「今日の一言アドバイス」を添えると、保護者の不安が軽くなる傾向です。</p>
+      <p>家庭側の負担を増やさずに実践できる点が評価され、クレーム予防にもつながっています。</p>
+    </section>
+
+    <section id="news4" class="article-card">
+      <p class="keyword-label">［検索キーワード：園内ICT AI レイアウト 業務効率］</p>
+      <p>写真と短文から園だよりを自動整形するツールが試験導入され、作成時間の削減に効果が出ています。</p>
+      <p>テンプレート選択や文字数チェックを自動化し、職員は内容の確認と修正に集中できる仕組みです。</p>
+      <p>発行履歴を残して次年度の再利用につなげるなど、ナレッジ蓄積も進んでいます。</p>
+    </section>
+
+    <section id="news5" class="article-card">
+      <p class="keyword-label">［検索キーワード：補食 たんぱく質 延長保育 健康］</p>
+      <p>延長保育中の補食を見直し、たんぱく質を補える軽食を取り入れる園が増えています。</p>
+      <p>アレルギー表示を明確にしながら、短時間で準備できる献立を確立する工夫がポイントです。</p>
+      <p>帰宅後の空腹感が抑えられ、家庭の夕食準備がスムーズになったという声もあります。</p>
+    </section>
+
+    <section id="news6" class="article-card">
+      <p class="keyword-label">［検索キーワード：保育事故 災害訓練 リスク管理］</p>
+      <p>災害時の引き渡し訓練をシナリオ化し、抜け漏れを洗い出す取り組みが注目されています。</p>
+      <p>ハザードマップと園内動線を照合し、連絡手順のボトルネックを事前に共有する動きです。</p>
+      <p>訓練後の短い振り返りメモを全職員で共有し、次回の改善点につなげています。</p>
+    </section>
+
+    <section id="news7" class="article-card">
+      <p class="keyword-label">［検索キーワード：保育士 処遇改善 働き方 人材］</p>
+      <p>処遇改善の配分ルールをわかりやすく提示することが、人材定着に影響するという議論が続いています。</p>
+      <p>評価基準の透明化と、面談での説明時間の確保が重要視される傾向です。</p>
+      <p>小規模園では支給方法の工夫と、現場の声を拾う仕組みづくりが課題になっています。</p>
+    </section>
+
+    <section id="news8" class="article-card">
+      <p class="keyword-label">［検索キーワード：子ども 発達研究 集団遊び エビデンス］</p>
+      <p>集団遊びの中での「順番待ち」体験が、自己調整力の発達に影響するという研究が報告されています。</p>
+      <p>無理に待たせるのではなく、役割を持たせる支援が効果的という示唆が出ています。</p>
+      <p>日々の保育記録に小さな変化を書き留めると、保護者説明にも活かしやすいとの声です。</p>
+    </section>
+
+    <section id="news9" class="article-card">
+      <p class="keyword-label">［検索キーワード：海外 保育 トレンド 屋外活動］</p>
+      <p>海外では、天候に合わせた屋外活動のバリエーションを増やし、運動量を確保する動きが進んでいます。</p>
+      <p>雨天時でも短時間の外気浴を取り入れることで、子どもの気分転換になるという報告があります。</p>
+      <p>安全確保のための装備リストや保護者への事前案内を整えることがポイントです。</p>
+    </section>
+
+    <section id="news10" class="article-card">
+      <p class="keyword-label">［検索キーワード：少子化 地域 子育て支援 社会動向］</p>
+      <p>地域の子育て支援拠点が、保育園と連携して情報発信を強化する動きが見られます。</p>
+      <p>少子化の影響で利用ニーズが分散する中、来園相談やオンライン窓口の整備が課題です。</p>
+      <p>園が持つ実践知を地域に還元することで、保護者の孤立感を減らす狙いがあります。</p>
+    </section>
+
+    <section id="archive-2025-02-20" class="article-card">
+      <p class="keyword-label">［検索キーワード：2025/02/20 アーカイブ］</p>
+      <p>この日付の過去記事は、制度動向・保護者支援・ICT活用の3テーマを中心に整理しました。</p>
+      <p>更新内容は社内向けの要点のみをまとめ、詳細は職員間で共有した記録を参照しています。</p>
+      <p>閲覧後の気づきは、次回のミーティングで共有することを推奨しています。</p>
+    </section>
+
+    <section id="archive-2025-02-19" class="article-card">
+      <p class="keyword-label">［検索キーワード：2025/02/19 アーカイブ］</p>
+      <p>保育現場の安全対策と研修に関する記事を中心にまとめ、要点だけを短く整理しました。</p>
+      <p>現場の運用に直結する内容は、園内の共有ボードにも反映しています。</p>
+      <p>詳細を確認したい場合は、担当者まで問い合わせる運用としています。</p>
+    </section>
+
+    <section id="archive-2025-02-18" class="article-card">
+      <p class="keyword-label">［検索キーワード：2025/02/18 アーカイブ］</p>
+      <p>人材・働き方と保護者コミュニケーションの動きを中心に、複数情報から整理しました。</p>
+      <p>アーカイブは簡潔な要約のみとし、引用元URLは掲載していません。</p>
+      <p>当時の運用メモは、園内共有フォルダで確認できるようになっています。</p>
+    </section>
+  </div>
+  <script>
+    // Initialize smooth swipe scrolling
+    (function() {
+      if (window.SwipeHandler) {
+        window.pageSwipeHandler = new SwipeHandler(document.body, {
+          enableGradient: true,
+          snapToSections: true,
+          enableMomentum: true,
+          showVisualFeedback: true
+        });
+      }
+    })();
+
+    (function() {
+      const refreshButton = document.getElementById('forceRefresh');
+      const lastUpdated = document.getElementById('lastUpdated');
+      const refreshNow = () => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('t', Date.now().toString());
+        window.location.replace(url.toString());
+      };
+
+      if (lastUpdated) {
+        const now = new Date();
+        const formatted = new Intl.DateTimeFormat('ja-JP', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        }).format(now);
+        lastUpdated.textContent = `最終更新: ${formatted}`;
+      }
+
+      if (refreshButton) {
+        refreshButton.addEventListener('click', refreshNow);
+      }
+
+      const scheduleTimes = [
+        { hours: 8, minutes: 0 },
+        { hours: 12, minutes: 0 },
+        { hours: 16, minutes: 30 }
+      ];
+
+      const scheduleNextRefresh = () => {
+        const now = new Date();
+        const candidates = scheduleTimes.map(({ hours, minutes }) => {
+          const next = new Date(now);
+          next.setHours(hours, minutes, 0, 0);
+          if (next <= now) {
+            next.setDate(next.getDate() + 1);
+          }
+          return next;
+        });
+
+        const nextRefreshAt = candidates.reduce((earliest, candidate) => {
+          if (!earliest || candidate < earliest) {
+            return candidate;
+          }
+          return earliest;
+        }, null);
+
+        if (!nextRefreshAt) {
+          return;
+        }
+
+        const delayMs = Math.max(nextRefreshAt.getTime() - now.getTime(), 0);
+        window.setTimeout(refreshNow, delayMs);
+      };
+
+      scheduleNextRefresh();
+    })();
+  </script>
+</body>
+</html>

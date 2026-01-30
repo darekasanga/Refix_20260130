@@ -1,0 +1,2653 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EnCho-エンチョ- | 管理ページメニュー</title>
+  <script src="theme.js"></script>
+  <script>
+    window.EnchoTheme?.applyCurrentTheme(document);
+  </script>
+  <style>
+    :root{
+      --accent:#8b5cf6;
+      --accent-2:#22d3ee;
+      --panel:#0f172a;
+      --panel-2:#111827;
+      --border:#1f2937;
+      --text:#f8fafc;
+      --sub:#e2e8f0;
+      --window-accent:#8b5cf6;
+      --window-accent-2:#f59e0b;
+      --window-accent-3:#22d3ee;
+      --window-accent-4:#fb7185;
+      --window-muted:#14121d;
+      --window-panel:#1b1827;
+      --window-panel-sub:#221f30;
+      --window-border:#2f2a3d;
+      --window-text:#fefefe;
+      --window-subtext:#d8d9e4;
+      --window-bg:linear-gradient(135deg, #0d0b16 0%, #0c1228 55%, #0f162f 100%);
+      --window-panel-overlay:#13121c;
+      --window-glow:0 12px 45px rgba(168, 85, 247, 0.28);
+      --dash-accent:var(--accent);
+      --dash-accent-2:var(--accent-2);
+      --dash-panel:var(--panel);
+      --dash-panel-2:var(--panel-sub, var(--panel-2));
+      --dash-border:var(--border);
+      --dash-text:var(--text);
+      --dash-sub:var(--subtext, var(--sub));
+      --dash-bg:var(--bg, #0b1021);
+      --dash-glow:var(--glow, 0 12px 40px rgba(139, 92, 246, 0.28));
+      --ui-scale:1;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family:"Noto Sans JP","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      zoom:var(--ui-scale);
+    }
+    .container{
+      max-width:980px;
+      margin:0 auto;
+      padding:28px 18px 48px;
+      display:grid;
+      gap:18px;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    h1{
+      margin:0;
+      font-size:24px;
+      letter-spacing:.02em;
+    }
+    .muted{color:var(--subtext);font-size:13px;}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:linear-gradient(120deg,var(--accent),var(--accent-2));
+      color:#0b1021;
+      font-weight:900;
+      text-decoration:none;
+      box-shadow:var(--glow);
+      cursor:pointer;
+    }
+    .btn.secondary{
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      box-shadow:none;
+    }
+    .menu-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:12px;
+    }
+    .menu-card{
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.04)), var(--panel-sub);
+      padding:16px;
+      display:grid;
+      gap:10px;
+      text-decoration:none;
+      color:var(--text);
+      transition:transform .2s ease, border-color .2s ease;
+    }
+    .menu-card.button{
+      text-align:left;
+      cursor:pointer;
+    }
+    .menu-card:hover{
+      transform:translateY(-2px);
+      border-color:rgba(148,163,184,.6);
+    }
+    .menu-card h2{
+      margin:0;
+      font-size:16px;
+    }
+    .menu-card span{
+      color:var(--subtext);
+      font-size:12px;
+    }
+    .menu-card .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.4);
+      color:var(--subtext);
+      font-size:11px;
+      width:max-content;
+    }
+    .menu-card .menu-actions{
+      display:flex;
+      justify-content:flex-end;
+    }
+    .login-management-section{
+      border-radius:18px;
+      border:1px solid #e2e8f0;
+      background:#ffffff;
+      color:#0f172a;
+      padding:20px;
+      display:grid;
+      gap:14px;
+      box-shadow:0 18px 36px rgba(15,23,42,.08);
+    }
+    .login-management-section h2{
+      margin:0;
+      font-size:20px;
+    }
+    .login-management-section .muted{
+      color:#475569;
+    }
+    .notice{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid #e2e8f0;
+      background:#f8fafc;
+      display:grid;
+      gap:4px;
+      font-size:13px;
+      color:#475569;
+    }
+    .notice ul{
+      margin:0;
+      padding-left:18px;
+      display:grid;
+      gap:4px;
+    }
+    .hidden{
+      display:none !important;
+    }
+    .login-management-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .login-management-header .btn{
+      box-shadow:none;
+    }
+    .login-management-table{
+      display:grid;
+      gap:10px;
+    }
+    .login-management-row{
+      display:grid;
+      gap:12px;
+      grid-template-columns:minmax(120px,1.05fr) minmax(180px,1.4fr) minmax(140px,.9fr) minmax(170px,1.1fr) minmax(110px,.8fr) minmax(120px,.8fr);
+      align-items:center;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid #e2e8f0;
+      background:#ffffff;
+    }
+    .login-management-row.header{
+      background:#f1f5f9;
+      font-size:12px;
+      font-weight:700;
+      color:#475569;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+    .login-management-cell strong{
+      display:block;
+      font-weight:700;
+      color:#0f172a;
+    }
+    .login-management-cell span{
+      display:block;
+      font-size:12px;
+      color:#64748b;
+    }
+    .login-management-url-cell strong,
+    .login-management-url-cell span{
+      white-space:normal;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+    }
+    .login-management-meta{
+      display:grid;
+      gap:4px;
+      font-size:12px;
+      color:#64748b;
+    }
+    .login-management-actions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #cbd5f5;
+      background:#eff6ff;
+      color:#1d4ed8;
+      font-weight:700;
+      font-size:12px;
+    }
+    .badge.secondary{
+      background:#f1f5f9;
+      border-color:#e2e8f0;
+      color:#475569;
+    }
+    .badge.warning{
+      background:#fff7ed;
+      border-color:#fed7aa;
+      color:#c2410c;
+    }
+    .btn.small{
+      padding:6px 10px;
+      border-radius:10px;
+      font-size:12px;
+      font-weight:700;
+    }
+    .login-management-section .btn.secondary{
+      background:#f8fafc;
+      color:#0f172a;
+      border-color:#e2e8f0;
+    }
+    .btn.danger{
+      background:#fee2e2;
+      color:#b91c1c;
+      border-color:#fecaca;
+      box-shadow:none;
+    }
+    @media (max-width: 980px){
+      .login-management-row{
+        grid-template-columns:1fr;
+        align-items:flex-start;
+      }
+      .login-management-row.header{
+        display:none;
+      }
+      .login-management-actions{
+        justify-content:flex-start;
+      }
+    }
+    .mini-btn{
+      padding:6px 10px;
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,.4);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      font-weight:700;
+      font-size:12px;
+      cursor:pointer;
+    }
+    .ctrl-dock{
+      position:fixed;
+      right:24px;
+      bottom:96px;
+      width:min(420px, 92vw);
+      display:none;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      color:var(--text);
+      box-shadow:0 20px 50px rgba(0,0,0,.38);
+      gap:14px;
+      z-index:40;
+    }
+    .floating-panel.is-open{display:grid;}
+    @media (max-width: 640px){
+      .floating-panel{
+        right:50%;
+        transform:translateX(50%);
+        bottom:92px;
+      }
+    }
+    .ctrl-dock.is-collapsed #adminCtrlDockCollapseBtn{
+      display:none;
+    }
+    .ctrl-label{
+      font-size:11px;
+      font-weight:800;
+      color:var(--dash-sub);
+      padding:6px 10px;
+      border-radius:12px;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(148,163,184,.35);
+      letter-spacing:.3px;
+      white-space:nowrap;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .ctrl-icon{
+      width:16px;
+      height:16px;
+      display:block;
+    }
+    .ctrl-strip{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .ctrl-primary{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .ctrl-items{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      max-width:520px;
+      opacity:1;
+      transform:translateX(0);
+      pointer-events:auto;
+      transition:opacity .18s ease, transform .18s ease, max-width .18s ease;
+    }
+    .ctrl-btn{
+      border:none;
+      border-radius:12px;
+      background:rgba(255,255,255,0.12);
+      color:var(--dash-text);
+      font-weight:700;
+      font-size:12px;
+      cursor:pointer;
+      padding:7px 12px;
+      transition:transform .18s ease, box-shadow .18s ease;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.24),
+        inset 0 -1px 0 rgba(0,0,0,0.18),
+        0 4px 10px rgba(0,0,0,0.18);
+      white-space:nowrap;
+      line-height:1;
+    }
+    .ctrl-btn:active{
+      transform:translateY(1px);
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,0.2),
+        inset 0 -2px 0 rgba(0,0,0,0.22),
+        0 2px 6px rgba(0,0,0,0.16);
+    }
+    .floating-panel .list-item .action-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .floating-panel .list-item .action-row button{
+      white-space:nowrap;
+    }
+    .floating-panel .list-item strong{font-size:13px;}
+    .floating-panel .list-item span{color:var(--dash-sub);font-size:12px;}
+    .floating-controller{
+      position:fixed;
+      right:24px;
+      bottom:24px;
+      border-radius:999px;
+      padding:12px 16px;
+      border:1px solid rgba(148,163,184,.4);
+      background:linear-gradient(120deg,var(--dash-accent),var(--dash-accent-2));
+      color:#0b1021;
+      font-weight:900;
+      font-size:13px;
+      box-shadow:var(--dash-glow);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+      z-index:45;
+    }
+    .floating-controller.is-open{
+      background:rgba(255,255,255,.08);
+      color:var(--dash-text);
+      box-shadow:none;
+    }
+    @media (max-width: 640px){
+      .floating-controller{
+        right:50%;
+        transform:translateX(50%);
+      }
+    }
+    .modal .list-item strong{font-size:13px;}
+    .modal .list-item span{color:var(--subtext, var(--dash-sub));font-size:12px;}
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(6, 8, 20, 0.7);
+      z-index:50;
+      padding:24px;
+    }
+    .modal-backdrop.is-open{display:flex;}
+    .line-settings-backdrop{
+      background:rgba(6, 8, 20, 0.7);
+    }
+    .modal{
+      width:min(720px, 92vw);
+      max-height:80vh;
+      overflow-y:auto;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:20px;
+      color:var(--text);
+      box-shadow:var(--glow);
+      display:grid;
+      gap:14px;
+    }
+    .line-settings-window{
+      background:var(--panel);
+      box-shadow:var(--glow);
+      opacity:1;
+      backdrop-filter:none;
+    }
+    .line-settings-window .line-settings-field input{
+      background:var(--panel-sub, var(--panel-2));
+    }
+    .line-settings-window .list-item{
+      background:var(--panel-sub, var(--panel-2));
+      border-color:var(--border);
+    }
+    .line-settings-window .list-item strong{
+      color:var(--text);
+    }
+    .form-grid{
+      display:grid;
+      gap:12px;
+    }
+    .form-grid label{
+      display:block;
+      font-size:12px;
+      color:var(--subtext, var(--dash-sub));
+      margin-bottom:6px;
+      font-weight:700;
+    }
+    .form-grid input,
+    .form-grid textarea,
+    .form-grid select{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--panel-sub, var(--panel-2));
+      color:var(--text);
+      font:inherit;
+    }
+    .form-grid textarea{
+      min-height:90px;
+      resize:vertical;
+    }
+    .wizard-header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .wizard-title{
+      display:grid;
+      gap:4px;
+    }
+    .wizard-note{
+      font-size:12px;
+      color:var(--subtext, var(--dash-sub));
+    }
+    .wizard-controls button{
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:var(--panel-sub, var(--panel-2));
+      color:var(--text);
+      padding:6px 10px;
+      cursor:pointer;
+    }
+    .modal-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:flex-end;
+      align-items:center;
+    }
+    .status-text{
+      font-size:12px;
+      color:var(--subtext, var(--dash-sub));
+    }
+    .status-text.error{
+      color:#fca5a5;
+    }
+    .layout-manager{
+      display:grid;
+      gap:14px;
+      grid-template-columns:minmax(220px, 1fr) minmax(320px, 1.2fr);
+    }
+    .layout-window{
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:var(--panel-sub, var(--panel-2));
+      padding:14px;
+      display:grid;
+      gap:12px;
+      box-shadow:var(--glow);
+    }
+    .layout-window h4{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.04em;
+    }
+    .layout-window .subtext{
+      font-size:12px;
+      color:var(--subtext, var(--dash-sub));
+    }
+    .parts-list{
+      display:grid;
+      gap:10px;
+    }
+    .parts-row{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:10px;
+      align-items:center;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--panel);
+      padding:10px;
+    }
+    .parts-controls{
+      display:grid;
+      gap:4px;
+      font-size:12px;
+    }
+    .parts-controls button{
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:var(--panel-sub, var(--panel-2));
+      color:var(--text);
+      padding:2px 6px;
+      cursor:pointer;
+    }
+    .parts-preview{
+      display:grid;
+      gap:6px;
+      font-size:12px;
+      color:var(--subtext, var(--dash-sub));
+    }
+    .parts-preview .preview-box{
+      border-radius:10px;
+      border:1px dashed var(--border);
+      padding:10px;
+      color:var(--text);
+      background:var(--panel-sub, var(--panel-2));
+      text-align:center;
+      font-weight:700;
+    }
+    .parts-actions{
+      display:grid;
+      gap:6px;
+      justify-items:end;
+    }
+    .parts-actions .mini-btn{
+      width:64px;
+    }
+    .editor-grid{
+      display:grid;
+      gap:10px;
+      grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+    }
+    .editor-field label{
+      display:block;
+      font-size:12px;
+      color:var(--subtext, var(--dash-sub));
+      margin-bottom:4px;
+    }
+    .editor-field input,
+    .editor-field select{
+      width:100%;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:var(--panel-sub, var(--panel-2));
+      color:var(--text);
+    }
+    @media (max-width: 820px){
+      .layout-manager{
+        grid-template-columns:1fr;
+      }
+    }
+    .layout-list{
+      display:grid;
+      gap:10px;
+    }
+    .layout-item{
+      border-radius:14px;
+      border:1px solid var(--border);
+      padding:12px;
+      display:grid;
+      gap:6px;
+      background:var(--panel);
+    }
+    .layout-item.active{
+      border-color:var(--accent-3);
+      background:var(--panel-sub, var(--panel-2));
+    }
+    .layout-item strong{
+      font-size:14px;
+    }
+    .layout-item span{
+      font-size:12px;
+      color:var(--subtext, var(--dash-sub));
+    }
+    .layout-item button{
+      justify-self:start;
+    }
+    .assignment-list{
+      display:grid;
+      gap:8px;
+    }
+    .assignment-item{
+      display:flex;
+      align-items:flex-start;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:var(--panel);
+      font-size:12px;
+      color:var(--subtext, var(--dash-sub));
+    }
+    .assignment-item strong{
+      display:block;
+      font-size:13px;
+      color:var(--text);
+    }
+    .wifi-modal-backdrop{
+      background:rgba(6, 8, 20, 0.7);
+    }
+    .wifi-modal{
+      background:var(--panel);
+      border:1px solid var(--border);
+      color:var(--text);
+      box-shadow:var(--glow);
+    }
+    .wifi-modal .wizard-note,
+    .wifi-modal .muted{
+      color:var(--subtext, var(--dash-sub));
+    }
+    .wifi-modal .btn{
+      background:linear-gradient(120deg,var(--accent),var(--accent-2));
+      color:#0b1021;
+      border:1px solid var(--border);
+      box-shadow:var(--glow);
+    }
+    .wifi-modal .btn.secondary{
+      background:var(--panel-sub, var(--panel-2));
+      color:var(--text);
+      box-shadow:none;
+    }
+    .wifi-modal .btn.danger{
+      background:#fee2e2;
+      color:#b91c1c;
+      border-color:#fecaca;
+      box-shadow:none;
+    }
+    .wifi-modal .mini-btn{
+      background:var(--panel-sub, var(--panel-2));
+      color:var(--text);
+      border-color:var(--border);
+    }
+    .wifi-device-table{
+      display:grid;
+      gap:10px;
+    }
+    .wifi-device-row{
+      display:grid;
+      gap:12px;
+      grid-template-columns:minmax(120px,1fr) minmax(140px,1fr) minmax(160px,1fr) minmax(180px,1.2fr) minmax(180px,.9fr);
+      align-items:center;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:var(--panel-sub, var(--panel-2));
+    }
+    .wifi-device-row.header{
+      background:var(--panel);
+      font-size:12px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+    .wifi-device-actions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .wifi-editor{
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:var(--panel-sub, var(--panel-2));
+      padding:14px;
+      display:none;
+      gap:12px;
+    }
+    .wifi-editor.is-open{
+      display:grid;
+    }
+    .wifi-editor label{
+      color:var(--subtext, var(--dash-sub));
+    }
+    .wifi-editor input,
+    .wifi-editor textarea,
+    .wifi-editor select{
+      background:var(--panel);
+      color:var(--text);
+      border:1px solid var(--border);
+    }
+    .wifi-rename-panel{
+      border-radius:14px;
+      border:1px dashed var(--border);
+      background:var(--panel);
+      padding:12px;
+      display:none;
+      gap:10px;
+    }
+    .wifi-rename-panel.is-open{
+      display:grid;
+    }
+    @media (max-width: 900px){
+      .wifi-device-row{
+        grid-template-columns:1fr;
+        align-items:flex-start;
+      }
+      .wifi-device-row.header{
+        display:none;
+      }
+      .wifi-device-actions{
+        justify-content:flex-start;
+      }
+    }
+    .line-settings-form{
+      display:grid;
+      gap:12px;
+    }
+    .line-settings-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+      gap:12px;
+    }
+    .line-settings-field label{
+      display:block;
+      font-size:12px;
+      color:var(--subtext, var(--dash-sub));
+      margin-bottom:6px;
+      font-weight:700;
+    }
+    .line-settings-field input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--panel-sub, var(--panel-2));
+      color:var(--text);
+    }
+    .line-settings-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .line-settings-actions .mini-btn{
+      background:var(--panel-sub, var(--panel-2));
+    }
+    .line-fastapi-section{
+      border-radius:18px;
+      border:1px solid var(--border);
+      background:var(--panel-sub);
+      padding:20px;
+      display:grid;
+      gap:16px;
+      box-shadow:0 18px 36px rgba(15,23,42,.18);
+    }
+    .line-fastapi-header{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .line-fastapi-grid{
+      display:grid;
+      gap:12px;
+      grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .line-fastapi-card{
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      padding:14px;
+      display:grid;
+      gap:10px;
+      font-size:12px;
+      color:var(--subtext);
+    }
+    .line-fastapi-card h3{
+      margin:0;
+      font-size:14px;
+      color:var(--text);
+    }
+    .line-fastapi-card ul{
+      margin:0;
+      padding-left:18px;
+      display:grid;
+      gap:6px;
+    }
+    .line-fastapi-card code{
+      background:rgba(148,163,184,.18);
+      color:var(--text);
+      padding:2px 6px;
+      border-radius:6px;
+      font-size:11px;
+    }
+    .user-id-window{
+      display:grid;
+      gap:14px;
+    }
+    .user-id-window .section-title{
+      font-size:14px;
+      font-weight:700;
+      margin:0;
+    }
+    .user-id-grid{
+      display:grid;
+      gap:12px;
+      grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .user-id-card{
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      padding:12px;
+      display:grid;
+      gap:8px;
+      font-size:12px;
+      color:var(--subtext);
+    }
+    .user-id-card strong{
+      color:var(--text);
+      font-size:13px;
+    }
+    .user-id-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .user-id-actions .mini-btn{
+      background:rgba(255,255,255,.12);
+    }
+    .network-diagram{
+      font-family:"SFMono-Regular","Menlo","Consolas",monospace;
+      white-space:pre-wrap;
+      background:rgba(15,23,42,.6);
+      border-radius:12px;
+      border:1px dashed rgba(148,163,184,.6);
+      padding:12px;
+      color:var(--text);
+      font-size:11px;
+      line-height:1.4;
+    }
+    button, a{
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>管理ページメニュー</h1>
+        <p class="muted">各管理メニューへ遷移するための一覧ページです。</p>
+      </div>
+      <div class="actions">
+        <a class="btn secondary" href="index.html">トップ</a>
+      </div>
+    </header>
+
+    <section class="menu-grid">
+      <button class="menu-card button" type="button" id="loginLayoutTrigger" aria-label="ログイン画面作成" aria-expanded="false">
+        <div class="tag">ログイン</div>
+        <h2>ログイン画面作成</h2>
+        <span>ログイン画面の構成・デザインを管理します。</span>
+        <div class="menu-actions">
+          <span class="mini-btn">ウィンドウを開く</span>
+        </div>
+      </button>
+      <button class="menu-card button" type="button" id="loginManagementListTrigger" aria-label="ログイン管理登録・一覧" aria-expanded="false">
+        <div class="tag">ログイン管理</div>
+        <h2>ログイン管理登録・一覧</h2>
+        <span>ログインに関する登録情報と一覧を確認します。</span>
+        <div class="menu-actions">
+          <span class="mini-btn">一覧を開く</span>
+        </div>
+      </button>
+      <button class="menu-card button" type="button" id="permissionSettingsTrigger" aria-label="権限設定" aria-expanded="false">
+        <div class="tag">権限</div>
+        <h2>権限設定</h2>
+        <span>管理者ごとの操作権限を割り当てます。</span>
+        <div class="menu-actions">
+          <span class="mini-btn">設定を開く</span>
+        </div>
+      </button>
+      <button class="menu-card button" type="button" id="adminAccountsTrigger" aria-label="管理者登録・一覧" aria-expanded="false">
+        <div class="tag">管理者</div>
+        <h2>管理者登録・一覧</h2>
+        <span>管理者アカウントの登録・一覧を管理します。</span>
+        <div class="menu-actions">
+          <span class="mini-btn">一覧を開く</span>
+        </div>
+      </button>
+      <button class="menu-card button" type="button" id="userIdManagementButton" aria-label="ユーザー登録・一覧" aria-expanded="false">
+        <div class="tag">ユーザー</div>
+        <h2>ユーザー登録・一覧</h2>
+        <span>ユーザーの登録やステータスを確認します。</span>
+        <div class="menu-actions">
+          <span class="mini-btn">ウィンドウを開く</span>
+        </div>
+      </button>
+      <button class="menu-card button" type="button" id="wifiLocalTrigger" aria-label="WiFiローカルネット管理" aria-expanded="false">
+        <div class="tag">ネットワーク</div>
+        <h2>WiFiローカルネット管理</h2>
+        <span>ローカルネットワークの状態を監視します。</span>
+        <div class="menu-actions">
+          <span class="mini-btn">ウィンドウを開く</span>
+        </div>
+      </button>
+      <button class="menu-card button" type="button" id="lineFastapiTrigger" aria-label="FAST API管理" aria-expanded="false">
+        <div class="tag">API</div>
+        <h2>FAST API管理</h2>
+        <span>LINE通知用のローカルAPI構成を確認します。</span>
+        <div class="menu-actions">
+          <span class="mini-btn">構成を開く</span>
+        </div>
+      </button>
+      <button class="menu-card button" type="button" id="lineSettingsButton" aria-label="LINE Official Account管理" aria-expanded="false">
+        <div class="tag">LINE</div>
+        <h2>LINE Official Account管理</h2>
+        <span>LINE公式アカウントの配信・連携を管理します。</span>
+        <div class="menu-actions">
+          <span class="mini-btn">設定を開く</span>
+        </div>
+      </button>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="loginManagementListModal" role="dialog" aria-modal="true" aria-labelledby="loginManagementListTitle">
+    <div class="modal">
+      <div class="wizard-header">
+        <div class="wizard-title">
+          <strong id="loginManagementListTitle">ログイン管理登録・一覧</strong>
+          <span class="wizard-note">ログインが必要なページを一覧で管理し、登録済みのログイン情報を編集・削除できます。</span>
+        </div>
+        <div class="wizard-controls">
+          <button type="button" id="loginManagementListClose">閉じる</button>
+        </div>
+      </div>
+      <div class="notice">
+        <strong>編集できる項目</strong>
+        <span>URL / ログイン先URL / 固定パスワード / 認証方法 / パスワード桁数 / 英数字大文字記号判定 / 有効期限 / ログイン画面</span>
+      </div>
+      <div class="login-management-header">
+        <div>
+          <strong>ログインページ一覧</strong>
+          <div class="muted">新規作成・編集・削除の操作はこの一覧から行います。</div>
+        </div>
+        <button class="btn" type="button" id="loginManagementCreate">新規作成</button>
+      </div>
+      <div class="login-management-table" role="table" aria-label="ログイン管理一覧">
+        <div class="login-management-row header" role="row">
+          <div role="columnheader">URL</div>
+          <div role="columnheader">ログイン先URL</div>
+          <div role="columnheader">認証方法</div>
+          <div role="columnheader">ワンタイムパスワード設定</div>
+          <div role="columnheader">有効期限</div>
+          <div role="columnheader">操作</div>
+        </div>
+        <div id="loginManagementRows" role="rowgroup"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="permissionSettingsModal" role="dialog" aria-modal="true" aria-labelledby="permissionSettingsTitle">
+    <div class="modal">
+      <header class="wizard-header">
+        <div class="wizard-title">
+          <strong id="permissionSettingsTitle">権限設定</strong>
+          <span class="wizard-note">管理者ごとの操作権限を設定します。</span>
+        </div>
+        <div class="wizard-controls">
+          <button type="button" id="permissionSettingsClose">閉じる</button>
+        </div>
+      </header>
+      <div class="list">
+        <div class="list-item">
+          <strong>権限テンプレート</strong>
+          <span>準備中です。近日中に権限テンプレートの割当てが可能になります。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="adminAccountsModal" role="dialog" aria-modal="true" aria-labelledby="adminAccountsTitle">
+    <div class="modal">
+      <header class="wizard-header">
+        <div class="wizard-title">
+          <strong id="adminAccountsTitle">管理者登録・一覧</strong>
+          <span class="wizard-note">管理者アカウントの登録や一覧確認を行います。</span>
+        </div>
+        <div class="wizard-controls">
+          <button type="button" id="adminAccountsClose">閉じる</button>
+        </div>
+      </header>
+      <div class="list">
+        <div class="list-item">
+          <strong>管理者アカウント</strong>
+          <span>現在はモーダル表示のみ対応しています。登録・編集機能は準備中です。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="loginManagementModal" role="dialog" aria-modal="true" aria-labelledby="loginManagementTitle">
+    <div class="modal">
+      <div class="wizard-header">
+        <div class="wizard-title">
+          <strong id="loginManagementTitle">ログイン管理を新規作成</strong>
+          <span class="wizard-note">URLごとのログイン管理情報を登録します。</span>
+        </div>
+        <div class="wizard-controls">
+          <button type="button" id="loginManagementClose">閉じる</button>
+        </div>
+      </div>
+      <form id="loginManagementForm" class="form-grid">
+        <div>
+          <label for="loginManagementName">表示名</label>
+          <input id="loginManagementName" type="text" placeholder="例: 先生ポータル">
+        </div>
+        <div>
+          <label for="loginManagementUrl">URL</label>
+          <input id="loginManagementUrl" type="url" placeholder="https://portal.encho.app/teacher/portal">
+          <div class="muted">省略形ではなく、https:// から始まる全長URLを入力してください。</div>
+        </div>
+        <div>
+          <label for="loginManagementLoginUrl">ログイン先URL</label>
+          <input id="loginManagementLoginUrl" type="text" placeholder="https://portal.encho.app/login">
+        </div>
+        <div>
+          <label for="loginManagementLoginNote">ログイン先の説明</label>
+          <textarea id="loginManagementLoginNote" placeholder="ログイン後の遷移や補足説明"></textarea>
+        </div>
+        <div>
+          <label for="loginManagementAuthMethod">認証方法</label>
+          <select id="loginManagementAuthMethod">
+            <option value="fixed_password">固定パスワード</option>
+            <option value="fixed_password_passkey">固定パスワード/Passkey</option>
+            <option value="assigned_credentials">指定ID/パスワード</option>
+            <option value="otp">ワンタイムパスワード</option>
+            <option value="passkey">Passkey</option>
+            <option value="oath">Oath</option>
+          </select>
+        </div>
+        <div id="loginManagementPasskeyFlow" class="notice hidden">
+          <strong>固定パスワード/Passkey 運用フロー</strong>
+          <ul>
+            <li>Passkey対応端末: 初回は固定パスワードでID登録タップ → ID指定項目＋パスワード変更項目 → Passkeyボタン → ID登録</li>
+            <li>Passkey非対応端末: 初回は固定パスワードでID登録タップ → ID指定項目＋パスワード変更項目 → ID登録</li>
+            <li>Passkey ID登録済みでPasskey登録済み機器からログイン: 生体認証からログイン</li>
+            <li>Passkey ID登録済みでPasskey登録していない対応端末からログイン: 生体認証 → ID入力項目ウィンドウ → Passkey ID登録（同じもの） → ログイン</li>
+            <li>Passkey ID登録済みでPasskey非対応端末からログイン: パスワード入力 → ID入力項目ウィンドウ → ログイン</li>
+          </ul>
+        </div>
+        <div>
+          <label for="loginManagementFixedPassword">固定パスワード</label>
+          <input id="loginManagementFixedPassword" type="text" placeholder="例: portal-2024">
+        </div>
+        <div>
+          <label for="loginManagementPasswordLength">パスワード桁数</label>
+          <input id="loginManagementPasswordLength" type="number" min="1" max="32" placeholder="例: 6">
+        </div>
+        <div>
+          <label for="loginManagementOtpLength">ワンタイムパスワード桁数</label>
+          <input id="loginManagementOtpLength" type="number" min="4" max="12" placeholder="例: 6">
+        </div>
+        <label class="toggle-item">
+          <input type="checkbox" id="loginManagementRequireAlphanumeric">
+          <div>
+            <strong>英数字判定</strong>
+            <span>英数字の混在を必須とします。</span>
+          </div>
+        </label>
+        <label class="toggle-item">
+          <input type="checkbox" id="loginManagementRequireUppercase">
+          <div>
+            <strong>大文字判定</strong>
+            <span>大文字の使用を必須とします。</span>
+          </div>
+        </label>
+        <label class="toggle-item">
+          <input type="checkbox" id="loginManagementRequireSymbols">
+          <div>
+            <strong>記号判定</strong>
+            <span>記号の使用を必須とします。</span>
+          </div>
+        </label>
+        <div>
+          <label for="loginManagementExpiresAt">有効期限</label>
+          <input id="loginManagementExpiresAt" type="date">
+        </div>
+        <div>
+          <label for="loginManagementLayoutSelect">ログイン画面</label>
+          <select id="loginManagementLayoutSelect"></select>
+        </div>
+      </form>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" id="loginManagementCancel">キャンセル</button>
+        <button type="button" class="btn" id="loginManagementSave">保存する</button>
+      </div>
+      <div id="loginManagementStatus" class="status-text"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="loginLayoutModal" role="dialog" aria-modal="true" aria-labelledby="loginLayoutTitle">
+    <div class="modal">
+      <div class="wizard-header">
+        <div class="wizard-title">
+          <strong id="loginLayoutTitle">ログイン画面作成</strong>
+          <span class="wizard-note">ログイン画面の新規作成・編集と、ログイン管理への割当てを行います。</span>
+        </div>
+        <div class="wizard-controls">
+          <button type="button" id="loginLayoutClose">閉じる</button>
+        </div>
+      </div>
+      <div class="layout-manager">
+        <div class="layout-window">
+          <h4>ログイン画面作成</h4>
+          <div class="subtext">ログイン画面名は任意入力です。ログイン画面URLは未入力の場合、新規作成します。</div>
+          <form id="loginLayoutForm" class="form-grid">
+          <div>
+            <label for="loginLayoutName">ログイン画面名</label>
+            <input id="loginLayoutName" type="text" placeholder="例: 先生向けログイン">
+          </div>
+          <div>
+            <label for="loginLayoutTemplateFile">ログイン画面URL</label>
+            <input id="loginLayoutTemplateFile" type="text" placeholder="login.html">
+            <div class="muted">.html 形式で任意入力。未入力の場合は新規作成します。</div>
+          </div>
+          <div class="form-grid">
+            <label>ログイン画面</label>
+            <div class="actions">
+              <button type="button" class="btn" id="loginLayoutCreate">作成する</button>
+              <button type="button" class="btn secondary">テンプレートから選ぶ</button>
+              <button type="button" class="btn secondary">編集</button>
+            </div>
+          </div>
+          <div>
+            <label for="loginLayoutDescription">画面説明</label>
+            <textarea id="loginLayoutDescription" placeholder="画面の用途や特徴を入力"></textarea>
+          </div>
+          <div>
+            <label for="loginLayoutTitleText">タイトル</label>
+            <input id="loginLayoutTitleText" type="text" placeholder="例: EnCho ログイン">
+          </div>
+          <div>
+            <label for="loginLayoutSubtitleText">サブタイトル</label>
+            <input id="loginLayoutSubtitleText" type="text" placeholder="例: 先生用ログイン">
+          </div>
+          <div>
+            <label for="loginLayoutHelperText">補助文</label>
+            <input id="loginLayoutHelperText" type="text" placeholder="例: 生体認証を開始してください">
+          </div>
+          <div>
+            <label for="loginLayoutBiometricButtonText">生体認証ボタン</label>
+            <input id="loginLayoutBiometricButtonText" type="text" placeholder="例: 生体認証を開始">
+          </div>
+          <div>
+            <label for="loginLayoutInitialButtonText">初回ログインボタン</label>
+            <input id="loginLayoutInitialButtonText" type="text" placeholder="例: 初回ログインはこちら">
+          </div>
+          <div>
+            <label>ログイン管理割当て</label>
+            <div class="assignment-list" id="loginLayoutAssignments"></div>
+          </div>
+          </form>
+          <div class="layout-list" id="loginLayoutList"></div>
+        </div>
+        <div class="layout-window">
+          <h4>パーツ</h4>
+          <div class="parts-list">
+            <div class="parts-row">
+              <div class="parts-controls">
+                <button type="button">↑</button>
+                <button type="button">↓</button>
+              </div>
+              <div class="parts-preview">
+                <div class="preview-box">[. パーツ] プレビュー</div>
+                <div>パーツ毎のプレビュー表示</div>
+              </div>
+              <div class="parts-actions">
+                <button class="mini-btn" type="button">編集</button>
+                <button class="mini-btn" type="button">ゴミ箱</button>
+              </div>
+            </div>
+            <div class="parts-row">
+              <div class="parts-controls">
+                <button type="button">↑</button>
+                <button type="button">↓</button>
+              </div>
+              <div class="parts-preview">
+                <div class="preview-box">[. パーツ] プレビュー</div>
+                <div>パーツ毎のプレビュー表示</div>
+              </div>
+              <div class="parts-actions">
+                <button class="mini-btn" type="button">編集</button>
+                <button class="mini-btn" type="button">ゴミ箱</button>
+              </div>
+            </div>
+            <div class="parts-row">
+              <div class="parts-controls">
+                <button type="button">↑</button>
+                <button type="button">↓</button>
+              </div>
+              <div class="parts-preview">
+                <div class="preview-box">[. パーツ] プレビュー</div>
+                <div>パーツ毎のプレビュー表示</div>
+              </div>
+              <div class="parts-actions">
+                <button class="mini-btn" type="button">編集</button>
+                <button class="mini-btn" type="button">ゴミ箱</button>
+              </div>
+            </div>
+          </div>
+          <h4>編集ウィンドウ</h4>
+          <div class="editor-grid">
+            <div class="editor-field">
+              <label>あ字 / フォント名</label>
+              <input type="text" placeholder="Noto Sans JP">
+            </div>
+            <div class="editor-field">
+              <label>サイズ(px)</label>
+              <input type="number" placeholder="16">
+            </div>
+            <div class="editor-field">
+              <label>カラー</label>
+              <input type="text" placeholder="#FFFFFF">
+            </div>
+            <div class="editor-field">
+              <label>ボタン種別</label>
+              <select>
+                <option>Primary</option>
+                <option>Secondary</option>
+                <option>Outline</option>
+              </select>
+            </div>
+            <div class="editor-field">
+              <label>ボタンサイズ</label>
+              <input type="text" placeholder="L / M / S">
+            </div>
+            <div class="editor-field">
+              <label>ボタンカラー</label>
+              <input type="text" placeholder="#8b5cf6">
+            </div>
+            <div class="editor-field">
+              <label>テキスト</label>
+              <input type="text" placeholder="ログイン">
+            </div>
+            <div class="editor-field">
+              <label>テキストサイズ</label>
+              <input type="number" placeholder="14">
+            </div>
+            <div class="editor-field">
+              <label>テキストカラー</label>
+              <input type="text" placeholder="#E2E8F0">
+            </div>
+            <div class="editor-field">
+              <label>フレーム種別</label>
+              <select>
+                <option>角丸</option>
+                <option>角</option>
+                <option>下線</option>
+              </select>
+            </div>
+            <div class="editor-field">
+              <label>フレームカラー</label>
+              <input type="text" placeholder="#334155">
+            </div>
+            <div class="editor-field">
+              <label>ICON type</label>
+              <input type="text" placeholder="lock">
+            </div>
+            <div class="editor-field">
+              <label>ICON size</label>
+              <input type="number" placeholder="20">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" id="loginLayoutNew">新規作成</button>
+        <button type="button" class="btn" id="loginLayoutSave">保存する</button>
+      </div>
+      <div id="loginLayoutStatus" class="status-text"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop line-settings-backdrop" id="lineSettingsModal" aria-hidden="true">
+    <div class="modal line-settings-window" role="dialog" aria-modal="true" aria-labelledby="lineSettingsTitle">
+      <header>
+        <h3 id="lineSettingsTitle">LINE Official Account設定</h3>
+        <button class="mini-btn" type="button" id="lineSettingsClose">閉じる</button>
+      </header>
+      <p class="muted">LINE連携に必要な設定項目を確認・更新できます。</p>
+      <form class="line-settings-form" id="lineSettingsForm" autocomplete="off">
+        <div class="line-settings-grid">
+          <div class="line-settings-field">
+            <label for="lineChannelId">チャネルID</label>
+            <input id="lineChannelId" type="text" placeholder="例: 1234567890" />
+          </div>
+          <div class="line-settings-field">
+            <label for="lineChannelSecret">チャネルシークレット</label>
+            <input id="lineChannelSecret" type="password" placeholder="例: xxxxxxxx" />
+          </div>
+          <div class="line-settings-field">
+            <label for="lineAccessToken">アクセストークン</label>
+            <input id="lineAccessToken" type="password" placeholder="例: xxxxxx" />
+          </div>
+          <div class="line-settings-field">
+            <label for="lineWebhookUrl">Webhook URL</label>
+            <input id="lineWebhookUrl" type="url" placeholder="https://example.com/line/webhook" />
+            <span class="muted">LINE Platform のWebhookは200応答が必須です。</span>
+          </div>
+        </div>
+        <div class="line-settings-actions">
+          <button class="mini-btn" type="button" id="lineSettingsSave">保存</button>
+          <button class="mini-btn" type="button" id="lineSettingsReset">リセット</button>
+          <span class="muted">保管先: localStorage</span>
+        </div>
+      </form>
+      <div class="list">
+        <div class="list-item">
+          <strong>チャネルID</strong>
+          <span>LINE Developersで発行されたチャネルIDを登録します。</span>
+        </div>
+        <div class="list-item">
+          <strong>チャネルシークレット</strong>
+          <span>Webhook署名に使用するシークレットの管理。</span>
+        </div>
+        <div class="list-item">
+          <strong>アクセストークン</strong>
+          <span>メッセージ送信用のアクセストークンを更新します。</span>
+        </div>
+        <div class="list-item">
+          <strong>Webhook URL</strong>
+          <span>イベント受信のURLを確認・変更します。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="userIdManagementModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="userIdManagementTitle">
+      <header>
+        <h3 id="userIdManagementTitle">ユーザー登録・一覧</h3>
+        <button class="mini-btn" type="button" id="userIdManagementClose">閉じる</button>
+      </header>
+      <p class="muted">ユーザー（保護者）ID管理の年度更新やLINE連携の一括変更を行います。</p>
+      <div class="user-id-window">
+        <div>
+          <p class="section-title">ユーザー（保護者）ID管理</p>
+          <div class="user-id-grid">
+            <div class="user-id-card">
+              <strong>年度更新</strong>
+              <span>クラス編成自動更新（ID）と卒園者一括自動期限削除（ID）を実行します。</span>
+              <div class="user-id-actions">
+                <button class="mini-btn" type="button">クラス編成自動更新（ID）</button>
+                <button class="mini-btn" type="button">卒園者一括自動期限削除（ID）</button>
+              </div>
+            </div>
+            <div class="user-id-card">
+              <strong>LINE連携一括変更</strong>
+              <span>複数選択の一括削除、QR再発行、卒園者LINE連携自動期限削除を実行します。</span>
+              <div class="user-id-actions">
+                <button class="mini-btn" type="button">複数選択一括削除</button>
+                <button class="mini-btn" type="button">QR再発行</button>
+                <button class="mini-btn" type="button">卒園者LINE連携自動期限削除</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="status-text">テーマ共通ウィンドウ（透過0%）で表示します。</div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="lineFastapiModal" role="dialog" aria-modal="true" aria-labelledby="lineFastapiTitle">
+    <div class="modal">
+      <div class="line-fastapi-header">
+        <div>
+          <h2 id="lineFastapiTitle">FAST API × LINE通知サーバ（WiFiローカル設置）</h2>
+          <p class="muted">園内WiFiに設置したFAST APIが、外部インターネットへ直接LINE通知を配信します。</p>
+        </div>
+        <button class="mini-btn" type="button" id="lineFastapiClose">閉じる</button>
+      </div>
+      <div class="network-diagram">
+Internet ←→ 園外ネット
+      ↓
+WiFiアクセスポイント ── NAS（月次確定データ）
+      │
+      ├─ .html + FAST API（LINE通知）※ iPad/NASは中継しない
+      │        ↑ EnCho
+      └─ iPad（ノード保存）
+      </div>
+      <div class="line-fastapi-grid">
+        <div class="line-fastapi-card">
+          <h3>FAST APIエンドポイント</h3>
+          <ul>
+            <li><code>POST /line/notify</code>：園内からのLINE配信リクエスト。</li>
+            <li><code>POST /line/webhook</code>：保護者返信/ポストバック受信。</li>
+            <li><code>X-Local-Token</code>：園内端末のみ通知を許可。</li>
+          </ul>
+        </div>
+        <div class="line-fastapi-card">
+          <h3>ノード/データ運用</h3>
+          <ul>
+            <li>園児履歴は4次元ノード化し、園内で共有。</li>
+            <li>ノードは園児データ＋計算基礎値。別ノードで法改正式を管理。</li>
+            <li>profit64で計算結果を格納、ロード時キャッシュは初期化。</li>
+          </ul>
+        </div>
+        <div class="line-fastapi-card">
+          <h3>データセット構成</h3>
+          <ul>
+            <li>Codmon単月CSVを暗号化したデータセット単位で管理。</li>
+            <li>クラス毎にノード生成、25名超は分割ノード。</li>
+            <li>他担当が同CSV編集時は園児ノード単位で差分取得。</li>
+          </ul>
+        </div>
+        <div class="line-fastapi-card">
+          <h3>LINE配信タイプ</h3>
+          <ul>
+            <li>QR連携 / リプライ配信 / コメント返しの3種類。</li>
+            <li>返信は園から配信した通知への応答に限定。</li>
+            <li>OK/NG返信は園児バッヂ色で表示。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="line-fastapi-card">
+        <h3>インターネット通信対象</h3>
+        <ul>
+          <li>LINE明細配信JSON、保護者ポストバック。</li>
+          <li>EnCho/SenSeiアップデートファイル。</li>
+          <li>園外管理者からのアップロードアクセス。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop wifi-modal-backdrop" id="wifiLocalModal" role="dialog" aria-modal="true" aria-labelledby="wifiLocalTitle">
+    <div class="modal wifi-modal">
+      <div class="wizard-header">
+        <div class="wizard-title">
+          <strong id="wifiLocalTitle">WiFiローカルネット管理</strong>
+          <span class="wizard-note">園内ローカルネット／WiFiローカルネット接続端末のIP管理をまとめます。</span>
+        </div>
+        <div class="wizard-controls">
+          <button type="button" id="wifiLocalClose">閉じる</button>
+        </div>
+      </div>
+      <div class="list">
+        <div class="list-item">
+          <strong>園内ローカルネット接続端末について</strong>
+          <span>IPアドレスを一覧管理し、端末ごとに割り当てを記録します。</span>
+        </div>
+        <div class="list-item">
+          <strong>WiFiローカルネットワーク接続端末について</strong>
+          <span>WiFi用IPアドレス管理（マイネットワーク化）の状態を登録します。</span>
+        </div>
+      </div>
+      <div class="login-management-header">
+        <div>
+          <strong>接続端末一覧</strong>
+          <div class="muted">新規作成・編集・削除・名前変更が可能です。</div>
+        </div>
+        <button class="btn" type="button" id="wifiDeviceCreate">新規作成</button>
+      </div>
+      <div class="wifi-device-table" role="table" aria-label="WiFiローカルネット接続端末一覧">
+        <div class="wifi-device-row header" role="row">
+          <div role="columnheader">端末名</div>
+          <div role="columnheader">種別</div>
+          <div role="columnheader">IPアドレス</div>
+          <div role="columnheader">管理メモ</div>
+          <div role="columnheader">操作</div>
+        </div>
+        <div id="wifiDeviceRows" role="rowgroup"></div>
+      </div>
+      <div class="wifi-editor" id="wifiDeviceEditor">
+        <form id="wifiDeviceForm" class="form-grid">
+          <div>
+            <label for="wifiDeviceName">端末名</label>
+            <input id="wifiDeviceName" type="text" placeholder="例: 園内NAS" />
+          </div>
+          <div>
+            <label for="wifiDeviceIp">IPアドレス</label>
+            <input id="wifiDeviceIp" type="text" placeholder="例: 192.168.10.10" />
+          </div>
+          <div>
+            <label for="wifiDeviceType">接続種別</label>
+            <select id="wifiDeviceType">
+              <option value="local">園内ローカルネット</option>
+              <option value="wifi">WiFiローカルネット</option>
+            </select>
+          </div>
+          <div>
+            <label for="wifiDeviceNote">管理メモ</label>
+            <textarea id="wifiDeviceNote" placeholder="設置場所・用途など"></textarea>
+          </div>
+        </form>
+        <div class="modal-actions">
+          <button type="button" class="btn secondary" id="wifiDeviceCancel">キャンセル</button>
+          <button type="button" class="btn" id="wifiDeviceSave">保存する</button>
+        </div>
+        <div id="wifiDeviceStatus" class="status-text"></div>
+      </div>
+      <div class="wifi-rename-panel" id="wifiRenamePanel">
+        <strong>名前の変更</strong>
+        <div>
+          <label for="wifiRenameName">新しい端末名</label>
+          <input id="wifiRenameName" type="text" placeholder="例: 先生室タブレット" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn secondary" id="wifiRenameCancel">キャンセル</button>
+          <button type="button" class="btn" id="wifiRenameSave">名前を更新</button>
+        </div>
+        <div id="wifiRenameStatus" class="status-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const LOGIN_MANAGEMENT_KEY = "encho_login_management_v1";
+    const LOGIN_LAYOUT_LIBRARY_KEY = "encho_login_layout_library_v1";
+    const lineSettingsButton = document.getElementById("lineSettingsButton");
+    const lineSettingsModal = document.getElementById("lineSettingsModal");
+    const lineSettingsClose = document.getElementById("lineSettingsClose");
+    const lineSettingsForm = document.getElementById("lineSettingsForm");
+    const lineChannelId = document.getElementById("lineChannelId");
+    const lineChannelSecret = document.getElementById("lineChannelSecret");
+    const lineAccessToken = document.getElementById("lineAccessToken");
+    const lineWebhookUrl = document.getElementById("lineWebhookUrl");
+    const lineSettingsSave = document.getElementById("lineSettingsSave");
+    const lineSettingsReset = document.getElementById("lineSettingsReset");
+    const loginManagementListTrigger = document.getElementById("loginManagementListTrigger");
+    const loginManagementListModal = document.getElementById("loginManagementListModal");
+    const loginManagementListClose = document.getElementById("loginManagementListClose");
+    const permissionSettingsTrigger = document.getElementById("permissionSettingsTrigger");
+    const permissionSettingsModal = document.getElementById("permissionSettingsModal");
+    const permissionSettingsClose = document.getElementById("permissionSettingsClose");
+    const adminAccountsTrigger = document.getElementById("adminAccountsTrigger");
+    const adminAccountsModal = document.getElementById("adminAccountsModal");
+    const adminAccountsClose = document.getElementById("adminAccountsClose");
+    const lineFastapiTrigger = document.getElementById("lineFastapiTrigger");
+    const lineFastapiModal = document.getElementById("lineFastapiModal");
+    const lineFastapiClose = document.getElementById("lineFastapiClose");
+    const userIdManagementButton = document.getElementById("userIdManagementButton");
+    const userIdManagementModal = document.getElementById("userIdManagementModal");
+    const userIdManagementClose = document.getElementById("userIdManagementClose");
+    const LINE_SETTINGS_KEY = "encho_line_official_settings";
+    const loginManagementRows = document.getElementById("loginManagementRows");
+    const loginManagementCreate = document.getElementById("loginManagementCreate");
+    const loginManagementModal = document.getElementById("loginManagementModal");
+    const loginManagementTitle = document.getElementById("loginManagementTitle");
+    const loginManagementForm = document.getElementById("loginManagementForm");
+    const loginManagementName = document.getElementById("loginManagementName");
+    const loginManagementUrl = document.getElementById("loginManagementUrl");
+    const loginManagementLoginUrl = document.getElementById("loginManagementLoginUrl");
+    const loginManagementLoginNote = document.getElementById("loginManagementLoginNote");
+    const loginManagementAuthMethod = document.getElementById("loginManagementAuthMethod");
+    const loginManagementPasskeyFlow = document.getElementById("loginManagementPasskeyFlow");
+    const loginManagementFixedPassword = document.getElementById("loginManagementFixedPassword");
+    const loginManagementPasswordLength = document.getElementById("loginManagementPasswordLength");
+    const loginManagementOtpLength = document.getElementById("loginManagementOtpLength");
+    const loginManagementRequireAlphanumeric = document.getElementById("loginManagementRequireAlphanumeric");
+    const loginManagementRequireUppercase = document.getElementById("loginManagementRequireUppercase");
+    const loginManagementRequireSymbols = document.getElementById("loginManagementRequireSymbols");
+    const loginManagementExpiresAt = document.getElementById("loginManagementExpiresAt");
+    const loginManagementLayoutSelect = document.getElementById("loginManagementLayoutSelect");
+    const loginManagementClose = document.getElementById("loginManagementClose");
+    const loginManagementCancel = document.getElementById("loginManagementCancel");
+    const loginManagementSave = document.getElementById("loginManagementSave");
+    const loginManagementStatus = document.getElementById("loginManagementStatus");
+    const loginLayoutTrigger = document.getElementById("loginLayoutTrigger");
+    const wifiLocalTrigger = document.getElementById("wifiLocalTrigger");
+    const wifiLocalModal = document.getElementById("wifiLocalModal");
+    const wifiLocalClose = document.getElementById("wifiLocalClose");
+    const wifiDeviceCreate = document.getElementById("wifiDeviceCreate");
+    const wifiDeviceRows = document.getElementById("wifiDeviceRows");
+    const wifiDeviceEditor = document.getElementById("wifiDeviceEditor");
+    const wifiDeviceForm = document.getElementById("wifiDeviceForm");
+    const wifiDeviceName = document.getElementById("wifiDeviceName");
+    const wifiDeviceIp = document.getElementById("wifiDeviceIp");
+    const wifiDeviceType = document.getElementById("wifiDeviceType");
+    const wifiDeviceNote = document.getElementById("wifiDeviceNote");
+    const wifiDeviceCancel = document.getElementById("wifiDeviceCancel");
+    const wifiDeviceSave = document.getElementById("wifiDeviceSave");
+    const wifiDeviceStatus = document.getElementById("wifiDeviceStatus");
+    const wifiRenamePanel = document.getElementById("wifiRenamePanel");
+    const wifiRenameName = document.getElementById("wifiRenameName");
+    const wifiRenameCancel = document.getElementById("wifiRenameCancel");
+    const wifiRenameSave = document.getElementById("wifiRenameSave");
+    const wifiRenameStatus = document.getElementById("wifiRenameStatus");
+    const loginLayoutModal = document.getElementById("loginLayoutModal");
+    const loginLayoutList = document.getElementById("loginLayoutList");
+    const loginLayoutForm = document.getElementById("loginLayoutForm");
+    const loginLayoutName = document.getElementById("loginLayoutName");
+    const loginLayoutTemplateFile = document.getElementById("loginLayoutTemplateFile");
+    const loginLayoutDescription = document.getElementById("loginLayoutDescription");
+    const loginLayoutTitleText = document.getElementById("loginLayoutTitleText");
+    const loginLayoutSubtitleText = document.getElementById("loginLayoutSubtitleText");
+    const loginLayoutHelperText = document.getElementById("loginLayoutHelperText");
+    const loginLayoutBiometricButtonText = document.getElementById("loginLayoutBiometricButtonText");
+    const loginLayoutInitialButtonText = document.getElementById("loginLayoutInitialButtonText");
+    const loginLayoutAssignments = document.getElementById("loginLayoutAssignments");
+    const loginLayoutClose = document.getElementById("loginLayoutClose");
+    const loginLayoutNew = document.getElementById("loginLayoutNew");
+    const loginLayoutCreate = document.getElementById("loginLayoutCreate");
+    const loginLayoutSave = document.getElementById("loginLayoutSave");
+    const loginLayoutStatus = document.getElementById("loginLayoutStatus");
+    const WIFI_LOCAL_DEVICE_KEY = "encho_wifi_local_devices_v1";
+    let activeLoginManagementId = null;
+    let activeLoginLayoutId = null;
+    let activeWifiDeviceId = null;
+    let activeWifiRenameId = null;
+
+    function setStatus(target, message, isError = false) {
+      if (!target) return;
+      target.textContent = message;
+      target.classList.toggle("error", !!isError);
+    }
+
+    function loadSettings(key, fallback = []) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function saveSettings(key, data) {
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    function getDefaultLoginLayoutLibrary() {
+      return [
+        {
+          id: "login-layout-1",
+          name: "登録1",
+          templateFile: "login.html",
+          description: "login.html を初期表示する標準ログイン画面。",
+          settings: {
+            titleText: "EnCho ログイン",
+            subtitleText: "登録1: 標準ログイン画面",
+            helperText: "生体認証またはコード入力でログインします。",
+            biometricButtonText: "生体認証を開始",
+            initialButtonText: "初回ログインはこちら"
+          },
+          updatedAt: Date.now()
+        }
+      ];
+    }
+
+    function loadLoginLayoutLibrary() {
+      const stored = loadSettings(LOGIN_LAYOUT_LIBRARY_KEY, []);
+      if (stored.length) return stored;
+      const defaults = getDefaultLoginLayoutLibrary();
+      saveSettings(LOGIN_LAYOUT_LIBRARY_KEY, defaults);
+      return defaults;
+    }
+
+    function getLoginManagementDefaults() {
+      return [
+        {
+          id: "login-portal",
+          name: "先生ポータル",
+          url: "https://portal.encho.app/teacher/portal",
+          loginUrl: "https://portal.encho.app/login",
+          loginNote: "ログイン後は/teacherへ遷移",
+          authMethod: "fixed_password",
+          fixedPassword: "portal-2024",
+          passwordLength: 6,
+          otpLength: null,
+          requireAlphanumeric: false,
+          requireUppercase: false,
+          requireSymbols: false,
+          expiresAt: "2025-03-31",
+          loginLayoutId: ""
+        },
+        {
+          id: "login-guardian",
+          name: "保護者ログイン",
+          url: "https://guardian.encho.app/guardian",
+          loginUrl: "https://guardian.encho.app/auth",
+          loginNote: "子ども情報を取得",
+          authMethod: "assigned_credentials",
+          fixedPassword: "",
+          passwordLength: 8,
+          otpLength: null,
+          requireAlphanumeric: true,
+          requireUppercase: false,
+          requireSymbols: false,
+          expiresAt: "2024-12-20",
+          loginLayoutId: ""
+        },
+        {
+          id: "login-support-otp",
+          name: "サポート窓口",
+          url: "https://support.encho.app/otp",
+          loginUrl: "https://support.encho.app/otp",
+          loginNote: "緊急連絡用",
+          authMethod: "otp",
+          fixedPassword: "",
+          passwordLength: null,
+          otpLength: 6,
+          requireAlphanumeric: true,
+          requireUppercase: true,
+          requireSymbols: false,
+          expiresAt: "2024-10-01",
+          loginLayoutId: ""
+        },
+        {
+          id: "login-admin-passkey",
+          name: "管理者端末",
+          url: "https://admin.encho.app/passkey",
+          loginUrl: "https://admin.encho.app/passkey",
+          loginNote: "端末登録必須",
+          authMethod: "passkey",
+          fixedPassword: "",
+          passwordLength: null,
+          otpLength: null,
+          requireAlphanumeric: false,
+          requireUppercase: false,
+          requireSymbols: false,
+          expiresAt: "",
+          loginLayoutId: ""
+        }
+      ];
+    }
+
+    function loadLoginManagementEntries() {
+      try {
+        const raw = localStorage.getItem(LOGIN_MANAGEMENT_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (error) {
+        // ignore
+      }
+      const defaults = getLoginManagementDefaults();
+      localStorage.setItem(LOGIN_MANAGEMENT_KEY, JSON.stringify(defaults));
+      return defaults;
+    }
+
+    function saveLoginManagementEntries(entries) {
+      localStorage.setItem(LOGIN_MANAGEMENT_KEY, JSON.stringify(entries));
+    }
+
+    function getLoginManagementAuthLabel(method) {
+      switch (method) {
+        case "fixed_password":
+          return "固定パスワード";
+        case "fixed_password_passkey":
+          return "固定パスワード/Passkey";
+        case "assigned_credentials":
+          return "指定ID/パスワード";
+        case "otp":
+          return "ワンタイムパスワード";
+        case "passkey":
+          return "Passkey";
+        case "oath":
+          return "Oath";
+        default:
+          return "未設定";
+      }
+    }
+
+    function getLoginManagementAuthClass(method) {
+      if (method === "otp") return "badge warning";
+      if (method === "assigned_credentials") return "badge secondary";
+      return "badge";
+    }
+
+    function getLoginLayoutName(layoutId) {
+      if (!layoutId) return "未指定";
+      const library = loadLoginLayoutLibrary();
+      const match = library.find((entry) => entry.id === layoutId);
+      return match ? match.name : "未指定";
+    }
+
+    function renderLoginManagementLayoutOptions(selectedId = "") {
+      if (!loginManagementLayoutSelect) return;
+      const library = loadLoginLayoutLibrary();
+      if (!library.length) {
+        loginManagementLayoutSelect.innerHTML = `<option value="">登録なし</option>`;
+        return;
+      }
+      loginManagementLayoutSelect.innerHTML = [
+        `<option value="">未指定</option>`,
+        ...library.map((entry) => `<option value="${entry.id}">${entry.name}</option>`)
+      ].join("");
+      loginManagementLayoutSelect.value = selectedId || "";
+    }
+
+    function updateLoginManagementAuthNotes() {
+      if (!loginManagementAuthMethod || !loginManagementPasskeyFlow) return;
+      const isFixedPasskey = loginManagementAuthMethod.value === "fixed_password_passkey";
+      loginManagementPasskeyFlow.classList.toggle("hidden", !isFixedPasskey);
+    }
+
+    function renderLoginManagementTable() {
+      if (!loginManagementRows) return;
+      const entries = loadLoginManagementEntries();
+      if (!entries.length) {
+        loginManagementRows.innerHTML = `
+          <div class="login-management-row" role="row">
+            <div class="login-management-cell" role="cell" style="grid-column:1/-1;">
+              <span class="small-muted">ログイン管理の登録はありません。</span>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      loginManagementRows.innerHTML = entries.map((entry) => {
+        const layoutName = getLoginLayoutName(entry.loginLayoutId);
+        const authLabel = getLoginManagementAuthLabel(entry.authMethod);
+        const authClass = getLoginManagementAuthClass(entry.authMethod);
+        const fixedPasswordLabel = ["fixed_password", "fixed_password_passkey"].includes(entry.authMethod)
+          ? `固定PW: ${entry.fixedPassword || "-"}`
+          : "固定PW: 対象外";
+        const otpMeta = entry.authMethod === "otp"
+          ? `
+            <span>桁数: ${entry.otpLength || "-"}</span>
+            <span>英数字: ${entry.requireAlphanumeric ? "有効" : "無効"} / 大文字: ${entry.requireUppercase ? "有効" : "無効"} / 記号: ${entry.requireSymbols ? "有効" : "無効"}</span>
+          `
+          : `<span>対象外</span>`;
+        const expiresLabel = entry.expiresAt ? entry.expiresAt.replace(/-/g, "/") : "無期限";
+        return `
+          <div class="login-management-row" role="row">
+            <div class="login-management-cell login-management-url-cell" role="cell">
+              <strong>${entry.url}</strong>
+              <span>${entry.name || "名称未設定"}</span>
+            </div>
+            <div class="login-management-cell login-management-url-cell" role="cell">
+              <strong>${entry.loginUrl}</strong>
+              <span>${entry.loginNote || "補足なし"} / ログイン画面: ${layoutName}</span>
+            </div>
+            <div class="login-management-cell" role="cell">
+              <span class="${authClass}">${authLabel}</span>
+              <span>PW桁数: ${entry.passwordLength || "-"}</span>
+              <span>${fixedPasswordLabel}</span>
+            </div>
+            <div class="login-management-cell login-management-meta" role="cell">
+              ${otpMeta}
+            </div>
+            <div class="login-management-cell" role="cell">
+              <strong>${expiresLabel}</strong>
+              <span>${entry.expiresAt ? "期限あり" : "期限なし"}</span>
+            </div>
+            <div class="login-management-actions" role="cell">
+              <button class="btn secondary small" type="button" data-edit-login="${entry.id}">編集</button>
+              <button class="btn danger small" type="button" data-remove-login="${entry.id}">削除</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      loginManagementRows.querySelectorAll("[data-edit-login]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.editLogin;
+          const entry = loadLoginManagementEntries().find((item) => item.id === id);
+          if (!entry) return;
+          openLoginManagementModal(entry);
+        });
+      });
+
+      loginManagementRows.querySelectorAll("[data-remove-login]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.removeLogin;
+          if (!id) return;
+          const next = loadLoginManagementEntries().filter((item) => item.id !== id);
+          saveLoginManagementEntries(next);
+          renderLoginManagementTable();
+        });
+      });
+    }
+
+    function renderLoginLayoutList() {
+      if (!loginLayoutList) return;
+      const library = loadLoginLayoutLibrary();
+      const loginEntries = loadLoginManagementEntries();
+      if (!library.length) {
+        loginLayoutList.innerHTML = `
+          <div class="layout-item">
+            <strong>登録がありません</strong>
+            <span>右側のフォームから新規作成してください。</span>
+          </div>
+        `;
+        return;
+      }
+      loginLayoutList.innerHTML = library.map((entry) => {
+        const assignedCount = loginEntries.filter((item) => item.loginLayoutId === entry.id).length;
+        const activeClass = entry.id === activeLoginLayoutId ? "layout-item active" : "layout-item";
+        return `
+          <div class="${activeClass}">
+            <strong>${entry.name}</strong>
+            <span>テンプレート: ${entry.templateFile || "-"}</span>
+            <span>割当て: ${assignedCount}件</span>
+            <button type="button" class="mini-btn" data-edit-layout="${entry.id}">編集</button>
+          </div>
+        `;
+      }).join("");
+
+      loginLayoutList.querySelectorAll("[data-edit-layout]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.editLayout;
+          const entry = loadLoginLayoutLibrary().find((item) => item.id === id);
+          if (entry) openLoginLayoutModal(entry);
+        });
+      });
+    }
+
+    function renderLoginLayoutAssignments(selectedIds = []) {
+      if (!loginLayoutAssignments) return;
+      const entries = loadLoginManagementEntries();
+      if (!entries.length) {
+        loginLayoutAssignments.innerHTML = `<div class="assignment-item"><span>ログイン管理の登録がありません。</span></div>`;
+        return;
+      }
+      loginLayoutAssignments.innerHTML = entries.map((entry) => {
+        const checked = selectedIds.includes(entry.id) ? "checked" : "";
+        return `
+          <label class="assignment-item">
+            <input type="checkbox" value="${entry.id}" ${checked}>
+            <div>
+              <strong>${entry.name || entry.url}</strong>
+              <span>${entry.url} / ${entry.loginUrl}</span>
+            </div>
+          </label>
+        `;
+      }).join("");
+    }
+
+    function openLoginLayoutModal(entry = null) {
+      if (!loginLayoutModal) return;
+      activeLoginLayoutId = entry?.id || null;
+      if (loginLayoutName) loginLayoutName.value = entry?.name || "";
+      if (loginLayoutTemplateFile) {
+        loginLayoutTemplateFile.value = entry?.templateFile || "";
+        loginLayoutTemplateFile.dataset.original = entry?.templateFile || "";
+      }
+      if (loginLayoutDescription) loginLayoutDescription.value = entry?.description || "";
+      if (loginLayoutTitleText) loginLayoutTitleText.value = entry?.settings?.titleText || "";
+      if (loginLayoutSubtitleText) loginLayoutSubtitleText.value = entry?.settings?.subtitleText || "";
+      if (loginLayoutHelperText) loginLayoutHelperText.value = entry?.settings?.helperText || "";
+      if (loginLayoutBiometricButtonText) loginLayoutBiometricButtonText.value = entry?.settings?.biometricButtonText || "";
+      if (loginLayoutInitialButtonText) loginLayoutInitialButtonText.value = entry?.settings?.initialButtonText || "";
+      const assignedIds = entry
+        ? loadLoginManagementEntries()
+          .filter((item) => item.loginLayoutId === entry.id)
+          .map((item) => item.id)
+        : [];
+      renderLoginLayoutAssignments(assignedIds);
+      renderLoginLayoutList();
+      setStatus(loginLayoutStatus, "");
+      loginLayoutModal.classList.add("is-open");
+      if (loginLayoutTrigger) loginLayoutTrigger.setAttribute("aria-expanded", "true");
+    }
+
+    function closeLoginLayoutModal() {
+      if (!loginLayoutModal) return;
+      loginLayoutModal.classList.remove("is-open");
+      if (loginLayoutTrigger) loginLayoutTrigger.setAttribute("aria-expanded", "false");
+      activeLoginLayoutId = null;
+      if (loginLayoutForm) loginLayoutForm.reset();
+      setStatus(loginLayoutStatus, "");
+    }
+
+    function saveLoginLayoutFromModal() {
+      if (!loginLayoutName || !loginLayoutTemplateFile) return;
+      const nameValue = loginLayoutName.value.trim();
+      const templateValue = loginLayoutTemplateFile.value.trim();
+      const fallbackTemplate = loginLayoutTemplateFile.dataset.original || "";
+      const resolvedTemplateValue = templateValue || fallbackTemplate || `login-${Date.now()}.html`;
+      if (!nameValue) {
+        setStatus(loginLayoutStatus, "ログイン画面名は任意ですが、登録内容が分かるよう入力をおすすめします。");
+      }
+      if (!templateValue) {
+        setStatus(loginLayoutStatus, "ログイン画面URL未入力のため、新規作成として保存します。");
+      }
+      const entry = {
+        id: activeLoginLayoutId || `login-layout-${Date.now()}`,
+        name: nameValue,
+        templateFile: resolvedTemplateValue,
+        description: (loginLayoutDescription?.value || "").trim(),
+        settings: {
+          titleText: (loginLayoutTitleText?.value || "").trim(),
+          subtitleText: (loginLayoutSubtitleText?.value || "").trim(),
+          helperText: (loginLayoutHelperText?.value || "").trim(),
+          biometricButtonText: (loginLayoutBiometricButtonText?.value || "").trim(),
+          initialButtonText: (loginLayoutInitialButtonText?.value || "").trim()
+        },
+        updatedAt: Date.now()
+      };
+      const library = loadLoginLayoutLibrary();
+      const index = library.findIndex((item) => item.id === entry.id);
+      if (index >= 0) {
+        library[index] = entry;
+      } else {
+        library.push(entry);
+      }
+      saveSettings(LOGIN_LAYOUT_LIBRARY_KEY, library);
+      const selectedIds = Array.from(loginLayoutAssignments?.querySelectorAll("input[type='checkbox']:checked") || [])
+        .map((input) => input.value);
+      const loginEntries = loadLoginManagementEntries().map((item) => {
+        if (selectedIds.includes(item.id)) {
+          return { ...item, loginLayoutId: entry.id };
+        }
+        if (item.loginLayoutId === entry.id) {
+          return { ...item, loginLayoutId: "" };
+        }
+        return item;
+      });
+      saveLoginManagementEntries(loginEntries);
+      renderLoginManagementTable();
+      renderLoginLayoutList();
+      renderLoginManagementLayoutOptions(entry.id);
+      setStatus(loginLayoutStatus, "保存しました。");
+    }
+
+    function openLoginManagementModal(entry = null) {
+      if (!loginManagementModal) return;
+      activeLoginManagementId = entry?.id || null;
+      if (loginManagementTitle) {
+        loginManagementTitle.textContent = entry ? "ログイン管理を編集" : "ログイン管理を新規作成";
+      }
+      if (loginManagementName) loginManagementName.value = entry?.name || "";
+      if (loginManagementUrl) loginManagementUrl.value = entry?.url || "";
+      if (loginManagementLoginUrl) loginManagementLoginUrl.value = entry?.loginUrl || "";
+      if (loginManagementLoginNote) loginManagementLoginNote.value = entry?.loginNote || "";
+      if (loginManagementAuthMethod) loginManagementAuthMethod.value = entry?.authMethod || "fixed_password";
+      if (loginManagementFixedPassword) loginManagementFixedPassword.value = entry?.fixedPassword || "";
+      if (loginManagementPasswordLength) loginManagementPasswordLength.value = entry?.passwordLength || "";
+      if (loginManagementOtpLength) loginManagementOtpLength.value = entry?.otpLength || "";
+      if (loginManagementRequireAlphanumeric) loginManagementRequireAlphanumeric.checked = !!entry?.requireAlphanumeric;
+      if (loginManagementRequireUppercase) loginManagementRequireUppercase.checked = !!entry?.requireUppercase;
+      if (loginManagementRequireSymbols) loginManagementRequireSymbols.checked = !!entry?.requireSymbols;
+      if (loginManagementExpiresAt) loginManagementExpiresAt.value = entry?.expiresAt || "";
+      renderLoginManagementLayoutOptions(entry?.loginLayoutId || "");
+      updateLoginManagementAuthNotes();
+      setStatus(loginManagementStatus, "");
+      loginManagementModal.classList.add("is-open");
+    }
+
+    function closeLoginManagementModal() {
+      if (!loginManagementModal) return;
+      loginManagementModal.classList.remove("is-open");
+      activeLoginManagementId = null;
+      if (loginManagementForm) loginManagementForm.reset();
+      setStatus(loginManagementStatus, "");
+    }
+
+    function saveLoginManagementFromModal() {
+      if (!loginManagementUrl || !loginManagementLoginUrl || !loginManagementAuthMethod) return;
+      const urlValue = (loginManagementUrl.value || "").trim();
+      const loginUrlValue = (loginManagementLoginUrl.value || "").trim();
+      const fullUrlPattern = /^https?:\/\//i;
+      if (!urlValue) {
+        setStatus(loginManagementStatus, "URLを入力してください。", true);
+        return;
+      }
+      if (!fullUrlPattern.test(urlValue)) {
+        setStatus(loginManagementStatus, "URLは https:// から始まる全長で入力してください。", true);
+        return;
+      }
+      if (!loginUrlValue) {
+        setStatus(loginManagementStatus, "ログイン先URLを入力してください。", true);
+        return;
+      }
+      const authMethodValue = loginManagementAuthMethod.value || "fixed_password";
+      const fixedPasswordValue = (loginManagementFixedPassword?.value || "").trim();
+      if (["fixed_password", "fixed_password_passkey"].includes(authMethodValue) && !fixedPasswordValue) {
+        setStatus(loginManagementStatus, "固定パスワードを入力してください。", true);
+        return;
+      }
+      const otpLengthValue = Number(loginManagementOtpLength?.value || "");
+      if (authMethodValue === "otp" && (!Number.isFinite(otpLengthValue) || otpLengthValue <= 0)) {
+        setStatus(loginManagementStatus, "ワンタイムパスワード桁数を入力してください。", true);
+        return;
+      }
+      const passwordLengthValue = Number(loginManagementPasswordLength?.value || "");
+      const entry = {
+        id: activeLoginManagementId || `login-${Date.now()}`,
+        name: (loginManagementName?.value || "").trim(),
+        url: urlValue,
+        loginUrl: loginUrlValue,
+        loginNote: (loginManagementLoginNote?.value || "").trim(),
+        authMethod: authMethodValue,
+        fixedPassword: ["fixed_password", "fixed_password_passkey"].includes(authMethodValue) ? fixedPasswordValue : "",
+        passwordLength: Number.isFinite(passwordLengthValue) && passwordLengthValue > 0 ? passwordLengthValue : null,
+        otpLength: Number.isFinite(otpLengthValue) && otpLengthValue > 0 ? otpLengthValue : null,
+        requireAlphanumeric: !!loginManagementRequireAlphanumeric?.checked,
+        requireUppercase: !!loginManagementRequireUppercase?.checked,
+        requireSymbols: !!loginManagementRequireSymbols?.checked,
+        expiresAt: loginManagementExpiresAt?.value || "",
+        loginLayoutId: loginManagementLayoutSelect?.value || ""
+      };
+      const entries = loadLoginManagementEntries();
+      const existingIndex = entries.findIndex((item) => item.id === activeLoginManagementId);
+      if (existingIndex >= 0) {
+        entries[existingIndex] = entry;
+      } else {
+        entries.push(entry);
+      }
+      saveLoginManagementEntries(entries);
+      renderLoginManagementTable();
+      closeLoginManagementModal();
+    }
+
+    function getWifiDeviceDefaults() {
+      return [
+        {
+          id: "wifi-device-1",
+          name: "園内NAS",
+          type: "local",
+          ipAddress: "192.168.10.2",
+          note: "NASバックアップ / 月次確定データ"
+        },
+        {
+          id: "wifi-device-2",
+          name: "園内iPad-01",
+          type: "local",
+          ipAddress: "192.168.10.20",
+          note: "園児ノード参照端末"
+        },
+        {
+          id: "wifi-device-3",
+          name: "先生室タブレット",
+          type: "wifi",
+          ipAddress: "192.168.20.15",
+          note: "WiFiローカル / マイネットワーク"
+        }
+      ];
+    }
+
+    function loadWifiDevices() {
+      try {
+        const raw = localStorage.getItem(WIFI_LOCAL_DEVICE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (error) {
+        // ignore
+      }
+      const defaults = getWifiDeviceDefaults();
+      localStorage.setItem(WIFI_LOCAL_DEVICE_KEY, JSON.stringify(defaults));
+      return defaults;
+    }
+
+    function saveWifiDevices(entries) {
+      localStorage.setItem(WIFI_LOCAL_DEVICE_KEY, JSON.stringify(entries));
+    }
+
+    function getWifiTypeLabel(type) {
+      return type === "wifi" ? "WiFiローカルネット" : "園内ローカルネット";
+    }
+
+    function renderWifiDeviceTable() {
+      if (!wifiDeviceRows) return;
+      const entries = loadWifiDevices();
+      if (!entries.length) {
+        wifiDeviceRows.innerHTML = `
+          <div class="wifi-device-row" role="row">
+            <div role="cell" style="grid-column:1/-1;">
+              <span class="muted">登録済みの端末はありません。</span>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      wifiDeviceRows.innerHTML = entries.map((entry) => `
+          <div class="wifi-device-row" role="row">
+            <div role="cell">
+              <strong>${entry.name}</strong>
+            </div>
+            <div role="cell">
+              <span class="badge secondary">${getWifiTypeLabel(entry.type)}</span>
+            </div>
+            <div role="cell">
+              <strong>${entry.ipAddress}</strong>
+            </div>
+            <div role="cell">
+              <span>${entry.note || "メモなし"}</span>
+            </div>
+            <div class="wifi-device-actions" role="cell">
+              <button class="btn secondary small" type="button" data-edit-wifi="${entry.id}">編集</button>
+              <button class="btn secondary small" type="button" data-rename-wifi="${entry.id}">名前変更</button>
+              <button class="btn danger small" type="button" data-remove-wifi="${entry.id}">削除</button>
+            </div>
+          </div>
+        `).join("");
+
+      wifiDeviceRows.querySelectorAll("[data-edit-wifi]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.editWifi;
+          const entry = loadWifiDevices().find((item) => item.id === id);
+          if (!entry) return;
+          openWifiEditor(entry);
+        });
+      });
+
+      wifiDeviceRows.querySelectorAll("[data-rename-wifi]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.renameWifi;
+          const entry = loadWifiDevices().find((item) => item.id === id);
+          if (!entry) return;
+          openWifiRename(entry);
+        });
+      });
+
+      wifiDeviceRows.querySelectorAll("[data-remove-wifi]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.removeWifi;
+          if (!id) return;
+          const next = loadWifiDevices().filter((item) => item.id !== id);
+          saveWifiDevices(next);
+          renderWifiDeviceTable();
+        });
+      });
+    }
+
+    function openWifiEditor(entry = null) {
+      if (!wifiDeviceEditor) return;
+      activeWifiDeviceId = entry?.id || null;
+      if (wifiDeviceName) wifiDeviceName.value = entry?.name || "";
+      if (wifiDeviceIp) wifiDeviceIp.value = entry?.ipAddress || "";
+      if (wifiDeviceType) wifiDeviceType.value = entry?.type || "local";
+      if (wifiDeviceNote) wifiDeviceNote.value = entry?.note || "";
+      setStatus(wifiDeviceStatus, "");
+      wifiDeviceEditor.classList.add("is-open");
+      wifiRenamePanel?.classList.remove("is-open");
+    }
+
+    function closeWifiEditor() {
+      if (!wifiDeviceEditor) return;
+      wifiDeviceEditor.classList.remove("is-open");
+      activeWifiDeviceId = null;
+      if (wifiDeviceForm) wifiDeviceForm.reset();
+      setStatus(wifiDeviceStatus, "");
+    }
+
+    function saveWifiDevice() {
+      if (!wifiDeviceName || !wifiDeviceIp || !wifiDeviceType) return;
+      const nameValue = wifiDeviceName.value.trim();
+      const ipValue = wifiDeviceIp.value.trim();
+      if (!nameValue) {
+        setStatus(wifiDeviceStatus, "端末名を入力してください。", true);
+        return;
+      }
+      if (!ipValue) {
+        setStatus(wifiDeviceStatus, "IPアドレスを入力してください。", true);
+        return;
+      }
+      const entry = {
+        id: activeWifiDeviceId || `wifi-device-${Date.now()}`,
+        name: nameValue,
+        type: wifiDeviceType.value || "local",
+        ipAddress: ipValue,
+        note: (wifiDeviceNote?.value || "").trim()
+      };
+      const entries = loadWifiDevices();
+      const index = entries.findIndex((item) => item.id === entry.id);
+      if (index >= 0) {
+        entries[index] = entry;
+      } else {
+        entries.push(entry);
+      }
+      saveWifiDevices(entries);
+      renderWifiDeviceTable();
+      closeWifiEditor();
+    }
+
+    function openWifiRename(entry) {
+      if (!wifiRenamePanel || !wifiRenameName) return;
+      activeWifiRenameId = entry.id;
+      wifiRenameName.value = entry.name || "";
+      setStatus(wifiRenameStatus, "");
+      wifiRenamePanel.classList.add("is-open");
+      wifiDeviceEditor?.classList.remove("is-open");
+    }
+
+    function closeWifiRename() {
+      if (!wifiRenamePanel) return;
+      wifiRenamePanel.classList.remove("is-open");
+      activeWifiRenameId = null;
+      if (wifiRenameName) wifiRenameName.value = "";
+      setStatus(wifiRenameStatus, "");
+    }
+
+    function saveWifiRename() {
+      if (!wifiRenameName) return;
+      const nameValue = wifiRenameName.value.trim();
+      if (!nameValue) {
+        setStatus(wifiRenameStatus, "新しい端末名を入力してください。", true);
+        return;
+      }
+      const entries = loadWifiDevices();
+      const index = entries.findIndex((item) => item.id === activeWifiRenameId);
+      if (index < 0) {
+        setStatus(wifiRenameStatus, "対象の端末が見つかりません。", true);
+        return;
+      }
+      entries[index] = { ...entries[index], name: nameValue };
+      saveWifiDevices(entries);
+      renderWifiDeviceTable();
+      closeWifiRename();
+    }
+
+    function toggleWifiModal(open) {
+      if (!wifiLocalModal) return;
+      wifiLocalModal.classList.toggle("is-open", open);
+      if (wifiLocalTrigger) {
+        wifiLocalTrigger.setAttribute("aria-expanded", String(open));
+      }
+      if (!open) {
+        closeWifiEditor();
+        closeWifiRename();
+      } else {
+        renderWifiDeviceTable();
+      }
+    }
+
+    function toggleLineSettings(open) {
+      if (!lineSettingsModal) return;
+      lineSettingsModal.classList.toggle("is-open", open);
+      lineSettingsModal.setAttribute("aria-hidden", String(!open));
+      if (lineSettingsButton) {
+        lineSettingsButton.setAttribute("aria-expanded", String(open));
+      }
+    }
+
+    function toggleUserIdManagement(open) {
+      if (!userIdManagementModal) return;
+      userIdManagementModal.classList.toggle("is-open", open);
+      userIdManagementModal.setAttribute("aria-hidden", String(!open));
+      if (userIdManagementButton) {
+        userIdManagementButton.setAttribute("aria-expanded", String(open));
+      }
+    }
+
+    function toggleLoginManagementList(open) {
+      if (!loginManagementListModal) return;
+      loginManagementListModal.classList.toggle("is-open", open);
+      if (loginManagementListTrigger) {
+        loginManagementListTrigger.setAttribute("aria-expanded", String(open));
+      }
+      if (open) {
+        renderLoginManagementTable();
+      }
+    }
+
+    function togglePermissionSettings(open) {
+      if (!permissionSettingsModal) return;
+      permissionSettingsModal.classList.toggle("is-open", open);
+      if (permissionSettingsTrigger) {
+        permissionSettingsTrigger.setAttribute("aria-expanded", String(open));
+      }
+    }
+
+    function toggleAdminAccounts(open) {
+      if (!adminAccountsModal) return;
+      adminAccountsModal.classList.toggle("is-open", open);
+      if (adminAccountsTrigger) {
+        adminAccountsTrigger.setAttribute("aria-expanded", String(open));
+      }
+    }
+
+    function toggleLineFastapi(open) {
+      if (!lineFastapiModal) return;
+      lineFastapiModal.classList.toggle("is-open", open);
+      if (lineFastapiTrigger) {
+        lineFastapiTrigger.setAttribute("aria-expanded", String(open));
+      }
+    }
+
+    function readLineSettings() {
+      if (!lineSettingsForm) return {};
+      const raw = localStorage.getItem(LINE_SETTINGS_KEY);
+      if (!raw) return {};
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        console.warn("Failed to parse LINE settings", error);
+        return {};
+      }
+    }
+
+    function applyLineSettings(settings) {
+      if (!settings) return;
+      if (lineChannelId) lineChannelId.value = settings.channelId || "";
+      if (lineChannelSecret) lineChannelSecret.value = settings.channelSecret || "";
+      if (lineAccessToken) lineAccessToken.value = settings.accessToken || "";
+      if (lineWebhookUrl) lineWebhookUrl.value = settings.webhookUrl || "";
+    }
+
+    function collectLineSettings() {
+      return {
+        channelId: lineChannelId?.value.trim() || "",
+        channelSecret: lineChannelSecret?.value.trim() || "",
+        accessToken: lineAccessToken?.value.trim() || "",
+        webhookUrl: lineWebhookUrl?.value.trim() || ""
+      };
+    }
+
+    function saveLineSettings() {
+      const settings = collectLineSettings();
+      localStorage.setItem(LINE_SETTINGS_KEY, JSON.stringify(settings));
+    }
+
+    function resetLineSettings() {
+      localStorage.removeItem(LINE_SETTINGS_KEY);
+      if (lineSettingsForm) lineSettingsForm.reset();
+    }
+
+    if (lineSettingsButton) {
+      lineSettingsButton.addEventListener("click", () => {
+        toggleLineSettings(true);
+        applyLineSettings(readLineSettings());
+      });
+    }
+    if (lineSettingsClose) {
+      lineSettingsClose.addEventListener("click", () => toggleLineSettings(false));
+    }
+    if (lineSettingsSave) {
+      lineSettingsSave.addEventListener("click", () => saveLineSettings());
+    }
+    if (lineSettingsReset) {
+      lineSettingsReset.addEventListener("click", () => resetLineSettings());
+    }
+    if (lineSettingsModal) {
+      lineSettingsModal.addEventListener("click", (event) => {
+        if (event.target === lineSettingsModal) {
+          toggleLineSettings(false);
+        }
+      });
+    }
+    if (userIdManagementButton) {
+      userIdManagementButton.addEventListener("click", () => {
+        toggleUserIdManagement(true);
+      });
+    }
+    if (userIdManagementClose) {
+      userIdManagementClose.addEventListener("click", () => toggleUserIdManagement(false));
+    }
+    if (userIdManagementModal) {
+      userIdManagementModal.addEventListener("click", (event) => {
+        if (event.target === userIdManagementModal) {
+          toggleUserIdManagement(false);
+        }
+      });
+    }
+    loginManagementListTrigger?.addEventListener("click", () => {
+      toggleLoginManagementList(true);
+    });
+    loginManagementListClose?.addEventListener("click", () => {
+      toggleLoginManagementList(false);
+    });
+    loginManagementListModal?.addEventListener("click", (event) => {
+      if (event.target === loginManagementListModal) {
+        toggleLoginManagementList(false);
+      }
+    });
+    permissionSettingsTrigger?.addEventListener("click", () => {
+      togglePermissionSettings(true);
+    });
+    permissionSettingsClose?.addEventListener("click", () => {
+      togglePermissionSettings(false);
+    });
+    permissionSettingsModal?.addEventListener("click", (event) => {
+      if (event.target === permissionSettingsModal) {
+        togglePermissionSettings(false);
+      }
+    });
+    adminAccountsTrigger?.addEventListener("click", () => {
+      toggleAdminAccounts(true);
+    });
+    adminAccountsClose?.addEventListener("click", () => {
+      toggleAdminAccounts(false);
+    });
+    adminAccountsModal?.addEventListener("click", (event) => {
+      if (event.target === adminAccountsModal) {
+        toggleAdminAccounts(false);
+      }
+    });
+    lineFastapiTrigger?.addEventListener("click", () => {
+      toggleLineFastapi(true);
+    });
+    lineFastapiClose?.addEventListener("click", () => {
+      toggleLineFastapi(false);
+    });
+    lineFastapiModal?.addEventListener("click", (event) => {
+      if (event.target === lineFastapiModal) {
+        toggleLineFastapi(false);
+      }
+    });
+    if (wifiLocalModal) {
+      wifiLocalModal.addEventListener("click", (event) => {
+        if (event.target === wifiLocalModal) {
+          toggleWifiModal(false);
+        }
+      });
+    }
+    if (loginLayoutModal) {
+      loginLayoutModal.addEventListener("click", (event) => {
+        if (event.target === loginLayoutModal) {
+          closeLoginLayoutModal();
+        }
+      });
+    }
+    if (loginManagementModal) {
+      loginManagementModal.addEventListener("click", (event) => {
+        if (event.target === loginManagementModal) {
+          closeLoginManagementModal();
+        }
+      });
+    }
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        toggleFloatingController(false);
+        toggleLineSettings(false);
+        toggleUserIdManagement(false);
+        toggleWifiModal(false);
+        toggleLoginManagementList(false);
+        togglePermissionSettings(false);
+        toggleAdminAccounts(false);
+        toggleLineFastapi(false);
+        closeLoginLayoutModal();
+        closeLoginManagementModal();
+      }
+    });
+    loginLayoutTrigger?.addEventListener("click", () => {
+      const library = loadLoginLayoutLibrary();
+      openLoginLayoutModal(library[0] || null);
+    });
+    loginLayoutClose?.addEventListener("click", () => {
+      closeLoginLayoutModal();
+    });
+    loginLayoutNew?.addEventListener("click", () => {
+      openLoginLayoutModal();
+    });
+    loginLayoutSave?.addEventListener("click", () => {
+      saveLoginLayoutFromModal();
+    });
+    loginLayoutCreate?.addEventListener("click", () => {
+      saveLoginLayoutFromModal();
+    });
+    loginManagementCreate?.addEventListener("click", () => {
+      openLoginManagementModal();
+    });
+    loginManagementAuthMethod?.addEventListener("change", () => {
+      updateLoginManagementAuthNotes();
+    });
+    loginManagementClose?.addEventListener("click", () => {
+      closeLoginManagementModal();
+    });
+    loginManagementCancel?.addEventListener("click", () => {
+      closeLoginManagementModal();
+    });
+    loginManagementSave?.addEventListener("click", () => {
+      saveLoginManagementFromModal();
+    });
+    wifiLocalTrigger?.addEventListener("click", () => {
+      toggleWifiModal(true);
+    });
+    wifiLocalClose?.addEventListener("click", () => {
+      toggleWifiModal(false);
+    });
+    wifiDeviceCreate?.addEventListener("click", () => {
+      openWifiEditor();
+    });
+    wifiDeviceCancel?.addEventListener("click", () => {
+      closeWifiEditor();
+    });
+    wifiDeviceSave?.addEventListener("click", () => {
+      saveWifiDevice();
+    });
+    wifiRenameCancel?.addEventListener("click", () => {
+      closeWifiRename();
+    });
+    wifiRenameSave?.addEventListener("click", () => {
+      saveWifiRename();
+    });
+    renderLoginManagementTable();
+    renderWifiDeviceTable();
+  </script>
+</body>
+</html>

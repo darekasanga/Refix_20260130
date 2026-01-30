@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>預かり保育 計算シート</title>
+  <script src="theme.js"></script>
+  <script>
+    window.EnchoTheme?.applyCurrentTheme(document);
+  </script>
+  <script src="session.js"></script>
+  <style>
+    body { font-family: "Noto Sans JP", system-ui, sans-serif; margin: 0; padding: 16px; background: var(--bg, #f8fafc); color: var(--text, #111827); }
+    h1 { margin: 0 0 12px; }
+    h2 { margin: 0 0 12px; }
+    .card { background: var(--panel, #fff); border: 1px solid var(--border, #d4d4d8); border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 16px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; }
+    .controls label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #4b5563; }
+    table { width: 100%; border-collapse: collapse; background: #fff; min-width: 980px; }
+    th, td { border: 1px solid var(--border, #d4d4d8); padding: 8px; text-align: center; font-size: 14px; background: var(--panel, #fff); }
+    th { background: var(--panel-sub, #eef2ff); }
+    .muted { color: var(--subtext, #6b7280); font-size: 13px; margin-top: 4px; }
+    .hidden-col { display: none; }
+    .azukari-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; margin-bottom: 6px; }
+    .plan-btn { padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; cursor: pointer; font-size: 13px; transition: all 0.15s ease; }
+    .plan-btn:hover { background: #eef2ff; }
+    .plan-btn.active { background: #4338ca; color: #fff; border-color: #4338ca; }
+    .azukari-summary, .extension-text, .total-text { font-weight: 700; color: #0f172a; }
+    .time-input { width: 90px; padding: 6px; font-size: 14px; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #e0e7ff; color: #3730a3; font-weight: 700; font-size: 12px; margin-right: 6px; }
+    .note-list { margin: 8px 0 0; padding-left: 18px; color: #4b5563; }
+    .user-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 10px; background: #f8fafc; font-weight: 700; color: #111827; }
+    .user-chip span { color: #6b7280; font-size: 12px; }
+    .nav-links { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: flex-end; margin-bottom: 10px; }
+    .nav-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border, #d4d4d8); background: linear-gradient(120deg, var(--accent, #8b5cf6), var(--accent-2, #f97316)); color: #fff; font-weight: 800; cursor: pointer; text-decoration: none; box-shadow: 0 8px 24px rgba(139,92,246,.18); }
+    .nav-btn.secondary { background: #f8fafc; color: #111827; box-shadow: none; }
+    .nav-btn:hover { filter: brightness(1.02); }
+    .nav-btn:active { transform: translateY(0); }
+    .type-select, .vacation-input { width: 100%; padding: 6px; border-radius: 8px; border: 1px solid #d4d4d8; font-size: 13px; }
+    .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+    .settings-grid label { font-weight: 700; color: #4b5563; font-size: 13px; display: block; margin-bottom: 6px; }
+    .muted-remark { color: #6b7280; font-size: 12px; margin-top: 6px; }
+    .calc-stack { display: grid; gap: 4px; justify-items: center; }
+    .table-scroll { overflow-x: auto; }
+    .time-stack { display: grid; gap: 4px; justify-items: center; }
+    .time-meta { font-size: 12px; color: #4b5563; }
+    .settings-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 12px; }
+    .settings-tab { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border, #d4d4d8); background: var(--panel-sub, #eef2ff); color: #4b5563; font-weight: 800; cursor: pointer; font-size: 13px; }
+    .settings-tab.active { background: #4338ca; border-color: #4338ca; color: #fff; }
+    .settings-pane[hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <header class="card">
+    <div class="nav-links">
+      <a class="nav-btn secondary" href="index.html">← トップに戻る</a>
+      <button type="button" class="nav-btn" id="logoutBtn">ログアウト</button>
+    </div>
+    <h1>預かり保育と延長の計算</h1>
+    <div class="muted">1号認定 8:30-13:00 / 預かり保育 13:00-16:30 500円。預かり保育利用時は延長保育料金がかかりません。</div>
+    <div class="user-chip" aria-label="ログインユーザー">
+      <span>ユーザー</span>
+      <div id="activeUserName">未ログイン</div>
+    </div>
+    <ul class="note-list">
+      <li>預かり保育の種類：午前(8:30-13:00) 500円、午後(13:00-16:30) 500円、1日(8:30-16:30) 1,000円。</li>
+      <li>降園列の右に預かり保育と延長保育の列を追加しています。</li>
+    </ul>
+  </header>
+
+  <section class="card" id="settingsCard">
+    <h2>設定</h2>
+    <div class="settings-tabs" role="tablist" aria-label="設定タブ">
+      <button type="button" class="settings-tab active" id="settingsTabDisplayBtn" data-settings-tab="display" role="tab" aria-selected="true" aria-controls="settingsTabDisplay">表示設定</button>
+      <button type="button" class="settings-tab" id="settingsTabVacationBtn" data-settings-tab="vacation" role="tab" aria-selected="false" aria-controls="settingsTabVacation">長期休暇</button>
+    </div>
+    <div class="settings-pane" id="settingsTabDisplay" data-settings-pane="display" role="tabpanel" aria-labelledby="settingsTabDisplayBtn">
+      <h3>表示設定</h3>
+      <div class="controls" id="columnToggles" aria-label="列の表示設定">
+        <label><input type="checkbox" data-target="col-year" checked> 年</label>
+        <label><input type="checkbox" data-target="col-month" checked> 月</label>
+        <label><input type="checkbox" data-target="col-day" checked> 日</label>
+        <label><input type="checkbox" data-target="col-type" checked> 区分</label>
+        <label><input type="checkbox" data-target="col-arrive" checked> 登園</label>
+        <label><input type="checkbox" data-target="col-leave" checked> 降園</label>
+        <label><input type="checkbox" data-target="col-azukari" checked> 預かり保育</label>
+        <label><input type="checkbox" data-target="col-extend" checked> 延長保育</label>
+        <label><input type="checkbox" data-target="col-remark" checked> 備考</label>
+      </div>
+    </div>
+    <div class="settings-pane" id="settingsTabVacation" data-settings-pane="vacation" role="tabpanel" aria-labelledby="settingsTabVacationBtn" hidden>
+      <h3>長期休暇</h3>
+      <div class="muted">1号認定の登園日は、下記の期間に該当すると長期休暇として午前／午後／1日の預かり保育を自動判定します。</div>
+      <div class="settings-grid" id="vacationSettings">
+        <div>
+          <label for="summerStart">夏休み 開始</label>
+          <input id="summerStart" class="vacation-input" type="date">
+        </div>
+        <div>
+          <label for="summerEnd">夏休み 終了</label>
+          <input id="summerEnd" class="vacation-input" type="date">
+        </div>
+        <div>
+          <label for="winterStart">冬休み 開始</label>
+          <input id="winterStart" class="vacation-input" type="date">
+        </div>
+        <div>
+          <label for="winterEnd">冬休み 終了</label>
+          <input id="winterEnd" class="vacation-input" type="date">
+        </div>
+        <div>
+          <label for="springStart">春休み 開始</label>
+          <input id="springStart" class="vacation-input" type="date">
+        </div>
+        <div>
+          <label for="springEnd">春休み 終了</label>
+          <input id="springEnd" class="vacation-input" type="date">
+        </div>
+      </div>
+      <div class="muted-remark">初期値：夏休み 7/21-8/31、冬休み 12/25-1/7、春休み 3/25-4/5（年度をまたぐ期間は翌年の日付で設定）。</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>日次明細</h2>
+    <div class="table-scroll">
+      <table id="detailTable">
+        <thead>
+          <tr>
+            <th class="col-year">年</th>
+            <th class="col-month">月</th>
+            <th class="col-day">日</th>
+            <th class="col-type">区分</th>
+            <th class="col-arrive">登園時刻</th>
+            <th class="col-leave">降園時刻</th>
+            <th class="col-azukari">預かり保育</th>
+            <th class="col-extend">延長保育</th>
+            <th class="col-remark">備考</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-arrive="08:30" data-leave="16:30" data-plan="afternoon">
+            <td class="col-year">2024</td>
+            <td class="col-month">05</td>
+            <td class="col-day">01</td>
+            <td class="col-type">
+              <select class="type-select" aria-label="5月1日の区分">
+                <option value="1gou" selected>1号認定</option>
+                <option value="general">通常</option>
+              </select>
+            </td>
+            <td class="col-arrive">
+              <div class="time-stack">
+                <input class="time-input arrive-input" type="time" value="08:30" aria-label="5月1日の登園時刻">
+                <span class="time-meta arrive-range">区分開始 —</span>
+                <span class="time-meta arrive-extension">延長時間 0分</span>
+              </div>
+            </td>
+            <td class="col-leave">
+              <div class="time-stack">
+                <input class="time-input leave-input" type="time" value="16:30" aria-label="5月1日の降園時刻">
+                <span class="time-meta leave-range">区分終了 —</span>
+                <span class="time-meta leave-extension">延長時間 0分</span>
+              </div>
+            </td>
+            <td class="col-azukari">
+              <div class="azukari-options" role="group" aria-label="預かり保育の選択">
+                <button type="button" class="plan-btn" data-plan="none">なし</button>
+                <button type="button" class="plan-btn" data-plan="morning">午前 8:30-13:00</button>
+                <button type="button" class="plan-btn" data-plan="afternoon">午後 13:00-16:30</button>
+                <button type="button" class="plan-btn" data-plan="fullday">1日 8:30-16:30</button>
+              </div>
+              <div class="azukari-summary">預かり保育なし / 0円</div>
+            </td>
+            <td class="col-extend">
+              <div class="calc-stack">
+                <span class="extension-text">延長料金 0円</span>
+                <span class="total-text">合計 0円</span>
+              </div>
+            </td>
+            <td class="col-remark"></td>
+          </tr>
+          <tr data-arrive="08:15" data-leave="18:00" data-plan="none">
+            <td class="col-year">2024</td>
+            <td class="col-month">05</td>
+            <td class="col-day">02</td>
+            <td class="col-type">
+              <select class="type-select" aria-label="5月2日の区分">
+                <option value="1gou" selected>1号認定</option>
+                <option value="general">通常</option>
+              </select>
+            </td>
+            <td class="col-arrive">
+              <div class="time-stack">
+                <input class="time-input arrive-input" type="time" value="08:15" aria-label="5月2日の登園時刻">
+                <span class="time-meta arrive-range">区分開始 —</span>
+                <span class="time-meta arrive-extension">延長時間 0分</span>
+              </div>
+            </td>
+            <td class="col-leave">
+              <div class="time-stack">
+                <input class="time-input leave-input" type="time" value="18:00" aria-label="5月2日の降園時刻">
+                <span class="time-meta leave-range">区分終了 —</span>
+                <span class="time-meta leave-extension">延長時間 0分</span>
+              </div>
+            </td>
+            <td class="col-azukari">
+              <div class="azukari-options" role="group" aria-label="預かり保育の選択">
+                <button type="button" class="plan-btn" data-plan="none">なし</button>
+                <button type="button" class="plan-btn" data-plan="morning">午前 8:30-13:00</button>
+                <button type="button" class="plan-btn" data-plan="afternoon">午後 13:00-16:30</button>
+                <button type="button" class="plan-btn" data-plan="fullday">1日 8:30-16:30</button>
+              </div>
+              <div class="azukari-summary">預かり保育なし / 0円</div>
+            </td>
+            <td class="col-extend">
+              <div class="calc-stack">
+                <span class="extension-text">延長料金 0円</span>
+                <span class="total-text">合計 0円</span>
+              </div>
+            </td>
+            <td class="col-remark">延長のみ利用などメモに</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script>
+    const session = window.EnchoSession;
+    const activeUser = session?.getActiveUser();
+    if (!activeUser) {
+      window.location.href = "login.html";
+      throw new Error("ログインが必要です");
+    }
+    const userLabel = document.getElementById('activeUserName');
+    if (userLabel) userLabel.textContent = activeUser;
+    window.addEventListener('load', () => session?.storeLastPageIfSignedIn());
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn?.addEventListener('click', () => {
+      session?.clearActiveUser?.();
+      window.location.href = "login.html";
+    });
+
+    const table = document.getElementById('detailTable');
+    const settingsCard = document.getElementById('settingsCard');
+    const settingsTabs = settingsCard?.querySelectorAll('[data-settings-tab]');
+    const settingsPanes = settingsCard?.querySelectorAll('[data-settings-pane]');
+    const toggleContainer = document.getElementById('columnToggles');
+    const vacationInputs = document.querySelectorAll('.vacation-input');
+
+    function activateSettingsTab(nextTab) {
+      if (!settingsTabs || !settingsPanes) return;
+      settingsTabs.forEach((btn) => {
+        const isActive = btn.dataset.settingsTab === nextTab;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        if (isActive) btn.removeAttribute('tabindex');
+        else btn.setAttribute('tabindex', '-1');
+      });
+      settingsPanes.forEach((pane) => {
+        const isActive = pane.dataset.settingsPane === nextTab;
+        pane.hidden = !isActive;
+      });
+    }
+
+    settingsTabs?.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        activateSettingsTab(btn.dataset.settingsTab);
+      });
+    });
+    activateSettingsTab('display');
+
+    const planInfo = {
+      none: { label: '預かり保育なし', fee: 0, range: '—' },
+      morning: { label: '午前預かり', fee: 500, range: '8:30-13:00' },
+      afternoon: { label: '午後預かり', fee: 500, range: '13:00-16:30' },
+      fullday: { label: '1日預かり', fee: 1000, range: '8:30-16:30' }
+    };
+
+    const EXTENSION_BASE_MINUTES = 16 * 60 + 30; // 16:30
+    const EXTENSION_UNIT = 30; // minutes
+    const EXTENSION_FEE_PER_UNIT = 200;
+    const VACATION_STORAGE_KEY = 'azukari_vacations_v1';
+
+    function getBaseYear() {
+      const firstYearCell = table.querySelector('tbody tr .col-year');
+      const year = Number(firstYearCell?.textContent?.trim());
+      return Number.isFinite(year) ? year : new Date().getFullYear();
+    }
+
+    const BASE_YEAR = getBaseYear();
+    const DEFAULT_VACATIONS = {
+      summer: { start: `${BASE_YEAR}-07-21`, end: `${BASE_YEAR}-08-31`, label: '夏休み' },
+      winter: { start: `${BASE_YEAR}-12-25`, end: `${BASE_YEAR + 1}-01-07`, label: '冬休み' },
+      spring: { start: `${BASE_YEAR + 1}-03-25`, end: `${BASE_YEAR + 1}-04-05`, label: '春休み' }
+    };
+
+    function loadVacations() {
+      try {
+        const raw = localStorage.getItem(VACATION_STORAGE_KEY);
+        if (!raw) return { ...DEFAULT_VACATIONS };
+        const parsed = JSON.parse(raw);
+        return {
+          summer: { ...DEFAULT_VACATIONS.summer, ...(parsed.summer || {}) },
+          winter: { ...DEFAULT_VACATIONS.winter, ...(parsed.winter || {}) },
+          spring: { ...DEFAULT_VACATIONS.spring, ...(parsed.spring || {}) }
+        };
+      } catch (e) {
+        console.warn('長期休暇設定の読み込みに失敗しました', e);
+        return { ...DEFAULT_VACATIONS };
+      }
+    }
+
+    function saveVacations(settings) {
+      localStorage.setItem(VACATION_STORAGE_KEY, JSON.stringify(settings));
+    }
+
+    let vacationSettings = loadVacations();
+
+    function syncVacationInputs() {
+      const map = {
+        summerStart: vacationSettings.summer.start,
+        summerEnd: vacationSettings.summer.end,
+        winterStart: vacationSettings.winter.start,
+        winterEnd: vacationSettings.winter.end,
+        springStart: vacationSettings.spring.start,
+        springEnd: vacationSettings.spring.end
+      };
+      Object.entries(map).forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el && !el.value) el.value = value;
+      });
+    }
+
+    function timeToMinutes(timeValue) {
+      if (!timeValue) return NaN;
+      const [hour, minute] = timeValue.split(':').map(Number);
+      if (!Number.isFinite(hour) || !Number.isFinite(minute)) return NaN;
+      return hour * 60 + minute;
+    }
+
+    function formatCurrency(amount) {
+      return `${amount.toLocaleString()}円`;
+    }
+
+    function markActiveButton(cell, planKey) {
+      cell.querySelectorAll('.plan-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.plan === planKey);
+      });
+    }
+
+    function getRowDate(row) {
+      const year = Number(row.querySelector('.col-year')?.textContent?.trim());
+      const month = Number(row.querySelector('.col-month')?.textContent?.trim());
+      const day = Number(row.querySelector('.col-day')?.textContent?.trim());
+      if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null;
+      return new Date(year, month - 1, day);
+    }
+
+    function isWithinRange(date, startStr, endStr) {
+      if (!startStr || !endStr) return false;
+      const start = new Date(startStr);
+      const end = new Date(endStr);
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return false;
+      return date >= start && date <= end;
+    }
+
+    function getVacationMatch(date) {
+      const entries = Object.values(vacationSettings);
+      for (const entry of entries) {
+        if (isWithinRange(date, entry.start, entry.end)) return entry;
+      }
+      return null;
+    }
+
+    function resolveAutoPlan(arriveMinutes, leaveMinutes) {
+      const MORNING_END = 13 * 60;
+      const AFTERNOON_START = 13 * 60;
+      if (!Number.isFinite(arriveMinutes) || !Number.isFinite(leaveMinutes)) return 'none';
+      if (leaveMinutes <= MORNING_END) return 'morning';
+      if (arriveMinutes >= AFTERNOON_START) return 'afternoon';
+      return 'fullday';
+    }
+
+    function buildRemark({ typeKey, vacationLabel, planKey, planSource }) {
+      const parts = [];
+      if (typeKey === '1gou') parts.push('1号認定');
+      if (vacationLabel) parts.push(`${vacationLabel}期間`);
+      if (planKey !== 'none') {
+        const base = planInfo[planKey]?.label || '';
+        const autoLabel = planSource.includes('auto') ? '（自動）' : '';
+        parts.push(`${base}${autoLabel}`);
+      } else {
+        parts.push('預かり保育なし');
+      }
+      return parts.join(' / ');
+    }
+
+    function calcExtensionMinutes(leaveMinutes, planKey) {
+      if (planKey !== 'none') return 0; // 預かり保育利用時は延長保育料金無し
+      return Math.max(0, leaveMinutes - EXTENSION_BASE_MINUTES);
+    }
+
+    function parsePlanRange(planRange) {
+      if (!planRange || planRange === '—') return { start: '—', end: '—' };
+      const [start, end] = planRange.split('-').map((part) => part.trim());
+      if (!start || !end) return { start: '—', end: '—' };
+      return { start, end };
+    }
+
+    function recalcRow(row) {
+      const leaveInput = row.querySelector('.leave-input');
+      const arriveInput = row.querySelector('.arrive-input');
+      const planKey = row.dataset.plan || 'none';
+      const typeKey = row.querySelector('.type-select')?.value || '1gou';
+      const planSource = row.dataset.planSource || 'manual';
+      const rowDate = getRowDate(row);
+      const vacationMatch = rowDate && getVacationMatch(rowDate);
+      const isVacation = typeKey === '1gou' && !!vacationMatch;
+
+      const arriveMinutes = timeToMinutes(arriveInput.value);
+      const leaveMinutes = timeToMinutes(leaveInput.value);
+      let nextPlanKey = planKey;
+      let nextPlanSource = planSource.includes('auto') && typeKey !== '1gou' ? 'manual' : planSource || 'auto';
+
+      if (typeKey === '1gou' && planSource !== 'manual') {
+        const autoPlan = resolveAutoPlan(arriveMinutes, leaveMinutes);
+        nextPlanKey = autoPlan;
+        nextPlanSource = isVacation ? 'vacation-auto' : 'auto';
+      }
+
+      row.dataset.plan = nextPlanKey;
+      row.dataset.planSource = nextPlanSource;
+      markActiveButton(row.querySelector('.col-azukari'), nextPlanKey);
+
+      const plan = planInfo[nextPlanKey] || planInfo.none;
+
+      const planFee = plan.fee;
+      const extensionMinutes = calcExtensionMinutes(leaveMinutes, nextPlanKey);
+      const extensionUnits = Math.ceil(extensionMinutes / EXTENSION_UNIT);
+      const extensionFee = extensionMinutes > 0 ? extensionUnits * EXTENSION_FEE_PER_UNIT : 0;
+
+      const { start: planStart, end: planEnd } = parsePlanRange(plan.range);
+      const arriveRangeEl = row.querySelector('.arrive-range');
+      if (arriveRangeEl) arriveRangeEl.textContent = `区分開始 ${planStart}`;
+      const leaveRangeEl = row.querySelector('.leave-range');
+      if (leaveRangeEl) leaveRangeEl.textContent = `区分終了 ${planEnd}`;
+      const arriveExtensionEl = row.querySelector('.arrive-extension');
+      if (arriveExtensionEl) arriveExtensionEl.textContent = `延長時間 ${extensionMinutes}分`;
+      const leaveExtensionEl = row.querySelector('.leave-extension');
+      if (leaveExtensionEl) leaveExtensionEl.textContent = `延長時間 ${extensionMinutes}分`;
+
+      const summaryEl = row.querySelector('.azukari-summary');
+      const autoText = nextPlanSource.includes('auto') ? '（自動判定）' : '';
+      summaryEl.textContent = `${plan.label}${plan.range !== '—' ? ` (${plan.range})` : ''} / ${formatCurrency(planFee)}${autoText}`;
+
+      const extensionEl = row.querySelector('.extension-text');
+      extensionEl.textContent = `延長料金 ${formatCurrency(extensionFee)}`;
+
+      const totalEl = row.querySelector('.total-text');
+      totalEl.textContent = `合計 ${formatCurrency(planFee + extensionFee)}`;
+
+      const remarkEl = row.querySelector('.col-remark');
+      if (remarkEl) {
+        remarkEl.textContent = buildRemark({
+          typeKey,
+          vacationLabel: vacationMatch?.label || '',
+          planKey: nextPlanKey,
+          planSource: nextPlanSource
+        });
+      }
+    }
+
+    function setupRows() {
+      table.querySelectorAll('tbody tr').forEach((row) => {
+        const initialPlan = row.dataset.plan || 'none';
+        row.dataset.plan = initialPlan;
+        row.dataset.planSource = row.dataset.planSource || 'auto';
+        markActiveButton(row.querySelector('.col-azukari'), initialPlan);
+        recalcRow(row);
+
+        row.querySelectorAll('.plan-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            row.dataset.plan = btn.dataset.plan;
+            row.dataset.planSource = 'manual';
+            markActiveButton(row.querySelector('.col-azukari'), btn.dataset.plan);
+            recalcRow(row);
+          });
+        });
+
+        row.querySelectorAll('.time-input').forEach((input) => {
+          input.addEventListener('change', () => recalcRow(row));
+        });
+
+        row.querySelector('.type-select')?.addEventListener('change', () => recalcRow(row));
+      });
+    }
+
+    function recalcAllRows() {
+      table.querySelectorAll('tbody tr').forEach((row) => recalcRow(row));
+    }
+
+    toggleContainer.addEventListener('change', (event) => {
+      const checkbox = event.target;
+      if (checkbox.tagName !== 'INPUT') return;
+      const targetClass = checkbox.getAttribute('data-target');
+      const cells = table.querySelectorAll('.' + targetClass);
+      cells.forEach((cell) => {
+        cell.classList.toggle('hidden-col', !checkbox.checked);
+      });
+    });
+
+    vacationInputs.forEach((input) => {
+      input.addEventListener('change', () => {
+        vacationSettings = {
+          summer: { ...vacationSettings.summer, start: document.getElementById('summerStart').value, end: document.getElementById('summerEnd').value, label: '夏休み' },
+          winter: { ...vacationSettings.winter, start: document.getElementById('winterStart').value, end: document.getElementById('winterEnd').value, label: '冬休み' },
+          spring: { ...vacationSettings.spring, start: document.getElementById('springStart').value, end: document.getElementById('springEnd').value, label: '春休み' }
+        };
+        saveVacations(vacationSettings);
+        recalcAllRows();
+      });
+    });
+
+    syncVacationInputs();
+    setupRows();
+  </script>
+</body>
+</html>

@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LINE連携 発行</title>
+
+  <!-- ここはワイヤー用：見た目は最低限。あとでCSS/デザインを当てる -->
+  <style>
+    body { font-family: "Noto Sans JP", system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; background: #f4f3fb; color: #201a32; }
+    header { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd; padding: 12px 16px; display: flex; gap: 12px; align-items: center; }
+    main { padding: 16px; display: grid; grid-template-columns: minmax(260px, 320px) minmax(0, 1fr); gap: 16px; max-width: 980px; margin: 0 auto; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 12px; background: #fff; }
+    .row { display: grid; gap: 8px; }
+    label { font-size: 12px; color: #333; }
+    select, input, button, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; }
+    button { cursor: pointer; }
+    .muted { color: #666; font-size: 12px; }
+    .badge { padding: 4px 8px; border-radius: 999px; border: 1px solid #ddd; font-size: 12px; }
+    .badge.success { border-color: #46b386; color: #0f7a4f; background: #e8f7ef; }
+    .badge.error { border-color: #f2a0a0; color: #b42525; background: #fdecec; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .hr { height: 1px; background: #eee; margin: 12px 0; }
+    .childItem { width: 100%; text-align: left; border: none; border-bottom: 1px solid #eee; background: #fff; padding: 10px 12px; }
+    .childItem.active { background: #f5f2ff; font-weight: 700; }
+    .line-button { background: #06c755; border-color: #06c755; color: #fff; }
+    .screen-only { display: block; }
+    .print-only { display: none; }
+
+    .print-sheet {
+      border: 2px solid #d7d0f5;
+      border-radius: 26px;
+      padding: 24px;
+      background: #ffffff;
+      display: grid;
+      gap: 12px;
+      box-shadow: 0 18px 36px rgba(76, 29, 149, 0.08);
+    }
+    .print-title {
+      font-size: 19px;
+      font-weight: 800;
+      text-align: center;
+      color: #3f2f8f;
+      letter-spacing: 0.08em;
+    }
+    .print-school {
+      text-align: right;
+      font-weight: 700;
+      color: #6d28d9;
+    }
+    .print-greeting {
+      font-weight: 700;
+      font-size: 15px;
+      color: #3b2f7a;
+    }
+    .print-rule {
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-align: center;
+      color: #8a81b5;
+    }
+    .print-body {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #312e81;
+      background: #f6f3ff;
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .print-qr-row {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+    .print-qr {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e6e0f5;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 220px;
+    }
+    .print-password {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e1b4b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .print-password .digits {
+      font-size: 18px;
+      letter-spacing: 0.18em;
+      font-weight: 800;
+      color: #7c3aed;
+    }
+    .print-keep {
+      font-size: 13px;
+      color: #4b3f7c;
+      line-height: 1.6;
+    }
+    .print-notes {
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 6px;
+      font-size: 12px;
+      color: #4338ca;
+      line-height: 1.6;
+    }
+    .print-notes p {
+      margin: 0;
+    }
+
+    /* 印刷用：右側の発行カードだけ印刷しやすく */
+    @page { size: A4; margin: 12mm; }
+    @media print {
+      header, .leftPane, .noPrint { display: none !important; }
+      main { grid-template-columns: 1fr; padding: 0; }
+      .printArea { border: none; border-radius: 0; }
+      body { margin: 0; }
+      .screen-only { display: none !important; }
+      .print-only { display: block !important; }
+      .print-sheet { box-shadow: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ヘッダー：Calcu.html側の「LINE連携」から開かれてもOK -->
+  <header>
+    <button id="btnBack" class="noPrint">← 一覧へ</button>
+
+    <div style="flex:1">
+      <div style="font-weight:700">LINE連携 発行</div>
+      <div class="muted">園児を選択 → ワンタイムPW発行 → 印刷して配布</div>
+    </div>
+
+    <!-- 先生のLINEログイン状態（ここは表示だけ。実処理はJSで） -->
+    <span id="teacherAuthBadge" class="badge">先生：未連携</span>
+    <button id="btnTeacherLogin" class="noPrint line-button">LINE連携（先生）</button>
+  </header>
+
+  <main>
+    <!-- 左ペイン：園 → クラス → 園児 -->
+    <section class="card leftPane">
+      <div style="font-weight:700; margin-bottom:8px">園児選択</div>
+
+      <div class="row">
+        <div>
+          <label for="selSchool">園</label>
+          <select id="selSchool">
+            <option value="">選択してください</option>
+            <!-- JSで埋める -->
+          </select>
+        </div>
+
+        <div>
+          <label for="selClass">クラス</label>
+          <select id="selClass" disabled>
+            <option value="">選択してください</option>
+            <!-- JSで埋める -->
+          </select>
+        </div>
+
+        <div>
+          <label for="txtSearch">園児名検索</label>
+          <input id="txtSearch" type="search" placeholder="例：やまだ" disabled />
+        </div>
+
+        <div>
+          <label>園児一覧</label>
+          <div id="childList" class="card" style="padding:0; max-height: 360px; overflow:auto">
+            <!--
+              <button class="childItem" data-child-key="...">山田 太郎</button>
+              …
+            -->
+            <div class="muted" style="padding:12px">園とクラスを選ぶと一覧が出ます</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="grid2">
+          <button id="btnIssue" disabled>発行（OTP生成）</button>
+          <button id="btnReissue" disabled>再発行</button>
+        </div>
+
+        <div class="muted">
+          ※ ワンタイムPWは1回使用で失効。再発行すると旧QR/PWは無効化。
+        </div>
+      </div>
+    </section>
+
+    <!-- 右ペイン：発行ページ（印刷対象） -->
+    <section class="card printArea" aria-label="発行カード">
+      <div class="screen-only" style="display:flex; align-items:center; gap:8px">
+        <div style="font-weight:700; font-size:16px">保護者 LINE連携カード</div>
+        <span id="issueStatusBadge" class="badge">未発行</span>
+        <div style="flex:1"></div>
+        <button id="btnPrint" class="noPrint" disabled>印刷</button>
+      </div>
+
+      <div class="print-sheet" aria-label="LINE連携QR印刷">
+        <div class="print-title">（＜<span id="printTitle">タイトル</span>＞）</div>
+        <div class="print-school">＜<span id="printSchoolName">園名</span>＞</div>
+        <div class="print-greeting">（＜<span id="printChildName">園児名</span>＞さんの保護者さまへ）</div>
+        <div class="print-rule">ーーーーーーーーーーーーーーーー</div>
+        <div class="print-body">＜<span id="printBody">本文</span>＞</div>
+        <div class="print-rule">ーーーーーーーーーーーーーーーー</div>
+        <div class="print-qr-row">
+          <div class="print-qr">
+            <div id="qrBox" class="muted">QRコードがここに表示されます</div>
+          </div>
+          <div class="row">
+            <div class="print-password">
+              「QRコード」、認証パスワード：＜<span class="digits" id="printPassword">認証パスワード</span>＞（有効期限日：＜<span id="printExpires">有効期限日</span>＞）
+            </div>
+            <div class="print-keep">
+              このQRコード、認証パスワードは無くさないよう有効期限日まで大切に保管ください。
+            </div>
+          </div>
+        </div>
+        <div class="print-rule">ーーーーーーーーーーーーーーーー</div>
+        <div class="print-notes">
+          <p>※パスワードはQRコードを読み込んだときに入力し認証します。</p>
+          <p>※ QRコードはスマートフォンのカメラで読み込んでください。</p>
+          <p>※ 複数の保護者が登録する場合もこのQRコードを使用します（同じグループトーク内に参加します）。</p>
+        </div>
+      </div>
+
+      <div class="screen-only">
+        <div class="hr"></div>
+
+        <!-- 園児情報 -->
+        <section class="row" aria-label="園児情報">
+          <div class="grid2">
+            <div>
+              <div class="muted">園</div>
+              <div id="viewSchool" style="font-weight:700">—</div>
+            </div>
+            <div>
+              <div class="muted">クラス</div>
+              <div id="viewClass" style="font-weight:700">—</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="muted">園児名</div>
+            <div id="viewChildName" style="font-weight:800; font-size:18px">—</div>
+            <div class="muted">園児キー（内部ID）：<span id="viewChildKey">—</span></div>
+          </div>
+        </section>
+
+        <div class="hr"></div>
+
+        <!-- OTP/パスワード -->
+        <section class="row" aria-label="認証情報">
+          <div class="grid2">
+            <div class="card">
+              <div class="muted">紐づけ用ワンタイムPW</div>
+              <div id="viewOtp" style="font-size: 22px; font-weight: 900; letter-spacing: 1px">—</div>
+              <div class="muted">認証パスワード（4桁）：<span id="viewPassword">—</span></div>
+              <div class="muted">有効期限：<span id="viewExpires">—</span></div>
+              <div class="muted">発行日時：<span id="viewIssuedAt">—</span></div>
+            </div>
+
+            <div class="card">
+              <div style="font-weight:700; margin-bottom:6px">使い方（保護者）</div>
+              <ol style="margin:0; padding-left: 18px;">
+                <li>QRを読み取る</li>
+                <li>パスワード（4桁）を入力</li>
+                <li>LINE連携（完了）</li>
+              </ol>
+              <div class="muted" style="margin-top:8px;">
+                ※ PWは1回のみ使用できます。うまくいかない場合は園に連絡してください。
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="hr"></div>
+
+        <!-- 発行履歴/状態（運用用） -->
+        <section class="row" aria-label="状態と履歴">
+          <div class="grid2">
+            <div class="card">
+              <div class="muted">連携状態</div>
+              <div id="viewLinkState" style="font-weight:800">未連携</div>
+              <div class="muted">連携日時：<span id="viewLinkedAt">—</span></div>
+            </div>
+
+            <div class="card">
+              <div class="muted">備考（先生メモ）</div>
+              <textarea id="txtMemo" rows="4" placeholder="例：父母どちらに渡した、など（任意）"></textarea>
+              <button id="btnSaveMemo" class="noPrint" disabled style="margin-top:8px">メモ保存</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- エラー表示 -->
+        <section id="errorBox" class="card" style="display:none; border-color:#f2c; margin-top:12px">
+          <div style="font-weight:700">エラー</div>
+          <div id="errorText" class="muted"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    const STORAGE_KEY = "enchoAzukari_app_v1";
+    const STORAGE_CHILDREN_FIELD = "children";
+    const FIELD_SCHOOL = "school";
+    const FIELD_CLASS = "clazz";
+    const FIELD_NAME = "name";
+    const FIELD_CHILD_KEY = "child_key";
+
+    const LINE_LIFF_ID = "YOUR_LIFF_ID";
+    const TEACHER_LINE_STORAGE_KEY = "encho_teacher_line_user_id";
+    const MEMO_STORAGE_KEY = "encho_line_link_memo_v1";
+    const LINK_BASE_URL = window.LINE_LINK_BASE_URL || location.origin;
+    const DEFAULT_PRINT_TITLE = "タイトル";
+    const DEFAULT_PRINT_BODY = "本文";
+
+    const btnBack = document.getElementById("btnBack");
+    const teacherAuthBadge = document.getElementById("teacherAuthBadge");
+    const btnTeacherLogin = document.getElementById("btnTeacherLogin");
+
+    const selSchool = document.getElementById("selSchool");
+    const selClass = document.getElementById("selClass");
+    const txtSearch = document.getElementById("txtSearch");
+    const childList = document.getElementById("childList");
+
+    const btnIssue = document.getElementById("btnIssue");
+    const btnReissue = document.getElementById("btnReissue");
+    const btnPrint = document.getElementById("btnPrint");
+
+    const viewSchool = document.getElementById("viewSchool");
+    const viewClass = document.getElementById("viewClass");
+    const viewChildName = document.getElementById("viewChildName");
+    const viewChildKey = document.getElementById("viewChildKey");
+    const viewOtp = document.getElementById("viewOtp");
+    const viewPassword = document.getElementById("viewPassword");
+    const viewExpires = document.getElementById("viewExpires");
+    const viewIssuedAt = document.getElementById("viewIssuedAt");
+    const qrBox = document.getElementById("qrBox");
+    const issueStatusBadge = document.getElementById("issueStatusBadge");
+    const viewLinkState = document.getElementById("viewLinkState");
+    const viewLinkedAt = document.getElementById("viewLinkedAt");
+    const txtMemo = document.getElementById("txtMemo");
+    const btnSaveMemo = document.getElementById("btnSaveMemo");
+    const errorBox = document.getElementById("errorBox");
+    const errorText = document.getElementById("errorText");
+    const printTitle = document.getElementById("printTitle");
+    const printSchoolName = document.getElementById("printSchoolName");
+    const printChildName = document.getElementById("printChildName");
+    const printBody = document.getElementById("printBody");
+    const printPassword = document.getElementById("printPassword");
+    const printExpires = document.getElementById("printExpires");
+
+    let allChildren = [];
+    let activeChild = null;
+    let memoState = {};
+
+    const setError = (message) => {
+      if (!message) {
+        errorBox.style.display = "none";
+        errorText.textContent = "";
+        return;
+      }
+      errorBox.style.display = "block";
+      errorText.textContent = message;
+    };
+
+    const loadMemoState = () => {
+      try {
+        memoState = JSON.parse(localStorage.getItem(MEMO_STORAGE_KEY) || "{}") || {};
+      } catch {
+        memoState = {};
+      }
+    };
+
+    const saveMemoState = () => {
+      localStorage.setItem(MEMO_STORAGE_KEY, JSON.stringify(memoState));
+    };
+
+    const updateTeacherBadge = () => {
+      const storedId = localStorage.getItem(TEACHER_LINE_STORAGE_KEY);
+      if (storedId) {
+        teacherAuthBadge.textContent = `先生：連携済み (${storedId})`;
+        teacherAuthBadge.classList.add("success");
+      } else {
+        teacherAuthBadge.textContent = "先生：未連携";
+        teacherAuthBadge.classList.remove("success");
+      }
+    };
+
+    btnTeacherLogin.addEventListener("click", () => {
+      if (!LINE_LIFF_ID || LINE_LIFF_ID === "YOUR_LIFF_ID") {
+        alert("LIFF ID が未設定です。LINE連携を有効にするには LINE_LIFF_ID を設定してください。");
+        return;
+      }
+      window.open(`https://liff.line.me/${LINE_LIFF_ID}`, "lineTeacherLink", "width=480,height=720");
+      const dummyId = `teacher_${Date.now()}`;
+      localStorage.setItem(TEACHER_LINE_STORAGE_KEY, dummyId);
+      updateTeacherBadge();
+    });
+
+    btnBack.addEventListener("click", () => {
+      if (window.opener) {
+        window.close();
+        return;
+      }
+      window.location.href = "Calcu.html";
+    });
+
+    const normalizeChild = (item) => ({
+      school: item?.[FIELD_SCHOOL] || "",
+      clazz: item?.[FIELD_CLASS] || "",
+      name: item?.[FIELD_NAME] || "",
+      childKey: item?.[FIELD_CHILD_KEY] || ""
+    });
+
+    const loadChildrenFromStorage = () => {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        setError(`LocalStorage に ${STORAGE_KEY} が見つかりません。`);
+        return [];
+      }
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        setError("LocalStorage のJSONが読み取れません。");
+        return [];
+      }
+
+      let list = [];
+      if (Array.isArray(data)) {
+        list = data;
+      } else if (Array.isArray(data?.[STORAGE_CHILDREN_FIELD])) {
+        list = data[STORAGE_CHILDREN_FIELD];
+      } else {
+        setError(`園児一覧が見つかりません。${STORAGE_CHILDREN_FIELD} 配列のキーを確認してください。`);
+        return [];
+      }
+
+      const missing = [];
+      const mapped = list.map((item, index) => {
+        const child = normalizeChild(item);
+        const absent = [];
+        if (!child.school) absent.push(FIELD_SCHOOL);
+        if (!child.clazz) absent.push(FIELD_CLASS);
+        if (!child.name) absent.push(FIELD_NAME);
+        if (!child.childKey) absent.push(FIELD_CHILD_KEY);
+        if (absent.length) {
+          missing.push(`行${index + 1}: ${absent.join(", ")} が不足しています。`);
+        }
+        return child;
+      }).filter((child) => child.school && child.clazz && child.name && child.childKey);
+
+      if (missing.length) {
+        setError(`園児データのフィールドが不足しています。\n${missing.join("\n")}`);
+      } else {
+        setError("");
+      }
+      return mapped;
+    };
+
+    const setSelectOptions = (selectEl, options) => {
+      selectEl.innerHTML = "";
+      selectEl.append(new Option("選択してください", ""));
+      options.forEach((value) => selectEl.append(new Option(value, value)));
+      selectEl.disabled = options.length === 0;
+    };
+
+    const renderSchoolOptions = () => {
+      const schools = Array.from(new Set(allChildren.map((child) => child.school))).sort();
+      setSelectOptions(selSchool, schools);
+    };
+
+    const renderClassOptions = () => {
+      const school = selSchool.value;
+      if (!school) {
+        setSelectOptions(selClass, []);
+        txtSearch.disabled = true;
+        return;
+      }
+      const classes = Array.from(
+        new Set(allChildren.filter((child) => child.school === school).map((child) => child.clazz))
+      ).sort();
+      setSelectOptions(selClass, classes);
+      txtSearch.disabled = classes.length === 0;
+    };
+
+    const resetIssueView = () => {
+      issueStatusBadge.textContent = "未発行";
+      issueStatusBadge.classList.remove("success", "error");
+      viewOtp.textContent = "—";
+      viewPassword.textContent = "—";
+      viewExpires.textContent = "—";
+      viewIssuedAt.textContent = "—";
+      qrBox.textContent = "QRコードがここに表示されます";
+      if (printPassword) printPassword.textContent = "認証パスワード";
+      if (printExpires) printExpires.textContent = "有効期限日";
+      btnPrint.disabled = true;
+    };
+
+    const updateMemoView = () => {
+      if (!activeChild) {
+        txtMemo.value = "";
+        btnSaveMemo.disabled = true;
+        return;
+      }
+      txtMemo.value = memoState[activeChild.childKey] || "";
+      btnSaveMemo.disabled = false;
+    };
+
+    const updateChildDetailView = () => {
+      if (!activeChild) {
+        viewSchool.textContent = "—";
+        viewClass.textContent = "—";
+        viewChildName.textContent = "—";
+        viewChildKey.textContent = "—";
+        if (printSchoolName) printSchoolName.textContent = "園名";
+        if (printChildName) printChildName.textContent = "園児名";
+        if (printTitle) printTitle.textContent = DEFAULT_PRINT_TITLE;
+        if (printBody) printBody.textContent = DEFAULT_PRINT_BODY;
+        viewLinkState.textContent = "未連携";
+        viewLinkedAt.textContent = "—";
+        btnIssue.disabled = true;
+        btnReissue.disabled = true;
+        resetIssueView();
+        updateMemoView();
+        return;
+      }
+      viewSchool.textContent = activeChild.school;
+      viewClass.textContent = activeChild.clazz;
+      viewChildName.textContent = activeChild.name;
+      viewChildKey.textContent = activeChild.childKey;
+      if (printSchoolName) printSchoolName.textContent = activeChild.school || "園名";
+      if (printChildName) printChildName.textContent = activeChild.name || "園児名";
+      if (printTitle) printTitle.textContent = DEFAULT_PRINT_TITLE;
+      if (printBody) printBody.textContent = DEFAULT_PRINT_BODY;
+      btnIssue.disabled = false;
+      btnReissue.disabled = false;
+      updateMemoView();
+    };
+
+    const renderChildList = () => {
+      const school = selSchool.value;
+      const clazz = selClass.value;
+      const keyword = txtSearch.value.trim();
+      const filtered = allChildren.filter((child) => {
+        if (school && child.school !== school) return false;
+        if (clazz && child.clazz !== clazz) return false;
+        if (keyword && !child.name.includes(keyword)) return false;
+        return true;
+      });
+
+      childList.innerHTML = "";
+      if (!school || !clazz) {
+        childList.innerHTML = '<div class="muted" style="padding:12px">園とクラスを選ぶと一覧が出ます</div>';
+        return;
+      }
+      if (!filtered.length) {
+        childList.innerHTML = '<div class="muted" style="padding:12px">該当する園児がいません</div>';
+        return;
+      }
+      filtered.forEach((child) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "childItem";
+        if (activeChild?.childKey === child.childKey) {
+          btn.classList.add("active");
+        }
+        btn.dataset.childKey = child.childKey;
+        btn.textContent = child.name;
+        btn.addEventListener("click", () => {
+          activeChild = child;
+          updateChildDetailView();
+          resetIssueView();
+          renderChildList();
+          fetchLinkStatus();
+        });
+        childList.appendChild(btn);
+      });
+    };
+
+    const renderQr = (linkUrl) => {
+      qrBox.innerHTML = "";
+      new QRCode(qrBox, { text: linkUrl, width: 200, height: 200 });
+    };
+
+    const generatePassword = () => String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+
+    const issueToken = async () => {
+      if (!activeChild) return;
+      btnIssue.disabled = true;
+      btnReissue.disabled = true;
+      issueStatusBadge.textContent = "発行中...";
+      issueStatusBadge.classList.remove("error");
+      try {
+        const res = await fetch("/api/issue-link", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ child_key: activeChild.childKey })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || "発行に失敗しました。");
+        }
+        viewOtp.textContent = data.otp;
+        const password = data.password || generatePassword();
+        viewPassword.textContent = password;
+        if (printPassword) {
+          printPassword.textContent = password;
+        }
+        const expiresDate = new Date(data.expires_at);
+        viewExpires.textContent = expiresDate.toLocaleString("ja-JP");
+        if (printExpires) printExpires.textContent = expiresDate.toLocaleDateString("ja-JP");
+        viewIssuedAt.textContent = new Date(data.issued_at).toLocaleString("ja-JP");
+        issueStatusBadge.textContent = "発行済み";
+        issueStatusBadge.classList.add("success");
+        const linkUrl = data.link_url || `${LINK_BASE_URL}/parent-link.html?token=${data.token}`;
+        renderQr(linkUrl);
+        btnPrint.disabled = false;
+      } catch (error) {
+        issueStatusBadge.textContent = "発行エラー";
+        issueStatusBadge.classList.add("error");
+        setError(error.message || "発行に失敗しました。");
+      } finally {
+        btnIssue.disabled = false;
+        btnReissue.disabled = false;
+      }
+    };
+
+    const fetchLinkStatus = async () => {
+      if (!activeChild) return;
+      try {
+        const res = await fetch(`/api/link-status?child_keys=${encodeURIComponent(activeChild.childKey)}`);
+        const data = await res.json();
+        const item = data.items?.[0];
+        if (item?.linked) {
+          viewLinkState.textContent = "連携済み";
+          viewLinkedAt.textContent = item.linked_at
+            ? new Date(item.linked_at).toLocaleString("ja-JP")
+            : "—";
+        } else {
+          viewLinkState.textContent = "未連携";
+          viewLinkedAt.textContent = "—";
+        }
+      } catch {
+        viewLinkState.textContent = "取得失敗";
+      }
+    };
+
+    btnIssue.addEventListener("click", issueToken);
+    btnReissue.addEventListener("click", issueToken);
+    btnPrint.addEventListener("click", () => window.print());
+
+    btnSaveMemo.addEventListener("click", () => {
+      if (!activeChild) return;
+      memoState[activeChild.childKey] = txtMemo.value.trim();
+      saveMemoState();
+    });
+
+    selSchool.addEventListener("change", () => {
+      renderClassOptions();
+      activeChild = null;
+      updateChildDetailView();
+      renderChildList();
+    });
+
+    selClass.addEventListener("change", () => {
+      activeChild = null;
+      updateChildDetailView();
+      renderChildList();
+    });
+
+    txtSearch.addEventListener("input", renderChildList);
+
+    loadMemoState();
+    updateTeacherBadge();
+    allChildren = loadChildrenFromStorage();
+    renderSchoolOptions();
+    renderClassOptions();
+    renderChildList();
+  </script>
+</body>
+</html>

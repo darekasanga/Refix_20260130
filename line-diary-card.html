@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LINE日記カード | 写真＋地図＋メモを1枚に</title>
+  <script src="theme.js"></script>
+  <script src="session.js"></script>
+  <script src="swipe-handler.js"></script>
+  <link rel="stylesheet" href="swipe-rail.css">
+  <script src="swipe-rail.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+  <style>
+    :root {
+      --accent: #8b5cf6;
+      --accent-2: #f59e0b;
+      --accent-3: #22d3ee;
+      --accent-4: #fb7185;
+      --muted: #14121d;
+      --panel: #1b1827;
+      --panel-sub: #221f30;
+      --border: #2f2a3d;
+      --text: #fefefe;
+      --subtext: #d8d9e4;
+      --bg: radial-gradient(circle at 12% 18%, rgba(139, 92, 246, 0.2), transparent 32%), radial-gradient(circle at 80% 10%, rgba(34, 211, 238, 0.2), transparent 30%), linear-gradient(140deg, #0d0b16, #0f162f);
+      --panel-overlay: rgba(19, 18, 28, 0.9);
+      --glow: 0 12px 45px rgba(168, 85, 247, 0.28);
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: "Noto Sans JP", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 18px;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .title {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: 0.5px;
+    }
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--subtext);
+      font-size: 14px;
+    }
+    .pill {
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-weight: 800;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 18px;
+    }
+    .panel {
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--glow);
+    }
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    label {
+      display: block;
+      font-weight: 700;
+      margin: 12px 0 6px;
+      color: var(--subtext);
+      font-size: 13px;
+    }
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      font-size: 14px;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    .stack {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: linear-gradient(120deg, var(--accent), var(--accent-2), var(--accent-3));
+      color: #0b1021;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
+    }
+    .btn.secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      box-shadow: none;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--text);
+    }
+    .preview-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      box-shadow: var(--glow);
+    }
+    .preview-media {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .map-thumb {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      background: rgba(255, 255, 255, 0.04);
+      border-top: 1px solid var(--border);
+    }
+    .preview-body {
+      padding: 14px 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .preview-title {
+      font-weight: 800;
+      font-size: 18px;
+      margin: 0;
+    }
+    .preview-memo {
+      margin: 0;
+      color: var(--subtext);
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .small-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+    }
+    .status {
+      color: var(--subtext);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+    pre {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 12px;
+      padding: 12px;
+      overflow: auto;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: #e5e7eb;
+      font-size: 12px;
+      line-height: 1.5;
+      max-height: 320px;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    @media (max-width: 1024px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <p class="pill">📸 写真＋地図＋メモ → LINE日記カード</p>
+        <h1 class="title">写真を選んで、位置を決めて、カードを作成</h1>
+        <p class="subtitle">A: 現在地 / B: 写真のEXIF GPS / C: 手入力 から座標をセットし、プレビューと LINE Flex JSON を同時に生成します。</p>
+      </div>
+      <div class="stack">
+        <button class="btn secondary" type="button" onclick="location.href='index.html'">← ホームへ戻る</button>
+        <button class="btn secondary" type="button" id="applyThemeBtn">テーマを同期</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>1. 素材の準備</h2>
+        <label for="photoInput">写真を選ぶ（iPad のファイル入力対応）</label>
+        <input id="photoInput" type="file" accept="image/*" />
+        <div class="status" id="photoStatus">未選択</div>
+
+        <label for="titleInput">タイトル</label>
+        <input id="titleInput" type="text" placeholder="例: 夕方のお散歩メモ" />
+
+        <label for="memoInput">メモ</label>
+        <textarea id="memoInput" placeholder="感じたこと、補足メモなどを自由にどうぞ"></textarea>
+
+        <h2>2. 位置情報を決める</h2>
+        <div class="stack">
+          <button class="btn" type="button" id="currentLocationBtn">📍 現在地を使う</button>
+          <button class="btn secondary" type="button" id="exifBtn">🧭 写真EXIFから探す</button>
+        </div>
+        <div class="two-col">
+          <div>
+            <label for="latInput">緯度（手入力）</label>
+            <input id="latInput" type="text" placeholder="35.6895" inputmode="decimal" />
+          </div>
+          <div>
+            <label for="lngInput">経度（手入力）</label>
+            <input id="lngInput" type="text" placeholder="139.6917" inputmode="decimal" />
+          </div>
+        </div>
+        <div class="small-grid">
+          <div>
+            <label for="zoomInput">ズーム（地図）</label>
+            <input id="zoomInput" type="number" min="5" max="18" value="15" />
+          </div>
+          <div class="stack" style="align-items: flex-end; justify-content: flex-end;">
+            <button class="btn secondary" type="button" id="manualLocationBtn">➡️ 手入力の座標をセット</button>
+          </div>
+        </div>
+        <div class="status" id="locationStatus">位置がまだ設定されていません。</div>
+      </section>
+
+      <section class="panel">
+        <h2>3. プレビュー</h2>
+        <div class="preview-card">
+          <img id="previewPhoto" class="preview-media" alt="写真プレビュー" />
+          <img id="previewMap" class="map-thumb" alt="地図プレビュー" />
+          <div class="preview-body">
+            <p class="preview-title" id="previewTitle">タイトル未設定</p>
+            <p class="preview-memo" id="previewMemo">メモがここに表示されます。改行も反映されます。</p>
+            <div class="badge" id="previewLocation">位置未設定</div>
+          </div>
+        </div>
+        <div class="status" id="previewStatus">必要な情報を入力するとリアルタイムで更新されます。</div>
+      </section>
+    </div>
+
+    <section class="panel">
+      <h2>4. LINE Flex Message JSON</h2>
+      <div class="stack" style="justify-content: space-between; align-items: center;">
+        <div class="badge" id="jsonHint">写真・メモ・座標を入れると JSON が更新されます。</div>
+        <div class="stack">
+          <button class="btn secondary" type="button" id="copyJsonBtn">JSONをコピー</button>
+          <button class="btn secondary" type="button" id="copyShareTextBtn">共有テキストをコピー</button>
+        </div>
+      </div>
+      <pre id="flexJson"></pre>
+    </section>
+  </div>
+
+  <script>
+    window.EnchoTheme?.applyCurrentTheme(document);
+    window.EnchoSession?.storeLastPageIfSignedIn?.();
+
+    const PHOTO_PLACEHOLDER = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%230b1021"/><stop offset="100%" stop-color="%23131a2f"/></linearGradient></defs><rect width="1280" height="720" fill="url(%23g1)"/><text x="50%" y="50%" fill="%236b7280" font-size="48" text-anchor="middle" font-family="Inter, sans-serif">写真プレビュー</text></svg>';
+    const MAP_PLACEHOLDER = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640"><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%230b1021"/><stop offset="100%" stop-color="%230f172a"/></linearGradient></defs><rect width="1280" height="640" fill="url(%23g2)"/><text x="50%" y="50%" fill="%236b7280" font-size="36" text-anchor="middle" font-family="Inter, sans-serif">地図プレビュー</text></svg>';
+
+    const state = {
+      photoDataUrl: "",
+      photoName: "",
+      title: "",
+      memo: "",
+      lat: null,
+      lng: null,
+      zoom: 15,
+      locationSource: "",
+    };
+
+    const els = {
+      photoInput: document.getElementById("photoInput"),
+      titleInput: document.getElementById("titleInput"),
+      memoInput: document.getElementById("memoInput"),
+      latInput: document.getElementById("latInput"),
+      lngInput: document.getElementById("lngInput"),
+      zoomInput: document.getElementById("zoomInput"),
+      manualLocationBtn: document.getElementById("manualLocationBtn"),
+      currentLocationBtn: document.getElementById("currentLocationBtn"),
+      exifBtn: document.getElementById("exifBtn"),
+      photoStatus: document.getElementById("photoStatus"),
+      locationStatus: document.getElementById("locationStatus"),
+      previewPhoto: document.getElementById("previewPhoto"),
+      previewMap: document.getElementById("previewMap"),
+      previewTitle: document.getElementById("previewTitle"),
+      previewMemo: document.getElementById("previewMemo"),
+      previewLocation: document.getElementById("previewLocation"),
+      previewStatus: document.getElementById("previewStatus"),
+      flexJson: document.getElementById("flexJson"),
+      jsonHint: document.getElementById("jsonHint"),
+      copyJsonBtn: document.getElementById("copyJsonBtn"),
+      copyShareTextBtn: document.getElementById("copyShareTextBtn"),
+      applyThemeBtn: document.getElementById("applyThemeBtn"),
+    };
+
+    const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+    const toNumber = (value) => {
+      if (typeof value === "number") return value;
+      if (value && typeof value === "object" && "numerator" in value && "denominator" in value) {
+        return Number(value.numerator) / (Number(value.denominator) || 1);
+      }
+      return Number(value) || NaN;
+    };
+    const toDecimalFromDms = (value, ref) => {
+      if (!value || value.length !== 3) return null;
+      const [deg, min, sec] = value.map(toNumber);
+      if (![deg, min, sec].every(Number.isFinite)) return null;
+      const decimal = deg + (min / 60) + (sec / 3600);
+      return (ref === "S" || ref === "W") ? -decimal : decimal;
+    };
+
+    const buildStaticMap = () => {
+      if (state.lat == null || state.lng == null) return "";
+      const zoom = clamp(Number(state.zoom) || 15, 5, 18);
+      return `https://staticmap.openstreetmap.de/staticmap.php?center=${state.lat},${state.lng}&zoom=${zoom}&size=720x360&markers=${state.lat},${state.lng},lightblue1`;
+    };
+
+    const getLocationLabel = () => {
+      if (state.lat == null || state.lng == null) return "位置未設定";
+      return `${Number(state.lat).toFixed(6)}, ${Number(state.lng).toFixed(6)} (${state.locationSource || "手動"})`;
+    };
+
+    const updatePreview = () => {
+      els.previewPhoto.src = state.photoDataUrl || PHOTO_PLACEHOLDER;
+      const mapUrl = buildStaticMap();
+      els.previewMap.src = mapUrl || MAP_PLACEHOLDER;
+      els.previewTitle.textContent = state.title || "タイトル未設定";
+      els.previewMemo.textContent = state.memo || "メモがここに表示されます。改行も反映されます。";
+      els.previewLocation.textContent = getLocationLabel();
+      els.previewStatus.textContent = state.photoDataUrl || state.memo || (state.lat != null && state.lng != null)
+        ? "カードプレビューを更新しました。"
+        : "必要な情報を入力するとリアルタイムで更新されます。";
+    };
+
+    const buildFlexJson = () => {
+      const mapUrl = buildStaticMap();
+      const mapLink = (state.lat != null && state.lng != null)
+        ? `https://www.google.com/maps?q=${state.lat},${state.lng}`
+        : "";
+      const heroUrl = state.photoDataUrl || mapUrl || "";
+      const bodyContents = [
+        { type: "text", text: state.title || "日記カード", weight: "bold", size: "lg", wrap: true },
+      ];
+
+      if (state.memo) {
+        bodyContents.push({ type: "text", text: state.memo, wrap: true, color: "#555555", margin: "md" });
+      }
+
+      if (mapLink) {
+        bodyContents.push({
+          type: "box",
+          layout: "vertical",
+          margin: "md",
+          spacing: "sm",
+          contents: [
+            { type: "text", text: "場所", weight: "bold", size: "sm", color: "#111111" },
+            { type: "text", text: `${Number(state.lat).toFixed(6)}, ${Number(state.lng).toFixed(6)}`, size: "sm", color: "#666666" },
+            { type: "text", text: mapLink, size: "xs", color: "#4f46e5", wrap: true }
+          ]
+        });
+      }
+
+      const bubble = {
+        type: "bubble",
+        hero: heroUrl ? {
+          type: "image",
+          url: heroUrl,
+          size: "full",
+          aspectRatio: "16:9",
+          aspectMode: "cover"
+        } : undefined,
+        body: {
+          type: "box",
+          layout: "vertical",
+          spacing: "md",
+          contents: bodyContents
+        },
+        footer: {
+          type: "box",
+          layout: "vertical",
+          spacing: "sm",
+          contents: [
+            mapLink ? {
+              type: "button",
+              style: "link",
+              height: "sm",
+              action: { type: "uri", label: "地図を開く", uri: mapLink }
+            } : undefined,
+            heroUrl ? {
+              type: "button",
+              style: "secondary",
+              height: "sm",
+              action: { type: "uri", label: "画像を開く", uri: heroUrl }
+            } : undefined,
+            {
+              type: "button",
+              style: "primary",
+              color: "#8b5cf6",
+              action: { type: "message", label: "カードを共有", text: `${state.title || "日記カード"}\n${state.memo || ""}` }
+            }
+          ].filter(Boolean)
+        }
+      };
+
+      els.flexJson.textContent = JSON.stringify(bubble, null, 2);
+      els.jsonHint.textContent = "コピーして LINE デベロッパーコンソールに貼り付けてください。";
+      return { bubble, mapLink, heroUrl };
+    };
+
+    const copyText = async (text) => {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (e) {
+        console.warn("Clipboard copy failed", e);
+        return false;
+      }
+    };
+
+    const updateState = () => {
+      updatePreview();
+      buildFlexJson();
+    };
+
+    els.photoInput.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) {
+        state.photoDataUrl = "";
+        state.photoName = "";
+        els.photoStatus.textContent = "未選択";
+        updateState();
+        return;
+      }
+      state.photoName = file.name;
+      els.photoStatus.textContent = `${file.name} を読み込み中…`;
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.photoDataUrl = reader.result;
+        els.photoStatus.textContent = `${file.name} を読み込みました。`;
+        updateState();
+      };
+      reader.readAsDataURL(file);
+
+      if (window.EXIF) {
+        EXIF.getData(file, function () {
+          const lat = EXIF.getTag(this, "GPSLatitude");
+          const lng = EXIF.getTag(this, "GPSLongitude");
+          const latRef = EXIF.getTag(this, "GPSLatitudeRef");
+          const lngRef = EXIF.getTag(this, "GPSLongitudeRef");
+          const latDec = toDecimalFromDms(lat, latRef);
+          const lngDec = toDecimalFromDms(lng, lngRef);
+          if (Number.isFinite(latDec) && Number.isFinite(lngDec)) {
+            state.lat = latDec;
+            state.lng = lngDec;
+            state.locationSource = "EXIF";
+            els.locationStatus.textContent = `EXIF から座標を取得: ${getLocationLabel()}`;
+            updateState();
+          } else {
+            els.locationStatus.textContent = "EXIF に位置情報が見つかりませんでした。";
+          }
+        });
+      }
+    });
+
+    els.titleInput.addEventListener("input", (e) => {
+      state.title = e.target.value;
+      updateState();
+    });
+
+    els.memoInput.addEventListener("input", (e) => {
+      state.memo = e.target.value;
+      updateState();
+    });
+
+    els.zoomInput.addEventListener("input", (e) => {
+      state.zoom = clamp(Number(e.target.value) || 15, 5, 18);
+      updateState();
+    });
+
+    els.manualLocationBtn.addEventListener("click", () => {
+      const latVal = parseFloat(els.latInput.value);
+      const lngVal = parseFloat(els.lngInput.value);
+      if (Number.isFinite(latVal) && Number.isFinite(lngVal)) {
+        state.lat = latVal;
+        state.lng = lngVal;
+        state.locationSource = "手入力";
+        els.locationStatus.textContent = `手入力でセット: ${getLocationLabel()}`;
+        updateState();
+      } else {
+        els.locationStatus.textContent = "緯度・経度の形式を確認してください。";
+      }
+    });
+
+    els.currentLocationBtn.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        els.locationStatus.textContent = "このブラウザでは現在地取得に非対応です。";
+        return;
+      }
+      els.locationStatus.textContent = "現在地を取得中…";
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          state.lat = pos.coords.latitude;
+          state.lng = pos.coords.longitude;
+          state.locationSource = "現在地";
+          els.latInput.value = state.lat.toFixed(6);
+          els.lngInput.value = state.lng.toFixed(6);
+          els.locationStatus.textContent = `現在地をセット: ${getLocationLabel()}`;
+          updateState();
+        },
+        (err) => {
+          els.locationStatus.textContent = `取得に失敗しました: ${err.message}`;
+        }
+      );
+    });
+
+    els.exifBtn.addEventListener("click", () => {
+      if (state.lat != null && state.locationSource === "EXIF") {
+        els.locationStatus.textContent = `既に EXIF 座標を使用中: ${getLocationLabel()}`;
+        return;
+      }
+      if (!els.photoInput.files?.length) {
+        els.locationStatus.textContent = "先に写真を選んでください。";
+        return;
+      }
+      const file = els.photoInput.files[0];
+      els.locationStatus.textContent = "EXIF を再スキャン中…";
+      if (window.EXIF) {
+        EXIF.getData(file, function () {
+          const lat = EXIF.getTag(this, "GPSLatitude");
+          const lng = EXIF.getTag(this, "GPSLongitude");
+          const latRef = EXIF.getTag(this, "GPSLatitudeRef");
+          const lngRef = EXIF.getTag(this, "GPSLongitudeRef");
+          const latDec = toDecimalFromDms(lat, latRef);
+          const lngDec = toDecimalFromDms(lng, lngRef);
+          if (Number.isFinite(latDec) && Number.isFinite(lngDec)) {
+            state.lat = latDec;
+            state.lng = lngDec;
+            state.locationSource = "EXIF";
+            els.latInput.value = state.lat.toFixed(6);
+            els.lngInput.value = state.lng.toFixed(6);
+            els.locationStatus.textContent = `EXIF から座標を取得: ${getLocationLabel()}`;
+            updateState();
+          } else {
+            els.locationStatus.textContent = "EXIF に位置情報が見つかりませんでした。";
+          }
+        });
+      } else {
+        els.locationStatus.textContent = "EXIF 読み込みライブラリが見つかりません。";
+      }
+    });
+
+    els.copyJsonBtn.addEventListener("click", async () => {
+      const ok = await copyText(els.flexJson.textContent || "");
+      els.jsonHint.textContent = ok ? "JSON をクリップボードにコピーしました" : "コピーに失敗しました";
+    });
+
+    els.copyShareTextBtn.addEventListener("click", async () => {
+      const mapLink = (state.lat != null && state.lng != null)
+        ? `https://www.google.com/maps?q=${state.lat},${state.lng}`
+        : "";
+      const share = [
+        state.title || "日記カード",
+        state.memo || "",
+        mapLink ? `場所: ${mapLink}` : ""
+      ].filter(Boolean).join("\n");
+      const ok = await copyText(share);
+      els.jsonHint.textContent = ok ? "共有テキストをコピーしました" : "コピーに失敗しました";
+    });
+
+    els.applyThemeBtn.addEventListener("click", () => {
+      window.EnchoTheme?.applyCurrentTheme(document);
+      updateState();
+    });
+
+    updateState();
+  </script>
+  <script>
+    // Initialize smooth swipe scrolling
+    (function() {
+      if (window.SwipeHandler) {
+        window.pageSwipeHandler = new SwipeHandler(document.body, {
+          enableGradient: true,
+          snapToSections: false,
+          enableMomentum: true,
+          showVisualFeedback: true
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

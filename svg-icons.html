@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SVGアイコン一覧</title>
+  <style>
+    :root {
+      --accent: #8b5cf6;
+      --accent-2: #f59e0b;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --panel: #ffffff;
+      --bg: linear-gradient(180deg, #f8fafc, #eef2ff);
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: "Noto Sans JP", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+    header {
+      display: grid;
+      gap: 8px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 800;
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .summary {
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      width: fit-content;
+    }
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .card {
+      background: var(--panel);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+    .preview {
+      width: 96px;
+      height: 96px;
+      border-radius: 16px;
+      border: 1px dashed rgba(17, 24, 39, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f9fafb;
+    }
+    .preview img {
+      width: 64px;
+      height: 64px;
+    }
+    .meta {
+      display: grid;
+      gap: 4px;
+    }
+    .meta strong {
+      font-size: 14px;
+    }
+    .meta span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      color: #1f1b2d;
+      font-weight: 700;
+      font-size: 12px;
+      text-decoration: none;
+    }
+    .btn.secondary {
+      background: #f3f4f6;
+      border-color: var(--border);
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>SVGアイコン一覧</h1>
+      <p class="subtitle">リポジトリ内のSVGアセットを一覧で確認できます。</p>
+      <div class="summary">現在のSVG数: 1</div>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <div class="preview">
+          <img src="favicon.svg" alt="Encho favicon" />
+        </div>
+        <div class="meta">
+          <strong>favicon.svg</strong>
+          <span>64×64 / Enchoアイコン</span>
+        </div>
+        <div class="actions">
+          <a class="btn" href="favicon.svg" target="_blank" rel="noopener">SVGを開く</a>
+          <a class="btn secondary" href="index.html">トップへ戻る</a>
+        </div>
+      </article>
+    </section>
+  </div>
+</body>
+</html>

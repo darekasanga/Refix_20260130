@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>通知カードレイアウト作成 | 教師用テンプレート作成</title>
+  <script src="theme.js"></script>
+  <script src="session.js"></script>
+  <style>
+    :root {
+      --accent: #8b5cf6;
+      --accent-2: #f59e0b;
+      --accent-3: #22d3ee;
+      --accent-4: #fb7185;
+      --muted: #1e1b2f;
+      --panel: #ffffff;
+      --panel-sub: #f7f4ff;
+      --border: #e6ddf5;
+      --text: #1f1b2d;
+      --subtext: #6b6477;
+      --bg: radial-gradient(circle at 18% 20%, rgba(255,221,235,.8), transparent 40%), radial-gradient(circle at 80% 8%, rgba(189,227,255,.7), transparent 34%), linear-gradient(180deg,#fff8fd,#f5f7ff);
+      --panel-overlay: rgba(255,255,255,.92);
+      --glow: 0 10px 30px rgba(139,92,246,.16);
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: "Noto Sans JP", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 18px;
+    }
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 800;
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--subtext);
+      font-size: 13px;
+    }
+    .pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.12);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .panel {
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: var(--glow);
+    }
+    .toolbar {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      align-items: end;
+    }
+    .toolbar label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--subtext);
+    }
+    .toolbar input,
+    .toolbar select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel-sub);
+      color: var(--text);
+    }
+    .btn {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      color: #1f1b2d;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+    .btn.secondary {
+      background: var(--panel-sub);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn.ghost {
+      background: rgba(139, 92, 246, 0.08);
+      border-color: rgba(139, 92, 246, 0.2);
+      color: var(--text);
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr 1.4fr 1fr;
+    }
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .parts-list {
+      display: grid;
+      gap: 8px;
+    }
+    .part-button {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+      background: rgba(139, 92, 246, 0.08);
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+    }
+    .canvas-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .tab {
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel-sub);
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .tab.active {
+      background: rgba(139, 92, 246, 0.12);
+      border-color: rgba(139, 92, 246, 0.4);
+    }
+    .part-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel-sub);
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .part-item.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+    }
+    .part-controls {
+      display: flex;
+      gap: 4px;
+    }
+    .mini-btn {
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(139, 92, 246, 0.08);
+      cursor: pointer;
+    }
+    .properties {
+      display: grid;
+      gap: 10px;
+    }
+    .properties label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--subtext);
+    }
+    .properties input,
+    .properties textarea,
+    .properties select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel-sub);
+      font-size: 13px;
+      color: var(--text);
+    }
+    .properties textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .properties-grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+    .preview {
+      display: grid;
+      gap: 12px;
+    }
+    .preview-panel {
+      grid-column: 1 / -1;
+    }
+    .preview-card {
+      background: var(--panel);
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      padding: 16px;
+      display: grid;
+      gap: 16px;
+      max-width: 100%;
+      width: 100%;
+      box-shadow: var(--glow);
+    }
+    .preview-section {
+      display: grid;
+      gap: 14px;
+    }
+    .preview-part {
+      position: relative;
+      padding: 12px 12px 32px;
+      border-radius: 16px;
+      border: 1px solid rgba(230, 221, 245, 0.7);
+      background: rgba(255, 255, 255, 0.75);
+    }
+    .preview-edit-btn {
+      position: absolute;
+      right: 10px;
+      bottom: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      background: rgba(139, 92, 246, 0.12);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .preview-text {
+      margin: 0;
+      line-height: 1.4;
+    }
+    .preview-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(139, 92, 246, 0.12);
+    }
+    .preview-button {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+    }
+    .preview-button[data-size="sm"] {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .preview-button[data-size="md"] {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .preview-button[data-size="lg"] {
+      padding: 12px 16px;
+      font-size: 16px;
+    }
+    .preview-input-pad {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      font-size: 12px;
+      color: var(--subtext);
+    }
+    .preview-input-pad[data-design="solid"] {
+      background: rgba(139, 92, 246, 0.18);
+    }
+    .preview-input-pad[data-design="outline"] {
+      background: transparent;
+    }
+    .preview-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(139, 92, 246, 0.12);
+      color: var(--text);
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .preview-icon[data-design="circle"] {
+      border-radius: 50%;
+    }
+    .preview-icon[data-design="square"] {
+      border-radius: 6px;
+    }
+    .preview-title-frame {
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+    .preview-title-frame[data-design="solid"] {
+      background: rgba(139, 92, 246, 0.18);
+    }
+    .preview-title-frame[data-design="outline"] {
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      background: transparent;
+    }
+    .preview-title-frame[data-design="soft"] {
+      background: rgba(139, 92, 246, 0.08);
+    }
+    .preview-separator {
+      height: 1px;
+      background: var(--border);
+      border: none;
+    }
+    .preview-items {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+    }
+    .preview-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .preview-item span {
+      color: var(--subtext);
+      font-size: 12px;
+    }
+    .preview-footer-note {
+      font-size: 11px;
+      color: var(--subtext);
+    }
+    .json-box {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      overflow: auto;
+      max-height: 320px;
+      white-space: pre-wrap;
+    }
+    .status-list {
+      padding-left: 18px;
+      color: #b91c1c;
+      font-size: 12px;
+      margin: 0;
+    }
+    .theme-grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+    .template-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .template-list select {
+      flex: 1;
+    }
+    @media (max-width: 1100px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .preview-panel {
+        grid-column: span 1;
+      }
+      .preview-card {
+        max-width: 100%;
+      }
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal {
+      background: var(--panel);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      padding: 16px;
+      width: min(720px, 100%);
+      box-shadow: var(--glow);
+      display: grid;
+      gap: 12px;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .modal-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .modal-body {
+      display: grid;
+      gap: 10px;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-top">
+        <div>
+          <h1 class="title">通知カードレイアウト作成</h1>
+          <p class="subtitle">先生向けの通知カードテンプレートを組み立てて保存・共有できます</p>
+        </div>
+        <span class="pill">Bubble版 β</span>
+      </div>
+    </header>
+
+    <section class="panel">
+      <h2>テンプレ管理</h2>
+      <div class="toolbar">
+        <div>
+          <label for="templateSelect">テンプレ一覧</label>
+          <div class="template-list">
+            <select id="templateSelect"></select>
+            <button class="btn ghost" id="newTemplateBtn" type="button">新規</button>
+          </div>
+        </div>
+        <div>
+          <label for="templateName">テンプレ名</label>
+          <input id="templateName" type="text" placeholder="例：明細通知テンプレ" />
+        </div>
+        <div>
+          <label for="templateCategory">種類</label>
+          <select id="templateCategory">
+            <option value="statement">明細通知</option>
+            <option value="confirm">確認</option>
+            <option value="refund">キャンセル/返金</option>
+          </select>
+        </div>
+        <div>
+          <label for="templateAltText">altText（必須）</label>
+          <input id="templateAltText" type="text" placeholder="例：ご請求明細のお知らせ" />
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="saveTemplate" type="button">保存</button>
+          <button class="btn secondary" id="duplicateTemplate" type="button">複製</button>
+          <button class="btn secondary" id="deleteTemplate" type="button">削除</button>
+          <button class="btn ghost" id="copyJson" type="button">JSONコピー</button>
+          <button class="btn ghost" id="toggleJson" type="button">JSON表示</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>パーツ追加</h2>
+        <div class="parts-list" id="partsList"></div>
+      </div>
+
+      <div class="panel">
+        <h2>キャンバス</h2>
+        <div class="canvas-tabs" id="canvasTabs"></div>
+        <div id="canvasList"></div>
+      </div>
+
+      <div class="panel">
+        <h2>プロパティ</h2>
+        <div class="properties" id="propertiesPanel">
+          <p class="subtitle">パーツを選択すると編集できます。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>テーマ・Bubble設定</h2>
+        <div class="properties" id="themePanel"></div>
+      </div>
+      <div class="panel preview preview-panel">
+        <h2>プレビュー</h2>
+        <div class="preview-card" id="previewCard"></div>
+      </div>
+      <div class="panel">
+        <h2>Flex JSON</h2>
+        <ul class="status-list" id="validationList"></ul>
+        <div class="json-box" id="jsonOutput" hidden></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="partEditModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3 class="modal-title">パーツ編集</h3>
+        <button class="btn secondary" id="closePartModal" type="button">閉じる</button>
+      </div>
+      <div class="modal-body" id="partEditBody"></div>
+      <div class="modal-actions">
+        <button class="btn" id="savePartModal" type="button">反映</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.EnchoTheme?.applyCurrentTheme(document);
+
+    const STORAGE_KEY = "flex_builder_templates_v1";
+    const SCHEMA_VERSION = 1;
+    const placements = ["header", "body", "footer"];
+    const partCatalog = [
+      { type: "date", label: "日付" },
+      { type: "teacher", label: "先生名" },
+      { type: "title", label: "タイトル" },
+      { type: "description", label: "説明文" },
+      { type: "icon", label: "アイコン" },
+      { type: "title_frame", label: "タイトル枠" },
+      { type: "items", label: "明細" },
+      { type: "comment", label: "コメント" },
+      { type: "tag", label: "タグ" },
+      { type: "image", label: "イラスト" },
+      { type: "button", label: "ボタン" },
+      { type: "reply_button", label: "返信するボタン" },
+      { type: "separator", label: "区切り線" },
+      { type: "spacer", label: "スペーサー" }
+    ];
+
+    const createId = () => {
+      if (window.crypto?.randomUUID) {
+        return window.crypto.randomUUID();
+      }
+      return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    };
+
+    const createBaseTemplate = (overrides = {}) => ({
+      id: createId(),
+      name: overrides.name || "新規テンプレ",
+      category: overrides.category || "statement",
+      altText: overrides.altText || "",
+      schemaVersion: SCHEMA_VERSION,
+      layout: {
+        bubbleSize: "mega",
+        header: [],
+        body: [],
+        footer: [],
+        theme: {
+          primaryColor: "#8b5cf6",
+          secondaryColor: "#f59e0b",
+          textColor: "#1f1b2d",
+          bgColor: "#ffffff"
+        }
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    const createPart = (type, placement = "body") => {
+      const base = {
+        id: createId(),
+        type,
+        placement,
+        order: Date.now(),
+        props: {},
+        style: {
+          align: "start",
+          margin: "md",
+          padding: "none",
+          bgColor: "",
+          color: "",
+          size: "md",
+          weight: "regular",
+          radius: 8,
+          font: "Noto Sans JP"
+        }
+      };
+
+      switch (type) {
+        case "date":
+          base.props = { mode: "auto", customText: "" };
+          break;
+        case "teacher":
+          base.props = { text: "担任：山田先生" };
+          break;
+        case "title":
+          base.props = { text: "お知らせタイトル" };
+          base.style.weight = "bold";
+          base.style.size = "lg";
+          break;
+        case "items":
+          base.props = {
+            showTotal: true,
+            items: [
+              { label: "保育料", amount: 12000, note: "" },
+              { label: "教材費", amount: 1500, note: "" }
+            ]
+          };
+          break;
+        case "comment":
+          base.props = { text: "いつもありがとうございます。" };
+          break;
+        case "description":
+          base.props = { text: "ここに説明文を入力します。" };
+          base.style.size = "sm";
+          break;
+        case "icon":
+          base.props = { design: "rounded", size: 40 };
+          break;
+        case "title_frame":
+          base.props = {
+            text: "タイトル枠",
+            design: "solid",
+            frameColor: "#8b5cf6",
+            textColor: "#1f1b2d",
+            textSize: 16
+          };
+          base.style.weight = "bold";
+          break;
+        case "button":
+          base.props = {
+            label: "確認しました",
+            actionType: "postback",
+            data: "approve:STATEMENT_ID",
+            uri: "https://example.com",
+            style: "primary",
+            buttonSize: "md",
+            buttonColor: "#8b5cf6",
+            textColor: "#ffffff",
+            textSize: 14
+          };
+          break;
+        case "image":
+          base.props = {
+            url: "https://placehold.co/600x400/png",
+            aspectRatio: "4:3",
+            aspectMode: "cover"
+          };
+          break;
+        case "tag":
+          base.props = { label: "返信待ち", color: "#fb7185", size: "sm" };
+          break;
+        case "reply_button":
+          base.props = {
+            label: "返信する",
+            data: "needfix:STATEMENT_ID",
+            preset: "needfix",
+            buttonSize: "md",
+            buttonColor: "#f59e0b",
+            textColor: "#1f1b2d",
+            textSize: 14,
+            inputPadDesign: "soft",
+            keyboardType: "text"
+          };
+          break;
+        case "separator":
+          base.props = {};
+          break;
+        case "spacer":
+          base.props = { size: 12 };
+          break;
+        default:
+          break;
+      }
+      return base;
+    };
+
+    const createDefaultTemplates = () => {
+      const statement = createBaseTemplate({
+        name: "明細通知テンプレ",
+        category: "statement",
+        altText: "ご請求明細のお知らせ"
+      });
+      statement.layout.header.push(createPart("title", "header"));
+      statement.layout.body.push(createPart("items", "body"));
+      statement.layout.body.push(createPart("comment", "body"));
+      statement.layout.footer.push(createPart("button", "footer"));
+      statement.layout.footer.push(createPart("reply_button", "footer"));
+
+      const confirm = createBaseTemplate({
+        name: "確認メッセージ",
+        category: "confirm",
+        altText: "ご確認のお願い"
+      });
+      const confirmTag = createPart("tag", "header");
+      confirmTag.props.label = "返信待ち";
+      confirm.layout.header.push(confirmTag);
+      const confirmTitle = createPart("title", "body");
+      confirmTitle.props.text = "ご確認をお願いします";
+      confirm.layout.body.push(confirmTitle);
+      confirm.layout.body.push(createPart("comment", "body"));
+      confirm.layout.footer.push(createPart("reply_button", "footer"));
+
+      const refund = createBaseTemplate({
+        name: "キャンセル/返金通知",
+        category: "refund",
+        altText: "キャンセルと返金のご案内"
+      });
+      const refundTitle = createPart("title", "header");
+      refundTitle.props.text = "キャンセルのお知らせ";
+      refund.layout.header.push(refundTitle);
+      const refundComment = createPart("comment", "body");
+      refundComment.props.text = "返金方法についてご案内します。";
+      refund.layout.body.push(refundComment);
+      refund.layout.footer.push(createPart("button", "footer"));
+
+      return [statement, confirm, refund];
+    };
+
+    const templateStore = {
+      load() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        try {
+          return JSON.parse(raw);
+        } catch (error) {
+          console.warn("テンプレ読み込みに失敗しました", error);
+          return null;
+        }
+      },
+      save(templates) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
+      }
+    };
+
+    const state = {
+      templates: [],
+      activeTemplateId: null,
+      activePlacement: "body",
+      selectedPartId: null,
+      showJson: false
+    };
+
+    const elements = {
+      templateSelect: document.getElementById("templateSelect"),
+      templateName: document.getElementById("templateName"),
+      templateCategory: document.getElementById("templateCategory"),
+      templateAltText: document.getElementById("templateAltText"),
+      partsList: document.getElementById("partsList"),
+      canvasTabs: document.getElementById("canvasTabs"),
+      canvasList: document.getElementById("canvasList"),
+      propertiesPanel: document.getElementById("propertiesPanel"),
+      themePanel: document.getElementById("themePanel"),
+      previewCard: document.getElementById("previewCard"),
+      jsonOutput: document.getElementById("jsonOutput"),
+      validationList: document.getElementById("validationList"),
+      saveTemplate: document.getElementById("saveTemplate"),
+      duplicateTemplate: document.getElementById("duplicateTemplate"),
+      deleteTemplate: document.getElementById("deleteTemplate"),
+      newTemplateBtn: document.getElementById("newTemplateBtn"),
+      copyJson: document.getElementById("copyJson"),
+      toggleJson: document.getElementById("toggleJson")
+    };
+
+    const loadInitialTemplates = () => {
+      const stored = templateStore.load();
+      if (stored && Array.isArray(stored)) {
+        state.templates = stored;
+      } else {
+        state.templates = createDefaultTemplates();
+        templateStore.save(state.templates);
+      }
+      state.activeTemplateId = state.templates[0]?.id || null;
+    };
+
+    const getActiveTemplate = () => state.templates.find((tpl) => tpl.id === state.activeTemplateId);
+
+    const updateTemplateMetaFromForm = () => {
+      const template = getActiveTemplate();
+      if (!template) return;
+      template.name = elements.templateName.value.trim() || template.name;
+      template.category = elements.templateCategory.value;
+      template.altText = elements.templateAltText.value.trim();
+      template.updatedAt = new Date().toISOString();
+    };
+
+    const setSelectedPart = (partId) => {
+      state.selectedPartId = partId;
+      renderCanvas();
+      renderProperties();
+    };
+
+    const getPartsForPlacement = (placement) => {
+      const template = getActiveTemplate();
+      if (!template) return [];
+      const parts = template.layout?.[placement] || [];
+      return [...parts].sort((a, b) => a.order - b.order);
+    };
+
+    const updatePart = (partId, updater) => {
+      const template = getActiveTemplate();
+      if (!template) return;
+      placements.forEach((placement) => {
+        const list = template.layout[placement];
+        const index = list.findIndex((part) => part.id === partId);
+        if (index >= 0) {
+          const next = updater(list[index]);
+          list[index] = next;
+        }
+      });
+      template.updatedAt = new Date().toISOString();
+      persistTemplates();
+      renderAll();
+    };
+
+    const removePart = (partId) => {
+      const template = getActiveTemplate();
+      if (!template) return;
+      placements.forEach((placement) => {
+        template.layout[placement] = template.layout[placement].filter((part) => part.id !== partId);
+      });
+      if (state.selectedPartId === partId) {
+        state.selectedPartId = null;
+      }
+      persistTemplates();
+      renderAll();
+    };
+
+    const duplicatePart = (partId) => {
+      const template = getActiveTemplate();
+      if (!template) return;
+      placements.forEach((placement) => {
+        const list = template.layout[placement];
+        const index = list.findIndex((part) => part.id === partId);
+        if (index >= 0) {
+          const copy = JSON.parse(JSON.stringify(list[index]));
+          copy.id = createId();
+          copy.order = Date.now();
+          list.splice(index + 1, 0, copy);
+        }
+      });
+      persistTemplates();
+      renderAll();
+    };
+
+    const movePart = (partId, direction) => {
+      const template = getActiveTemplate();
+      if (!template) return;
+      const list = template.layout[state.activePlacement];
+      const index = list.findIndex((part) => part.id === partId);
+      if (index < 0) return;
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= list.length) return;
+      const [moved] = list.splice(index, 1);
+      list.splice(newIndex, 0, moved);
+      list.forEach((part, idx) => {
+        part.order = idx;
+      });
+      persistTemplates();
+      renderAll();
+    };
+
+    const addPart = (type) => {
+      const template = getActiveTemplate();
+      if (!template) return;
+      const part = createPart(type, state.activePlacement);
+      template.layout[state.activePlacement].push(part);
+      state.selectedPartId = part.id;
+      persistTemplates();
+      renderAll();
+    };
+
+    const persistTemplates = () => {
+      templateStore.save(state.templates);
+    };
+
+    const formatYen = (value) => {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return "-";
+      return `¥${number.toLocaleString("ja-JP")}`;
+    };
+
+    const buildFlexText = (text, style = {}) => ({
+      type: "text",
+      text,
+      size: style.size || "md",
+      weight: style.weight || "regular",
+      align: style.align || "start",
+      color: style.color || undefined,
+      wrap: true
+    });
+
+    const normalizeSize = (size) => {
+      const allowed = ["xs", "sm", "md", "lg", "xl", "xxl", "3xl"];
+      return allowed.includes(size) ? size : "md";
+    };
+
+    const normalizeAlign = (align) => {
+      const allowed = ["start", "center", "end"];
+      return allowed.includes(align) ? align : "start";
+    };
+
+    const convertPartToFlex = (part, errors) => {
+      switch (part.type) {
+        case "date": {
+          const dateText = part.props.mode === "custom"
+            ? (part.props.customText || "")
+            : new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" });
+          return buildFlexText(dateText || "日付", normalizeStyle(part.style));
+        }
+        case "teacher":
+          return buildFlexText(part.props.text || "先生名", normalizeStyle(part.style));
+        case "title":
+          return buildFlexText(part.props.text || "タイトル", normalizeStyle({ ...part.style, weight: "bold" }));
+        case "comment":
+          return buildFlexText(part.props.text || "コメント", normalizeStyle(part.style));
+        case "description":
+          return buildFlexText(part.props.text || "説明文", normalizeStyle(part.style));
+        case "icon":
+          return buildFlexText(`icon:${part.props.design || "rounded"}`, normalizeStyle(part.style));
+        case "title_frame":
+          return buildFlexText(part.props.text || "タイトル枠", normalizeStyle(part.style));
+        case "tag":
+          return {
+            type: "text",
+            text: part.props.label || "タグ",
+            size: normalizeSize(part.style.size || part.props.size || "sm"),
+            color: part.props.color || part.style.color || "#fb7185",
+            weight: "bold",
+            align: normalizeAlign(part.style.align),
+            wrap: false
+          };
+        case "items": {
+          const items = Array.isArray(part.props.items) ? part.props.items : [];
+          const contents = items.map((item) => ({
+            type: "box",
+            layout: "horizontal",
+            contents: [
+              { type: "text", text: item.label || "項目", size: "sm", flex: 3 },
+              { type: "text", text: formatYen(item.amount), size: "sm", flex: 2, align: "end" }
+            ]
+          }));
+          if (part.props.showTotal) {
+            const total = items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            contents.push({
+              type: "box",
+              layout: "horizontal",
+              contents: [
+                { type: "text", text: "合計", weight: "bold", size: "sm", flex: 3 },
+                { type: "text", text: formatYen(total), weight: "bold", size: "sm", flex: 2, align: "end" }
+              ]
+            });
+          }
+          return { type: "box", layout: "vertical", spacing: "sm", contents };
+        }
+        case "image": {
+          const url = (part.props.url || "").trim();
+          if (url && !url.startsWith("https://")) {
+            errors.push("画像URLはhttpsのみ対応です。");
+          }
+          return {
+            type: "image",
+            url: url || "https://placehold.co/600x400/png",
+            aspectRatio: part.props.aspectRatio || "4:3",
+            aspectMode: part.props.aspectMode || "cover"
+          };
+        }
+        case "button": {
+          const actionType = part.props.actionType || "postback";
+          const data = (part.props.data || "").slice(0, 300);
+          if (actionType === "postback" && (part.props.data || "").length > 300) {
+            errors.push("postback.dataは300文字以内にしてください。");
+          }
+          if (actionType === "uri" && part.props.uri && !part.props.uri.startsWith("https://")) {
+            errors.push("ボタンURIはhttpsのみ対応です。");
+          }
+          return {
+            type: "button",
+            style: part.props.style || "primary",
+            action: actionType === "uri"
+              ? { type: "uri", label: part.props.label || "詳細を見る", uri: part.props.uri || "https://example.com" }
+              : { type: "postback", label: part.props.label || "確認しました", data: data || "approve:STATEMENT_ID" }
+          };
+        }
+        case "reply_button": {
+          return {
+            type: "button",
+            style: "secondary",
+            action: {
+              type: "postback",
+              label: part.props.label || "返信する",
+              data: part.props.data || "needfix:STATEMENT_ID"
+            }
+          };
+        }
+        case "separator":
+          return { type: "separator" };
+        case "spacer":
+          return { type: "spacer", size: "md" };
+        default:
+          return buildFlexText("未定義パーツ", normalizeStyle(part.style));
+      }
+    };
+
+    const normalizeStyle = (style = {}) => ({
+      size: normalizeSize(style.size || "md"),
+      weight: style.weight || "regular",
+      align: normalizeAlign(style.align || "start"),
+      color: style.color || undefined
+    });
+
+    const convertTemplateToFlex = (template) => {
+      const errors = [];
+      if (!template.altText) {
+        errors.push("altTextは必須です。");
+      }
+      const bubble = {
+        type: "bubble",
+        size: template.layout.bubbleSize || "mega",
+        styles: {
+          body: { backgroundColor: template.layout.theme.bgColor || "#ffffff" }
+        }
+      };
+
+      placements.forEach((placement) => {
+        const parts = getPartsForPlacement(placement);
+        if (!parts.length) return;
+        bubble[placement] = {
+          type: "box",
+          layout: "vertical",
+          spacing: "sm",
+          contents: parts.map((part) => convertPartToFlex(part, errors))
+        };
+      });
+
+      return {
+        payload: {
+          type: "flex",
+          altText: template.altText || "",
+          contents: bubble
+        },
+        errors
+      };
+    };
+
+    const renderPartsList = () => {
+      elements.partsList.innerHTML = partCatalog.map((part) => {
+        return `<button type="button" class="part-button" data-type="${part.type}">${part.label}</button>`;
+      }).join("");
+      elements.partsList.querySelectorAll(".part-button").forEach((btn) => {
+        btn.addEventListener("click", () => addPart(btn.dataset.type));
+      });
+    };
+
+    const renderCanvasTabs = () => {
+      elements.canvasTabs.innerHTML = placements.map((placement) => {
+        const label = placement === "header" ? "Header" : placement === "body" ? "Body" : "Footer";
+        return `<button type="button" class="tab ${placement === state.activePlacement ? "active" : ""}" data-placement="${placement}">${label}</button>`;
+      }).join("");
+      elements.canvasTabs.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          state.activePlacement = tab.dataset.placement;
+          state.selectedPartId = null;
+          renderCanvas();
+          renderProperties();
+        });
+      });
+    };
+
+    const renderCanvas = () => {
+      const parts = getPartsForPlacement(state.activePlacement);
+      if (!parts.length) {
+        elements.canvasList.innerHTML = `<p class="subtitle">この領域にはパーツがありません。</p>`;
+        return;
+      }
+      elements.canvasList.innerHTML = parts.map((part) => {
+        const label = partCatalog.find((item) => item.type === part.type)?.label || part.type;
+        return `
+          <div class="part-item ${part.id === state.selectedPartId ? "active" : ""}" data-id="${part.id}">
+            <div>
+              <strong>${label}</strong>
+              <div class="subtitle">${part.type}</div>
+            </div>
+            <div class="part-controls">
+              <button class="mini-btn" data-action="up">↑</button>
+              <button class="mini-btn" data-action="down">↓</button>
+              <button class="mini-btn" data-action="duplicate">複製</button>
+              <button class="mini-btn" data-action="delete">削除</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      elements.canvasList.querySelectorAll(".part-item").forEach((item) => {
+        item.addEventListener("click", (event) => {
+          if (event.target.closest(".mini-btn")) return;
+          setSelectedPart(item.dataset.id);
+        });
+        item.querySelectorAll(".mini-btn").forEach((btn) => {
+          btn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const action = btn.dataset.action;
+            if (action === "up") movePart(item.dataset.id, -1);
+            if (action === "down") movePart(item.dataset.id, 1);
+            if (action === "duplicate") duplicatePart(item.dataset.id);
+            if (action === "delete") removePart(item.dataset.id);
+          });
+        });
+      });
+    };
+
+    const renderProperties = () => {
+      const partId = state.selectedPartId;
+      if (!partId) {
+        elements.propertiesPanel.innerHTML = `<p class="subtitle">パーツを選択すると編集できます。</p>`;
+        return;
+      }
+      const template = getActiveTemplate();
+      if (!template) return;
+      const part = placements.flatMap((placement) => template.layout[placement]).find((item) => item.id === partId);
+      if (!part) return;
+
+      const commonFields = `
+        <label>配置領域</label>
+        <select id="propPlacement">
+          ${placements.map((placement) => `<option value="${placement}" ${placement === part.placement ? "selected" : ""}>${placement}</option>`).join("")}
+        </select>
+        <div class="properties-grid">
+          <div>
+            <label>文字サイズ</label>
+            <select id="propSize">
+              ${["xs","sm","md","lg","xl","xxl","3xl"].map((size) => `<option value="${size}" ${size === part.style.size ? "selected" : ""}>${size}</option>`).join("")}
+            </select>
+          </div>
+          <div>
+            <label>太さ</label>
+            <select id="propWeight">
+              ${["regular","bold"].map((weight) => `<option value="${weight}" ${weight === part.style.weight ? "selected" : ""}>${weight}</option>`).join("")}
+            </select>
+          </div>
+          <div>
+            <label>揃え</label>
+            <select id="propAlign">
+              ${["start","center","end"].map((align) => `<option value="${align}" ${align === part.style.align ? "selected" : ""}>${align}</option>`).join("")}
+            </select>
+          </div>
+          <div>
+            <label>文字色</label>
+            <input id="propColor" type="text" value="${part.style.color || ""}" placeholder="#333333" />
+          </div>
+          <div>
+            <label>フォント</label>
+            <select id="propFont">
+              ${["Noto Sans JP","Inter","Rounded","Serif"].map((font) => `<option value="${font}" ${font === part.style.font ? "selected" : ""}>${font}</option>`).join("")}
+            </select>
+          </div>
+        </div>
+      `;
+
+      let specificFields = "";
+      if (part.type === "date") {
+        specificFields = `
+          <label>表示方式</label>
+          <select id="propDateMode">
+            <option value="auto" ${part.props.mode === "auto" ? "selected" : ""}>自動</option>
+            <option value="custom" ${part.props.mode === "custom" ? "selected" : ""}>手入力</option>
+          </select>
+          <label>手入力テキスト</label>
+          <input id="propDateText" type="text" value="${part.props.customText || ""}" />
+        `;
+      }
+      if (["teacher", "title", "comment", "description"].includes(part.type)) {
+        specificFields = `
+          <label>テキスト</label>
+          <textarea id="propText">${part.props.text || ""}</textarea>
+        `;
+      }
+      if (part.type === "icon") {
+        specificFields = `
+          <label>アイコンデザイン</label>
+          <select id="propIconDesign">
+            ${["rounded","circle","square"].map((design) => `<option value="${design}" ${part.props.design === design ? "selected" : ""}>${design}</option>`).join("")}
+          </select>
+          <label>アイコンサイズ(px)</label>
+          <input id="propIconSize" type="number" value="${part.props.size || 40}" />
+        `;
+      }
+      if (part.type === "title_frame") {
+        specificFields = `
+          <label>タイトル枠テキスト</label>
+          <input id="propTitleFrameText" type="text" value="${part.props.text || ""}" />
+          <label>タイトル枠デザイン</label>
+          <select id="propTitleFrameDesign">
+            ${["solid","outline","soft"].map((design) => `<option value="${design}" ${part.props.design === design ? "selected" : ""}>${design}</option>`).join("")}
+          </select>
+          <label>タイトル枠色</label>
+          <input id="propTitleFrameColor" type="text" value="${part.props.frameColor || ""}" />
+          <label>タイトル枠テキスト色</label>
+          <input id="propTitleFrameTextColor" type="text" value="${part.props.textColor || ""}" />
+          <label>タイトル枠テキストサイズ(px)</label>
+          <input id="propTitleFrameTextSize" type="number" value="${part.props.textSize || 16}" />
+        `;
+      }
+      if (part.type === "items") {
+        const rows = part.props.items || [];
+        const rowsHtml = rows.map((row, index) => `
+          <div class="properties-grid">
+            <input data-field="label" data-index="${index}" type="text" value="${row.label || ""}" placeholder="項目名" />
+            <input data-field="amount" data-index="${index}" type="number" value="${row.amount ?? 0}" placeholder="金額" />
+            <input data-field="note" data-index="${index}" type="text" value="${row.note || ""}" placeholder="補足" />
+            <button class="mini-btn" data-action="remove-row" data-index="${index}" type="button">削除</button>
+          </div>
+        `).join("");
+        specificFields = `
+          <label>明細アイテム</label>
+          ${rowsHtml}
+          <button class="btn secondary" id="addItemRow" type="button">行追加</button>
+          <label>合計表示</label>
+          <select id="propShowTotal">
+            <option value="true" ${part.props.showTotal ? "selected" : ""}>ON</option>
+            <option value="false" ${!part.props.showTotal ? "selected" : ""}>OFF</option>
+          </select>
+        `;
+      }
+      if (part.type === "button") {
+        specificFields = `
+          <label>ラベル</label>
+          <input id="propButtonLabel" type="text" value="${part.props.label || ""}" />
+          <label>アクション</label>
+          <select id="propButtonAction">
+            <option value="postback" ${part.props.actionType === "postback" ? "selected" : ""}>postback</option>
+            <option value="uri" ${part.props.actionType === "uri" ? "selected" : ""}>uri</option>
+          </select>
+          <label>postback.data</label>
+          <input id="propButtonData" type="text" value="${part.props.data || ""}" />
+          <label>URI</label>
+          <input id="propButtonUri" type="text" value="${part.props.uri || ""}" />
+          <label>スタイル</label>
+          <select id="propButtonStyle">
+            <option value="primary" ${part.props.style === "primary" ? "selected" : ""}>primary</option>
+            <option value="secondary" ${part.props.style === "secondary" ? "selected" : ""}>secondary</option>
+            <option value="link" ${part.props.style === "link" ? "selected" : ""}>link</option>
+          </select>
+        `;
+      }
+      if (part.type === "image") {
+        specificFields = `
+          <label>画像URL (https)</label>
+          <input id="propImageUrl" type="text" value="${part.props.url || ""}" />
+          <label>aspectRatio</label>
+          <input id="propImageRatio" type="text" value="${part.props.aspectRatio || "4:3"}" />
+          <label>aspectMode</label>
+          <select id="propImageMode">
+            <option value="cover" ${part.props.aspectMode === "cover" ? "selected" : ""}>cover</option>
+            <option value="fit" ${part.props.aspectMode === "fit" ? "selected" : ""}>fit</option>
+          </select>
+        `;
+      }
+      if (part.type === "tag") {
+        specificFields = `
+          <label>タグラベル</label>
+          <input id="propTagLabel" type="text" value="${part.props.label || ""}" />
+          <label>タグ色</label>
+          <input id="propTagColor" type="text" value="${part.props.color || ""}" />
+          <label>サイズ</label>
+          <select id="propTagSize">
+            ${["xs","sm","md","lg"].map((size) => `<option value="${size}" ${part.props.size === size ? "selected" : ""}>${size}</option>`).join("")}
+          </select>
+        `;
+      }
+      if (part.type === "reply_button") {
+        specificFields = `
+          <label>ラベル</label>
+          <input id="propReplyLabel" type="text" value="${part.props.label || ""}" />
+          <label>postback.data</label>
+          <input id="propReplyData" type="text" value="${part.props.data || ""}" />
+          <label>プリセット</label>
+          <select id="propReplyPreset">
+            <option value="needfix" ${part.props.preset === "needfix" ? "selected" : ""}>needfix</option>
+            <option value="reply" ${part.props.preset === "reply" ? "selected" : ""}>reply</option>
+            <option value="approve" ${part.props.preset === "approve" ? "selected" : ""}>approve</option>
+          </select>
+        `;
+      }
+      if (part.type === "spacer") {
+        specificFields = `
+          <label>高さ(px)</label>
+          <input id="propSpacer" type="number" value="${part.props.size || 12}" />
+        `;
+      }
+
+      elements.propertiesPanel.innerHTML = commonFields + specificFields;
+
+      const placementSelect = document.getElementById("propPlacement");
+      placementSelect?.addEventListener("change", () => {
+        const nextPlacement = placementSelect.value;
+        if (nextPlacement === part.placement) return;
+        const template = getActiveTemplate();
+        if (!template) return;
+        template.layout[part.placement] = template.layout[part.placement].filter((p) => p.id !== part.id);
+        part.placement = nextPlacement;
+        template.layout[nextPlacement].push(part);
+        state.activePlacement = nextPlacement;
+        persistTemplates();
+        renderAll();
+      });
+
+      const bindInput = (selector, handler) => {
+        const input = document.getElementById(selector);
+        if (input) {
+          input.addEventListener("input", () => handler(input.value));
+        }
+      };
+
+      const bindSelect = (selector, handler) => {
+        const input = document.getElementById(selector);
+        if (input) {
+          input.addEventListener("change", () => handler(input.value));
+        }
+      };
+
+      bindSelect("propSize", (value) => updatePart(part.id, (current) => ({ ...current, style: { ...current.style, size: value } })));
+      bindSelect("propWeight", (value) => updatePart(part.id, (current) => ({ ...current, style: { ...current.style, weight: value } })));
+      bindSelect("propAlign", (value) => updatePart(part.id, (current) => ({ ...current, style: { ...current.style, align: value } })));
+      bindInput("propColor", (value) => updatePart(part.id, (current) => ({ ...current, style: { ...current.style, color: value } })));
+      bindSelect("propFont", (value) => updatePart(part.id, (current) => ({ ...current, style: { ...current.style, font: value } })));
+
+      if (part.type === "date") {
+        bindSelect("propDateMode", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, mode: value } })));
+        bindInput("propDateText", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, customText: value } })));
+      }
+      if (["teacher", "title", "comment", "description"].includes(part.type)) {
+        bindInput("propText", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, text: value } })));
+      }
+      if (part.type === "icon") {
+        bindSelect("propIconDesign", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, design: value } })));
+        bindInput("propIconSize", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, size: Number(value) } })));
+      }
+      if (part.type === "title_frame") {
+        bindInput("propTitleFrameText", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, text: value } })));
+        bindSelect("propTitleFrameDesign", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, design: value } })));
+        bindInput("propTitleFrameColor", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, frameColor: value } })));
+        bindInput("propTitleFrameTextColor", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, textColor: value } })));
+        bindInput("propTitleFrameTextSize", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, textSize: Number(value) } })));
+      }
+      if (part.type === "items") {
+        const rows = elements.propertiesPanel.querySelectorAll("input[data-field]");
+        rows.forEach((input) => {
+          input.addEventListener("input", () => {
+            const index = Number(input.dataset.index);
+            const field = input.dataset.field;
+            updatePart(part.id, (current) => {
+              const items = [...(current.props.items || [])];
+              const next = { ...items[index], [field]: field === "amount" ? Number(input.value) : input.value };
+              items[index] = next;
+              return { ...current, props: { ...current.props, items } };
+            });
+          });
+        });
+        elements.propertiesPanel.querySelectorAll("button[data-action='remove-row']").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const index = Number(btn.dataset.index);
+            updatePart(part.id, (current) => {
+              const items = [...(current.props.items || [])];
+              items.splice(index, 1);
+              return { ...current, props: { ...current.props, items } };
+            });
+          });
+        });
+        document.getElementById("addItemRow")?.addEventListener("click", () => {
+          updatePart(part.id, (current) => ({
+            ...current,
+            props: {
+              ...current.props,
+              items: [...(current.props.items || []), { label: "項目", amount: 0, note: "" }]
+            }
+          }));
+        });
+        bindSelect("propShowTotal", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, showTotal: value === "true" } })));
+      }
+      if (part.type === "button") {
+        bindInput("propButtonLabel", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, label: value } })));
+        bindSelect("propButtonAction", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, actionType: value } })));
+        bindInput("propButtonData", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, data: value } })));
+        bindInput("propButtonUri", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, uri: value } })));
+        bindSelect("propButtonStyle", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, style: value } })));
+      }
+      if (part.type === "image") {
+        bindInput("propImageUrl", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, url: value } })));
+        bindInput("propImageRatio", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, aspectRatio: value } })));
+        bindSelect("propImageMode", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, aspectMode: value } })));
+      }
+      if (part.type === "tag") {
+        bindInput("propTagLabel", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, label: value } })));
+        bindInput("propTagColor", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, color: value } })));
+        bindSelect("propTagSize", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, size: value } })));
+      }
+      if (part.type === "reply_button") {
+        bindInput("propReplyLabel", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, label: value } })));
+        bindInput("propReplyData", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, data: value } })));
+        bindSelect("propReplyPreset", (value) => updatePart(part.id, (current) => ({
+          ...current,
+          props: {
+            ...current.props,
+            preset: value,
+            data: `${value}:STATEMENT_ID`
+          }
+        })));
+      }
+      if (part.type === "spacer") {
+        bindInput("propSpacer", (value) => updatePart(part.id, (current) => ({ ...current, props: { ...current.props, size: Number(value) } })));
+      }
+    };
+
+    const renderThemePanel = () => {
+      const template = getActiveTemplate();
+      if (!template) return;
+      const theme = template.layout.theme;
+      elements.themePanel.innerHTML = `
+        <div class="properties-grid">
+          <div>
+            <label>Bubbleサイズ</label>
+            <select id="themeBubbleSize">
+              ${["nano","micro","kilo","mega","giga"].map((size) => `<option value="${size}" ${template.layout.bubbleSize === size ? "selected" : ""}>${size}</option>`).join("")}
+            </select>
+          </div>
+          <div>
+            <label>背景色</label>
+            <input id="themeBg" type="text" value="${theme.bgColor}" />
+          </div>
+          <div>
+            <label>メインカラー</label>
+            <input id="themePrimary" type="text" value="${theme.primaryColor}" />
+          </div>
+          <div>
+            <label>アクセントカラー</label>
+            <input id="themeSecondary" type="text" value="${theme.secondaryColor}" />
+          </div>
+          <div>
+            <label>文字色</label>
+            <input id="themeText" type="text" value="${theme.textColor}" />
+          </div>
+        </div>
+      `;
+
+      const bindTheme = (selector, handler) => {
+        const input = document.getElementById(selector);
+        if (input) {
+          input.addEventListener("input", () => handler(input.value));
+        }
+      };
+      const bindThemeSelect = (selector, handler) => {
+        const input = document.getElementById(selector);
+        if (input) {
+          input.addEventListener("change", () => handler(input.value));
+        }
+      };
+
+      bindThemeSelect("themeBubbleSize", (value) => {
+        template.layout.bubbleSize = value;
+        persistTemplates();
+        renderAll();
+      });
+      bindTheme("themeBg", (value) => {
+        template.layout.theme.bgColor = value;
+        persistTemplates();
+        renderAll();
+      });
+      bindTheme("themePrimary", (value) => {
+        template.layout.theme.primaryColor = value;
+        persistTemplates();
+        renderAll();
+      });
+      bindTheme("themeSecondary", (value) => {
+        template.layout.theme.secondaryColor = value;
+        persistTemplates();
+        renderAll();
+      });
+      bindTheme("themeText", (value) => {
+        template.layout.theme.textColor = value;
+        persistTemplates();
+        renderAll();
+      });
+    };
+
+    const renderPreview = () => {
+      const template = getActiveTemplate();
+      if (!template) return;
+      const theme = template.layout.theme;
+      const buildSection = (placement) => {
+        const parts = getPartsForPlacement(placement);
+        if (!parts.length) return "";
+        return `
+          <div class="preview-section">
+            ${parts.map((part) => renderPreviewPart(part, theme)).join("")}
+          </div>
+        `;
+      };
+      elements.previewCard.style.background = theme.bgColor;
+      elements.previewCard.style.color = theme.textColor;
+      elements.previewCard.innerHTML = [
+        buildSection("header"),
+        buildSection("body"),
+        buildSection("footer")
+      ].join("");
+    };
+
+    const renderPreviewPart = (part, theme) => {
+      const style = part.style || {};
+      const alignMap = { start: "left", center: "center", end: "right" };
+      const textStyle = `style="text-align:${alignMap[style.align] || "left"};color:${style.color || theme.textColor};font-family:${style.font || "Noto Sans JP"};"`;
+      let inner = "";
+      if (part.type === "date") {
+        const value = part.props.mode === "custom" ? part.props.customText : new Date().toLocaleDateString("ja-JP");
+        inner = `<p class="preview-text" ${textStyle}>${value || "日付"}</p>`;
+      } else if (part.type === "teacher") {
+        inner = `<p class="preview-text" ${textStyle}>${part.props.text || "先生名"}</p>`;
+      } else if (part.type === "title") {
+        inner = `<h3 class="preview-text" ${textStyle}>${part.props.text || "タイトル"}</h3>`;
+      } else if (part.type === "description") {
+        inner = `<p class="preview-text" ${textStyle}>${(part.props.text || "説明文").replace(/\n/g, "<br>")}</p>`;
+      } else if (part.type === "comment") {
+        inner = `<p class="preview-text" ${textStyle}>${(part.props.text || "").replace(/\n/g, "<br>")}</p>`;
+      } else if (part.type === "tag") {
+        inner = `<span class="preview-tag" style="background:${part.props.color || theme.secondaryColor};">${part.props.label || "タグ"}</span>`;
+      } else if (part.type === "image") {
+        inner = `<img src="${part.props.url || "https://placehold.co/600x400/png"}" alt="" style="width:100%;border-radius:12px;object-fit:${part.props.aspectMode || "cover"};" />`;
+      } else if (part.type === "items") {
+        const rows = part.props.items || [];
+        const itemsHtml = rows.map((row) => `
+          <div class="preview-item">
+            <div>${row.label || "項目"}</div>
+            <div>${formatYen(row.amount)}</div>
+          </div>
+          ${row.note ? `<span>${row.note}</span>` : ""}
+        `).join("");
+        const total = rows.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+        const totalRow = part.props.showTotal ? `
+          <div class="preview-item">
+            <strong>合計</strong>
+            <strong>${formatYen(total)}</strong>
+          </div>
+        ` : "";
+        inner = `<div class="preview-items">${itemsHtml}${totalRow}</div>`;
+      } else if (part.type === "icon") {
+        const size = part.props.size || 40;
+        inner = `<div class="preview-icon" data-design="${part.props.design || "rounded"}" style="width:${size}px;height:${size}px;">${part.props.design || "icon"}</div>`;
+      } else if (part.type === "title_frame") {
+        const textSize = part.props.textSize || 16;
+        const frameColor = part.props.frameColor || theme.primaryColor;
+        const textColor = part.props.textColor || theme.textColor;
+        inner = `<div class="preview-title-frame" data-design="${part.props.design || "solid"}" style="border-color:${frameColor};background:${part.props.design === "solid" ? frameColor : ""};color:${textColor};font-size:${textSize}px;font-family:${style.font || "Noto Sans JP"};">${part.props.text || "タイトル枠"}</div>`;
+      } else if (part.type === "button") {
+        const label = part.props.label || "確認しました";
+        const color = part.props.buttonColor || theme.primaryColor;
+        const textColor = part.props.textColor || "#ffffff";
+        const textSize = part.props.textSize || 14;
+        inner = `<button class="preview-button" data-size="${part.props.buttonSize || "md"}" style="background:${color};color:${textColor};font-size:${textSize}px;font-family:${style.font || "Noto Sans JP"};">${label}</button>`;
+      } else if (part.type === "reply_button") {
+        const label = part.props.label || "返信する";
+        const color = part.props.buttonColor || theme.secondaryColor;
+        const textColor = part.props.textColor || "#1f1b2d";
+        const textSize = part.props.textSize || 14;
+        inner = `
+          <div class="preview-input-pad" data-design="${part.props.inputPadDesign || "soft"}">
+            <span>入力パッド（${part.props.keyboardType || "text"}）</span>
+            <button class="preview-button" data-size="${part.props.buttonSize || "md"}" style="background:${color};color:${textColor};font-size:${textSize}px;font-family:${style.font || "Noto Sans JP"};">${label}</button>
+          </div>
+        `;
+      } else if (part.type === "separator") {
+        inner = `<hr class="preview-separator" />`;
+      } else if (part.type === "spacer") {
+        inner = `<div style="height:${part.props.size || 12}px"></div>`;
+      } else {
+        inner = `<p class="preview-text" ${textStyle}>未定義パーツ</p>`;
+      }
+
+      return `
+        <div class="preview-part" data-part-id="${part.id}">
+          ${inner}
+          <button class="preview-edit-btn" type="button" data-id="${part.id}">編集</button>
+        </div>
+      `;
+    };
+
+    const renderJson = () => {
+      const template = getActiveTemplate();
+      if (!template) return;
+      const { payload, errors } = convertTemplateToFlex(template);
+      elements.validationList.innerHTML = errors.map((error) => `<li>${error}</li>`).join("");
+      elements.jsonOutput.textContent = JSON.stringify(payload, null, 2);
+      elements.jsonOutput.hidden = !state.showJson;
+    };
+
+    const renderTemplateSelector = () => {
+      elements.templateSelect.innerHTML = state.templates.map((tpl) => {
+        return `<option value="${tpl.id}" ${tpl.id === state.activeTemplateId ? "selected" : ""}>${tpl.name}</option>`;
+      }).join("");
+      elements.templateSelect.addEventListener("change", () => {
+        state.activeTemplateId = elements.templateSelect.value;
+        state.selectedPartId = null;
+        renderAll();
+      });
+    };
+
+    const bindTemplateForm = () => {
+      const template = getActiveTemplate();
+      if (!template) return;
+      elements.templateName.value = template.name || "";
+      elements.templateCategory.value = template.category || "statement";
+      elements.templateAltText.value = template.altText || "";
+    };
+
+    const saveTemplate = () => {
+      updateTemplateMetaFromForm();
+      persistTemplates();
+      renderTemplateSelector();
+      renderAll();
+    };
+
+    const duplicateTemplate = () => {
+      const template = getActiveTemplate();
+      if (!template) return;
+      const clone = JSON.parse(JSON.stringify(template));
+      clone.id = createId();
+      clone.name = `${template.name}（コピー）`;
+      clone.createdAt = new Date().toISOString();
+      clone.updatedAt = new Date().toISOString();
+      state.templates.push(clone);
+      state.activeTemplateId = clone.id;
+      persistTemplates();
+      renderAll();
+    };
+
+    const deleteTemplate = () => {
+      if (state.templates.length <= 1) {
+        alert("最低1件のテンプレートが必要です。");
+        return;
+      }
+      state.templates = state.templates.filter((tpl) => tpl.id !== state.activeTemplateId);
+      state.activeTemplateId = state.templates[0]?.id || null;
+      persistTemplates();
+      renderAll();
+    };
+
+    const createNewTemplate = () => {
+      const template = createBaseTemplate({ name: "新規テンプレ" });
+      state.templates.push(template);
+      state.activeTemplateId = template.id;
+      persistTemplates();
+      renderAll();
+    };
+
+    const copyJsonToClipboard = async () => {
+      const template = getActiveTemplate();
+      if (!template) return;
+      const { payload, errors } = convertTemplateToFlex(template);
+      if (errors.length) {
+        alert("入力エラーがあります。修正後にコピーしてください。");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+        alert("JSONをコピーしました。");
+      } catch (error) {
+        console.warn("コピーに失敗しました", error);
+        alert("コピーに失敗しました。");
+      }
+    };
+
+    const renderAll = () => {
+      renderTemplateSelector();
+      bindTemplateForm();
+      renderPartsList();
+      renderCanvasTabs();
+      renderCanvas();
+      renderProperties();
+      renderThemePanel();
+      renderPreview();
+      renderJson();
+    };
+
+    elements.saveTemplate.addEventListener("click", saveTemplate);
+    elements.duplicateTemplate.addEventListener("click", duplicateTemplate);
+    elements.deleteTemplate.addEventListener("click", deleteTemplate);
+    elements.newTemplateBtn.addEventListener("click", createNewTemplate);
+    elements.copyJson.addEventListener("click", copyJsonToClipboard);
+    elements.toggleJson.addEventListener("click", () => {
+      state.showJson = !state.showJson;
+      renderJson();
+    });
+
+    const partEditModal = document.getElementById("partEditModal");
+    const partEditBody = document.getElementById("partEditBody");
+    const closePartModal = document.getElementById("closePartModal");
+    const savePartModal = document.getElementById("savePartModal");
+
+    const getPartById = (partId) => {
+      const template = getActiveTemplate();
+      if (!template) return null;
+      return placements.flatMap((placement) => template.layout[placement]).find((item) => item.id === partId);
+    };
+
+    const openPartModal = (partId) => {
+      state.selectedPartId = partId;
+      renderEditModal();
+      partEditModal.classList.add("open");
+      partEditModal.setAttribute("aria-hidden", "false");
+    };
+
+    const closePartModalView = () => {
+      partEditModal.classList.remove("open");
+      partEditModal.setAttribute("aria-hidden", "true");
+    };
+
+    const renderEditModal = () => {
+      const part = getPartById(state.selectedPartId);
+      if (!part) {
+        partEditBody.innerHTML = "<p class='subtitle'>編集するパーツがありません。</p>";
+        return;
+      }
+      const fontOptions = ["Noto Sans JP", "Inter", "Rounded", "Serif"];
+      const baseFont = part.style?.font || "Noto Sans JP";
+      let fields = "";
+      if (["teacher", "title", "comment", "description", "date"].includes(part.type)) {
+        fields += `
+          <label>内容</label>
+          <textarea id="editText">${part.type === "date" ? part.props.customText || "" : part.props.text || ""}</textarea>
+          <label>テキストサイズ</label>
+          <select id="editTextSize">
+            ${["xs","sm","md","lg","xl","xxl","3xl"].map((size) => `<option value="${size}" ${size === part.style.size ? "selected" : ""}>${size}</option>`).join("")}
+          </select>
+          <label>テキスト色</label>
+          <input id="editTextColor" type="text" value="${part.style.color || ""}" placeholder="#333333" />
+          <label>フォント</label>
+          <select id="editFont">
+            ${fontOptions.map((font) => `<option value="${font}" ${font === baseFont ? "selected" : ""}>${font}</option>`).join("")}
+          </select>
+        `;
+      }
+      if (part.type === "button" || part.type === "reply_button") {
+        fields += `
+          <label>ボタンサイズ</label>
+          <select id="editButtonSize">
+            ${["sm","md","lg"].map((size) => `<option value="${size}" ${size === part.props.buttonSize ? "selected" : ""}>${size}</option>`).join("")}
+          </select>
+          <label>ボタン色</label>
+          <input id="editButtonColor" type="text" value="${part.props.buttonColor || ""}" />
+          <label>テキスト</label>
+          <input id="editButtonText" type="text" value="${part.props.label || ""}" />
+          <label>テキスト色</label>
+          <input id="editButtonTextColor" type="text" value="${part.props.textColor || ""}" />
+          <label>テキストサイズ(px)</label>
+          <input id="editButtonTextSize" type="number" value="${part.props.textSize || 14}" />
+          <label>フォント</label>
+          <select id="editFont">
+            ${fontOptions.map((font) => `<option value="${font}" ${font === baseFont ? "selected" : ""}>${font}</option>`).join("")}
+          </select>
+        `;
+      }
+      if (part.type === "reply_button") {
+        fields += `
+          <label>入力パッドデザイン</label>
+          <select id="editInputPadDesign">
+            ${["soft","solid","outline"].map((design) => `<option value="${design}" ${design === part.props.inputPadDesign ? "selected" : ""}>${design}</option>`).join("")}
+          </select>
+          <label>キーボード指定</label>
+          <select id="editKeyboardType">
+            ${["text","number","email","url"].map((type) => `<option value="${type}" ${type === part.props.keyboardType ? "selected" : ""}>${type}</option>`).join("")}
+          </select>
+        `;
+      }
+      if (part.type === "icon") {
+        fields += `
+          <label>アイコンデザイン</label>
+          <select id="editIconDesign">
+            ${["rounded","circle","square"].map((design) => `<option value="${design}" ${design === part.props.design ? "selected" : ""}>${design}</option>`).join("")}
+          </select>
+          <label>アイコンサイズ(px)</label>
+          <input id="editIconSize" type="number" value="${part.props.size || 40}" />
+        `;
+      }
+      if (part.type === "title_frame") {
+        fields += `
+          <label>タイトル枠デザイン</label>
+          <select id="editTitleFrameDesign">
+            ${["solid","outline","soft"].map((design) => `<option value="${design}" ${design === part.props.design ? "selected" : ""}>${design}</option>`).join("")}
+          </select>
+          <label>タイトル枠テキスト</label>
+          <input id="editTitleFrameText" type="text" value="${part.props.text || ""}" />
+          <label>タイトル枠色</label>
+          <input id="editTitleFrameColor" type="text" value="${part.props.frameColor || ""}" />
+          <label>タイトル枠テキスト色</label>
+          <input id="editTitleFrameTextColor" type="text" value="${part.props.textColor || ""}" />
+          <label>タイトル枠テキストサイズ(px)</label>
+          <input id="editTitleFrameTextSize" type="number" value="${part.props.textSize || 16}" />
+          <label>フォント</label>
+          <select id="editFont">
+            ${fontOptions.map((font) => `<option value="${font}" ${font === baseFont ? "selected" : ""}>${font}</option>`).join("")}
+          </select>
+        `;
+      }
+      partEditBody.innerHTML = fields || "<p class='subtitle'>このパーツは編集項目がありません。</p>";
+    };
+
+    savePartModal.addEventListener("click", () => {
+      const part = getPartById(state.selectedPartId);
+      if (!part) return;
+      const byId = (id) => document.getElementById(id);
+      if (["teacher", "title", "comment", "description", "date"].includes(part.type)) {
+        const text = byId("editText")?.value ?? "";
+        const size = byId("editTextSize")?.value ?? part.style.size;
+        const color = byId("editTextColor")?.value ?? part.style.color;
+        const font = byId("editFont")?.value ?? part.style.font;
+        updatePart(part.id, (current) => ({
+          ...current,
+          style: { ...current.style, size, color, font }
+        }));
+        if (part.type === "date") {
+          updatePart(part.id, (current) => ({ ...current, props: { ...current.props, mode: "custom", customText: text } }));
+        } else {
+          updatePart(part.id, (current) => ({ ...current, props: { ...current.props, text } }));
+        }
+      }
+      if (part.type === "button" || part.type === "reply_button") {
+        const buttonSize = byId("editButtonSize")?.value ?? part.props.buttonSize;
+        const buttonColor = byId("editButtonColor")?.value ?? part.props.buttonColor;
+        const label = byId("editButtonText")?.value ?? part.props.label;
+        const textColor = byId("editButtonTextColor")?.value ?? part.props.textColor;
+        const textSize = Number(byId("editButtonTextSize")?.value ?? part.props.textSize);
+        const font = byId("editFont")?.value ?? part.style.font;
+        updatePart(part.id, (current) => ({
+          ...current,
+          props: { ...current.props, buttonSize, buttonColor, label, textColor, textSize },
+          style: { ...current.style, font }
+        }));
+      }
+      if (part.type === "reply_button") {
+        const inputPadDesign = byId("editInputPadDesign")?.value ?? part.props.inputPadDesign;
+        const keyboardType = byId("editKeyboardType")?.value ?? part.props.keyboardType;
+        updatePart(part.id, (current) => ({
+          ...current,
+          props: { ...current.props, inputPadDesign, keyboardType }
+        }));
+      }
+      if (part.type === "icon") {
+        const design = byId("editIconDesign")?.value ?? part.props.design;
+        const size = Number(byId("editIconSize")?.value ?? part.props.size);
+        updatePart(part.id, (current) => ({ ...current, props: { ...current.props, design, size } }));
+      }
+      if (part.type === "title_frame") {
+        const design = byId("editTitleFrameDesign")?.value ?? part.props.design;
+        const text = byId("editTitleFrameText")?.value ?? part.props.text;
+        const frameColor = byId("editTitleFrameColor")?.value ?? part.props.frameColor;
+        const textColor = byId("editTitleFrameTextColor")?.value ?? part.props.textColor;
+        const textSize = Number(byId("editTitleFrameTextSize")?.value ?? part.props.textSize);
+        const font = byId("editFont")?.value ?? part.style.font;
+        updatePart(part.id, (current) => ({
+          ...current,
+          props: { ...current.props, design, text, frameColor, textColor, textSize },
+          style: { ...current.style, font }
+        }));
+      }
+      closePartModalView();
+    });
+
+    closePartModal.addEventListener("click", closePartModalView);
+    partEditModal.addEventListener("click", (event) => {
+      if (event.target === partEditModal) {
+        closePartModalView();
+      }
+    });
+
+    elements.previewCard.addEventListener("click", (event) => {
+      const button = event.target.closest(".preview-edit-btn");
+      if (button) {
+        openPartModal(button.dataset.id);
+        return;
+      }
+      const part = event.target.closest(".preview-part");
+      if (!part) return;
+      openPartModal(part.dataset.partId);
+    });
+    elements.templateName.addEventListener("input", () => updateTemplateMetaFromForm());
+    elements.templateCategory.addEventListener("change", () => updateTemplateMetaFromForm());
+    elements.templateAltText.addEventListener("input", () => updateTemplateMetaFromForm());
+
+    loadInitialTemplates();
+    renderAll();
+  </script>
+</body>
+</html>

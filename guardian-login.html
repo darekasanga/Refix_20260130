@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>保護者ログイン</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --sub: #64748b;
+      --accent: #2563eb;
+      --accent-2: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans JP", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 32px 20px;
+    }
+    .card {
+      width: min(720px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+      display: grid;
+      gap: 18px;
+    }
+    h1 { margin: 0; font-size: 22px; }
+    p { margin: 0; color: var(--sub); font-size: 13px; }
+    .note {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--sub);
+      font-size: 12px;
+    }
+    .section { display: grid; gap: 10px; }
+    .input-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    input {
+      flex: 1;
+      min-width: 220px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font: inherit;
+    }
+    button, .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      color: #fff;
+      text-decoration: none;
+      text-align: center;
+    }
+    .btn.secondary {
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .provider-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    .status { font-size: 12px; color: var(--sub); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div>
+      <h1>保護者ログイン</h1>
+      <p>園児名などの内容はログイン後に表示されます</p>
+    </div>
+    <div class="note">QRは入口で、個人情報は含みません</div>
+
+    <section class="section">
+      <strong>SMS（推奨）</strong>
+      <div class="input-row">
+        <input id="phoneInput" type="tel" placeholder="+81..." autocomplete="tel">
+        <button id="smsStartBtn" type="button">SMSで続ける</button>
+      </div>
+      <div class="input-row" id="codeRow" style="display:none;">
+        <input id="codeInput" type="text" placeholder="認証コード" inputmode="numeric">
+        <button id="smsVerifyBtn" type="button">認証</button>
+      </div>
+      <div class="status" id="smsStatus"></div>
+    </section>
+
+    <section class="section">
+      <strong>アカウントをお持ちの方（任意）</strong>
+      <div class="provider-grid">
+        <a class="btn secondary" id="microsoftBtn" href="#">Microsoftで続ける</a>
+        <a class="btn secondary" id="appleBtn" href="#">Appleで続ける</a>
+        <a class="btn secondary" id="googleBtn" href="#">Googleで続ける</a>
+        <a class="btn secondary" id="yahooBtn" href="#">Yahoo!で続ける</a>
+      </div>
+      <p class="status">お持ちのアカウントで本人確認できます（新規作成は不要）</p>
+    </section>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const returnTo = params.get("return_to") || "/guardian-portal.html";
+    const phoneInput = document.getElementById("phoneInput");
+    const codeInput = document.getElementById("codeInput");
+    const codeRow = document.getElementById("codeRow");
+    const smsStatus = document.getElementById("smsStatus");
+    let challengeId = null;
+
+    const providerLinks = {
+      microsoft: document.getElementById("microsoftBtn"),
+      apple: document.getElementById("appleBtn"),
+      google: document.getElementById("googleBtn"),
+      yahoo: document.getElementById("yahooBtn")
+    };
+    Object.entries(providerLinks).forEach(([key, el]) => {
+      if (el) {
+        el.href = `/auth/${key}/login?return_to=${encodeURIComponent(returnTo)}`;
+      }
+    });
+
+    document.getElementById("smsStartBtn").addEventListener("click", async () => {
+      const phone = phoneInput.value.trim();
+      if (!phone) {
+        smsStatus.textContent = "電話番号を入力してください。";
+        return;
+      }
+      smsStatus.textContent = "送信中...";
+      const res = await fetch("/auth/sms/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone_e164: phone, purpose: "LINK_BY_QR", return_to: returnTo })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        smsStatus.textContent = data.detail || "SMS送信に失敗しました。";
+        return;
+      }
+      challengeId = data.challenge_id;
+      codeRow.style.display = "flex";
+      smsStatus.textContent = "SMSを送信しました。認証コードを入力してください。";
+    });
+
+    document.getElementById("smsVerifyBtn").addEventListener("click", async () => {
+      if (!challengeId) {
+        smsStatus.textContent = "先にSMS送信を行ってください。";
+        return;
+      }
+      const code = codeInput.value.trim();
+      if (!code) {
+        smsStatus.textContent = "認証コードを入力してください。";
+        return;
+      }
+      smsStatus.textContent = "認証中...";
+      const res = await fetch("/auth/sms/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ challenge_id: challengeId, code })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        smsStatus.textContent = data.detail || "認証に失敗しました。";
+        return;
+      }
+      window.location.href = data.return_to || returnTo;
+    });
+  </script>
+</body>
+</html>
